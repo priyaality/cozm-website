@@ -8,13 +8,14 @@
  * track of items slides left in step with the scroll (1px down = 1px across).
  * Once the last item is in place the stage unpins and the page carries on.
  *
- * Items are sized to fit the viewport below the fixed header, so a whole card
- * is always visible, and centred when narrower than the page grid.
+ * Items are the full width of the page grid. On desktop they keep `aspect`,
+ * unless the viewport is too short to show a whole card below the fixed header,
+ * in which case only their height is reduced to fit.
  *
  * Without JS, or with prefers-reduced-motion, the items simply stack vertically.
  */
 interface Props {
-  /** Width ÷ height of each item at desktop, used to fit items to the viewport height. */
+  /** Width ÷ height of each item at desktop (the height is trimmed on short viewports). */
   aspect?: number;
   class?: string;
 }
@@ -53,20 +54,27 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
   }
 
   .hscroll[data-active] .hscroll__track {
-    --hs-item-w: min(
-      100cqw - 2 * var(--spacing-gutter),
-      (100svh - var(--spacing-nav) - 5rem) * var(--hs-aspect)
-    );
+    /* Items are always the full width of the page grid, as in the vertical layout. */
+    --hs-item-w: calc(100cqw - 2 * var(--spacing-gutter));
     flex-direction: row;
     gap: var(--spacing-gutter);
     width: max-content;
-    padding: 0 max(var(--spacing-gutter), (100cqw - var(--hs-item-w)) / 2);
+    padding: 0 var(--spacing-gutter);
     will-change: transform;
   }
 
   .hscroll[data-active] .hscroll__track > :global(*) {
     width: var(--hs-item-w);
     flex-shrink: 0;
+  }
+
+  /* Desktop: keep the design's proportions, but if the viewport is too short to
+     show the whole card below the header, trim the height (never the width). */
+  @media (width >= 64rem) {
+    .hscroll[data-active] .hscroll__track > :global(*) {
+      aspect-ratio: auto;
+      height: min(var(--hs-item-w) / var(--hs-aspect), 100svh - var(--spacing-nav) - 2rem);
+    }
   }
 </style>
 
