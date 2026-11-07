@@ -1,12 +1,14 @@
 ---
 /**
- * WorkRow — a wide and a narrow WorkCard side by side, split by a 1px rule.
+ * WorkRow — two full-bleed WorkCards in a 7:5 split of the page grid
+ * (5:7 when `reverse`), separated by a 1px rule.
  *
- * The narrow card is `aside-bleed` wide (column gap + 554px aside + page gutter),
- * so the seam sits on the page's column gap and the narrow card's text (16px in
- * from the seam) lands exactly on the same keyline as the header nav, CTAs and
- * other aside content, at every desktop width. The wide card takes the rest.
- * `reverse` mirrors the row (narrow card first). Stacks vertically below lg.
+ * Each seam sits in the column gap just before a grid column, and the card on
+ * its right has 16px (one column gap) of inner padding, so that card's text
+ * starts exactly on a grid column line:
+ *   row 1 (7:5): text on column 8, the page's right-hand keyline
+ *   row 2 (5:7): text on column 6
+ * Stacks vertically below lg.
  */
 import WorkCard from './WorkCard.astro';
 import divider from '../assets/icons/divider-vertical.svg';
@@ -22,12 +24,7 @@ const [first, second] = items;
 ---
 
 <div
-  class:list={[
-    'relative grid border-t border-ink bg-sand lg:h-[521px]',
-    reverse
-      ? 'lg:grid-cols-[var(--spacing-aside-bleed)_minmax(0,1fr)]'
-      : 'lg:grid-cols-[minmax(0,1fr)_var(--spacing-aside-bleed)]',
-  ]}
+  class:list={['work-row relative grid border-t border-ink bg-sand lg:h-[521px]', reverse && 'work-row--reverse']}
 >
   <WorkCard {...first} edge="left" />
   <WorkCard {...second} edge="right" class="border-t border-ink lg:border-t-0" />
@@ -38,9 +35,26 @@ const [first, second] = items;
     height="520"
     alt=""
     aria-hidden="true"
-    class:list={[
-      'pointer-events-none absolute inset-y-0 hidden h-full w-px lg:block',
-      reverse ? 'left-[var(--spacing-aside-bleed)]' : 'right-[var(--spacing-aside-bleed)]',
-    ]}
+    class="work-row__divider pointer-events-none absolute inset-y-0 hidden h-full w-px lg:block"
   />
 </div>
+
+<style>
+  @media (width >= 64rem) {
+    .work-row {
+      /* One page-grid column, computed against this full-bleed row's width. */
+      --track: calc((100% - 2 * var(--spacing-gutter) - 11 * var(--spacing-column-gap)) / 12);
+      /* Seam = page gutter + N columns + (N - 1) gaps, i.e. the gap before column N + 1. */
+      --seam: calc(var(--spacing-gutter) + 7 * var(--track) + 6 * var(--spacing-column-gap));
+      grid-template-columns: var(--seam) minmax(0, 1fr);
+    }
+
+    .work-row--reverse {
+      --seam: calc(var(--spacing-gutter) + 5 * var(--track) + 4 * var(--spacing-column-gap));
+    }
+
+    .work-row__divider {
+      left: var(--seam);
+    }
+  }
+</style>

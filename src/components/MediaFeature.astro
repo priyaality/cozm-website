@@ -1,7 +1,9 @@
 ---
 /**
  * MediaFeature — large bordered media card with a title, description and CTA
- * pinned to the bottom-right (aligned to the 554px aside column).
+ * pinned to the bottom-right. On desktop the copy sits in columns 8–12 of the
+ * page grid (the card is exactly the grid's width), so it lines up with the
+ * page's right-hand keyline.
  * The media area is a white placeholder in Figma. Pass a video or image
  * through the `media` slot when it's ready.
  */
@@ -22,11 +24,14 @@ const { title, description, cta } = Astro.props;
   <div class="aspect-video w-full lg:absolute lg:inset-0 lg:aspect-auto">
     <slot name="media" />
   </div>
-  <div
-    class="flex flex-col gap-4 p-4 lg:absolute lg:right-[15px] lg:bottom-[15px] lg:w-[calc(var(--spacing-aside)-16px)] lg:p-0"
-  >
-    <h3 class="text-title">{title}</h3>
-    <p class="text-body text-ink-muted">{description}</p>
-    <Button href={cta.href} variant="secondary">{cta.label}</Button>
+  <!-- -inset-px: lay the grid over the border box so its columns match the page grid -->
+  <div class="lg:pointer-events-none lg:absolute lg:-inset-px lg:grid-12 lg:items-end">
+    <div
+      class="flex flex-col gap-4 p-4 lg:pointer-events-auto lg:col-span-5 lg:col-start-8 lg:p-0 lg:pr-4 lg:pb-4"
+    >
+      <h3 class="text-title">{title}</h3>
+      <p class="text-body text-ink-muted">{description}</p>
+      <Button href={cta.href} variant="secondary">{cta.label}</Button>
+    </div>
   </div>
 </article>

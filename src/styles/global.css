@@ -93,11 +93,7 @@
   /* ---------- Spacing ---------- */
   --spacing-gutter: clamp(1.25rem, -0.25rem + 6vw, 5rem); /* page side padding: 80px at desktop */
   --spacing-section: clamp(3rem, 1.75rem + 5vw, 5rem); /* section vertical padding: 80px */
-  --spacing-aside: 34.625rem; /* 554px right-hand column */
-  --spacing-column-gap: 1rem; /* 16px gap between the main column and the aside */
-  /* Full-bleed width from the column gap to the viewport edge:
-     a block this wide, with column-gap padding, puts content on the aside keyline. */
-  --spacing-aside-bleed: calc(var(--spacing-column-gap) + var(--spacing-aside) + var(--spacing-gutter));
+  --spacing-column-gap: 1rem; /* 16px gap between the 12 grid columns */
   --spacing-nav: 5.3125rem; /* 85px fixed header height */
 
   /* ---------- Effects ---------- */
@@ -117,13 +113,30 @@
   }
 }
 
-/* Two-column layout used across the page: flexible content + fixed 554px aside.
-   The aside's left edge is the page's right-hand keyline. */
+/*
+ * Page grid — 12 columns, 16px gaps, inside the page gutter (80px margins).
+ * At 1512px each column is 98px, so 7 columns = 782px and 5 columns = 554px,
+ * exactly the Figma layout. Column 8's left edge is the page's right-hand keyline.
+ */
+@utility grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--spacing-column-gap);
+}
+
+/* 7/5 split of the page grid: first child spans 7 columns, second spans 5.
+   Stacks below lg (set the stacked spacing with gap-y-*). */
 @utility grid-split {
   display: grid;
-  gap: var(--spacing-column-gap);
   grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--spacing-column-gap);
   @variant lg {
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--spacing-aside));
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    & > :nth-child(1) {
+      grid-column: span 7 / span 7;
+    }
+    & > :nth-child(2) {
+      grid-column: span 5 / span 5;
+    }
   }
 }

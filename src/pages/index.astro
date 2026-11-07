@@ -23,7 +23,7 @@ const [uncovered, capmint, paisasmart, masaba] = featuredWork;
   <main>
     <!-- Intro + services ticker together fill one viewport -->
     <div class="flex min-h-svh flex-col">
-      <Section rule class="grid-split flex-1 items-start pt-[calc(var(--spacing-nav)+2.5rem)]">
+      <Section rule class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">
         <h1 class="text-display">
           Cozm is a media studio that helps brands build original media for India’s top 10%.
         </h1>
@@ -60,11 +60,11 @@ const [uncovered, capmint, paisasmart, masaba] = featuredWork;
     </Section>
 
     <!-- Approach -->
-    <Section class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-4">
-      <div class="lg:flex-1">
+    <Section class="grid-split items-start gap-y-12">
+      <div>
         <ScriptPage />
       </div>
-      <div class="flex flex-col gap-6 lg:w-aside lg:shrink-0">
+      <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
           <h2 class="text-headline">Our job is to get your team to a point where they don’t need us.</h2>
           <p class="text-body text-ink-muted">
@@ -78,7 +78,7 @@ const [uncovered, capmint, paisasmart, masaba] = featuredWork;
     <!-- Featured work -->
     <section aria-labelledby="featured-work">
       <Section padded={false} class="pt-16 pb-[23px]">
-        <div class="grid-split items-end gap-6">
+        <div class="grid-split items-end gap-y-6">
           <h2 id="featured-work" class="text-headline">Featured work</h2>
           <Button href="/work" variant="secondary">View all work</Button>
         </div>

@@ -18,9 +18,9 @@ All tokens live in `src/styles/global.css` (`@theme`). Each one is both a CSS va
 | Colour  | `ink` `sand` `paper` `graphite` `black` `ink-muted` (70%) `ink-faint` (40%) `scrim` (60%) |
 | Font    | `font-sans` (Arimo), `font-mono` (IBM Plex Mono), `font-hand` (Caveat, stand-in for Figma Hand) |
 | Type    | `text-display` `text-headline` `text-statement` `text-title` `text-body` `text-label` `text-eyebrow` `text-nav` `text-caption` |
-| Spacing | `gutter` (80px) `section` (80px) `aside` (554px column) `nav` (85px fixed header) |
+| Spacing | `gutter` (80px) `section` (80px) `column-gap` (16px) `nav` (85px fixed header) |
 | Effect  | `drop-shadow-paper` |
-| Layout  | `grid-split`: flexible column + 554px aside |
+| Layout  | 12-column grid (80px margins, 16px gaps). `grid-12`, and `grid-split` for the 7/5 split; column 8 is the right-hand keyline |
 
 ## Components
 
@@ -31,7 +31,7 @@ All tokens live in `src/styles/global.css` (`@theme`). Each one is both a CSS va
 - `ServicesTicker`: infinite horizontal marquee
 - `ScrollWordReveal`: statement copy that fades in word by word as the page scrolls (uses `motion`); the first paragraph is fully lit when the section top reaches mid-viewport (`landAt`, default 0.5) and every word is lit once 70% of the section has scrolled out (`completeAt`, default 0.7)
 - `MediaFeature`: bordered media card with a bottom-right CTA (media goes in the `media` slot)
-- `WorkCard`, `WorkRow`: featured-work tiles in 878/634 pairs
+- `WorkCard`, `WorkRow`: full-bleed featured-work tiles in 7:5 / 5:7 rows, with card text on grid lines
 - `script/ScriptPage`, `script/ScriptRevision`: the revised "agency script"
 
 Content (nav, services, featured work) lives in `src/data/site.ts`.

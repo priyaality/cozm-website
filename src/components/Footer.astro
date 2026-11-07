@@ -21,8 +21,9 @@ import { contactHref } from '../data/site';
     sizes="540px"
   />
 
-  <div class="relative flex flex-col-reverse gap-16 lg:flex-row lg:items-start lg:justify-between">
-    <div class="flex w-[285px] flex-col gap-16">
+  <!-- Desktop: 7/5 page grid. Mobile: stacked with the CTA first. -->
+  <div class="relative grid-split items-start gap-y-16">
+    <div class="order-last flex w-[285px] flex-col gap-16 lg:order-none">
       <div class="flex flex-col gap-6">
         <Logo class="w-[158px]" />
         <nav aria-label="Footer">
@@ -35,7 +36,7 @@ import { contactHref } from '../data/site';
       </div>
     </div>
 
-    <div class="flex w-full flex-col gap-[22px] lg:w-aside">
+    <div class="flex flex-col gap-[22px]">
       <h2 class="text-headline lg:text-right">
         If India’s top 10% is who you want to reach, let’s talk about what your first 90 days could
         look like.
