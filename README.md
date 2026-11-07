@@ -29,7 +29,7 @@ All tokens live in `src/styles/global.css` (`@theme`). Each one is both a CSS va
 - `Header` (fixed; turns into a sand bar once the hero scrolls away), `Footer`
 - `HeroVideo`: full-viewport muted autoplay video (drop the file at `public/video/hero.mp4`)
 - `ServicesTicker`: infinite horizontal marquee
-- `ScrollWordReveal`: statement copy that fades in word by word as the page scrolls (uses `motion`); the first paragraph is fully lit when the section top reaches mid-viewport (`landAt`, default 0.5)
+- `ScrollWordReveal`: statement copy that fades in word by word as the page scrolls (uses `motion`); the first paragraph is fully lit when the section top reaches mid-viewport (`landAt`, default 0.5) and every word is lit once 70% of the section has scrolled out (`completeAt`, default 0.7)
 - `MediaFeature`: bordered media card with a bottom-right CTA (media goes in the `media` slot)
 - `WorkCard`, `WorkRow`: featured-work tiles in 878/634 pairs
 - `script/ScriptPage`, `script/ScriptRevision`: the revised "agency script"
