@@ -27,7 +27,7 @@ All tokens live in `src/styles/global.css` (`@theme`). Each one is both a CSS va
 - `ui/Button`: `primary` / `secondary` / `inverse` variants, `lg` / `sm` sizes
 - `ui/Logo`, `ui/NavLinks`, `ui/Section`
 - `Header` (fixed; turns into a sand bar once the hero scrolls away), `Footer`
-- `hero/HeroPlayer` (+ `PlayerCard`, `NowPlaying`): intro where a music-player card fades in, expands until its thumbnail (the hero video) fills the viewport, then plays muted with a "now playing" card and a scroll-down button. Video file goes at `public/video/hero.mp4`; labels live in `heroVideo` in `src/data/site.ts`
+- `hero/HeroPlayer` (+ `PlayerCard`, `NowPlaying`): the site loading animation (scroll is locked until it ends). Intro where a music-player card fades in, expands until its thumbnail (the hero video) fills the viewport, then plays muted with a "now playing" card and a scroll-down button. Video file goes at `public/video/hero.mp4`; labels live in `heroVideo` in `src/data/site.ts`
 - `ServicesTicker`: infinite horizontal marquee
 - `ScrollWordReveal`: statement copy that fades in word by word as the page scrolls (uses `motion`); the first paragraph is fully lit when the section top reaches mid-viewport (`landAt`, default 0.5) and every word is lit once 70% of the section has scrolled out (`completeAt`, default 0.7)
 - `MediaFeature`: bordered media card with a bottom-right CTA (media goes in the `media` slot)

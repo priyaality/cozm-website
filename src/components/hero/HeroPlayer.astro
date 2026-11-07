@@ -1,16 +1,21 @@
 ---
 /**
- * HeroPlayer — full-viewport hero with an intro sequence:
+ * HeroPlayer — full-viewport hero whose intro doubles as the site's loading
+ * animation. Scrolling is locked until it finishes:
  *
  *   1. A music-player card fades in. Its thumbnail is the hero video, paused.
  *   2. The card scales up around the thumbnail until the thumbnail covers the
  *      viewport (the frame and controls move off-screen and fade out).
- *   3. Once it's full-screen, the video plays (muted, looping), a "now playing"
- *      card appears bottom-left and a scroll-down button bottom-right.
+ *   3. The video plays (muted, looping).
+ *   4. The "now playing" card (bottom-left) and the site header fade in.
+ *   5. The scroll-down button (bottom-right) fades in, then scrolling unlocks.
  *
- * The video is the same element throughout, so there's no jump when it starts.
- * With prefers-reduced-motion the intro is skipped and it starts in step 3.
- * Without JS the card is shown, unexpanded.
+ * State lives on <html>: `.hero-header-in` shows the header, `.hero-intro-done`
+ * unlocks scrolling. A failsafe unlocks everything after 10s if the sequence
+ * fails. The video is the same element throughout, so there's no jump when it
+ * starts. With prefers-reduced-motion, or when the URL has a #hash (a deep
+ * link), the intro is skipped. Without JS the card is shown unexpanded and the
+ * page scrolls normally.
  */
 import PlayerCard from './PlayerCard.astro';
 import NowPlaying from './NowPlaying.astro';
@@ -75,35 +80,37 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
 <style is:global>
   /* Global: these target elements rendered by child components. */
   /* Hidden until the intro reveals them (only when JS is running). */
-  html.js [data-hero-player] [data-player-card],
-  html.js [data-hero-player] .hero-reveal {
+  html.js [data-hero-player] [data-player-card] {
     opacity: 0;
   }
-  html.js [data-hero-player] [data-now-playing] {
+  /* visibility too, so the hidden controls can't be tabbed to or clicked during the intro. */
+  html.js [data-hero-player] .hero-reveal {
+    opacity: 0;
     visibility: hidden;
+  }
+
+  /* Loading-animation scroll lock, lifted when the intro adds .hero-intro-done. */
+  html.js:not(.hero-intro-done):has([data-hero-player]) {
+    overflow: hidden;
   }
   /* Without JS the video never plays, so the "now playing" card is meaningless. */
   html:not(.js) [data-hero-player] [data-now-playing] {
     display: none;
   }
 
-  /*
-   * Site header: hidden during the intro, fades in once the "now playing" card is
-   * up (HeroPlayer adds .hero-intro-done to <html>). If the visitor scrolls past
-   * the hero first (header gets [data-scrolled]), it shows straight away.
-   */
+  /* Site header: hidden during the intro, fades in with the "now playing" card. */
   html.js body:has([data-hero-player]) #site-header {
     transition-property: color, background-color, border-color, opacity, visibility;
     transition-duration: 300ms, 300ms, 300ms, 600ms, 600ms;
   }
-  html.js:not(.hero-intro-done) body:has([data-hero-player]) #site-header:not([data-scrolled]) {
+  html.js:not(.hero-header-in) body:has([data-hero-player]) #site-header {
     opacity: 0;
     visibility: hidden;
   }
 </style>
 
 <script>
-  import { animate, stagger } from 'motion';
+  import { animate } from 'motion';
 
   const hero = document.querySelector<HTMLElement>('[data-hero-player]');
 
@@ -116,8 +123,23 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
     const nowPlaying = hero.querySelector<HTMLElement>('[data-now-playing]')!;
     const toggle = hero.querySelector<HTMLButtonElement>('[data-now-playing-toggle]')!;
     const cue = hero.querySelector<HTMLAnchorElement>('[data-scroll-cue]')!;
-    const reveals = hero.querySelectorAll<HTMLElement>('.hero-reveal');
+    const nowPlayingWrap = nowPlaying.closest<HTMLElement>('.hero-reveal')!;
+    const root = document.documentElement;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // A deep link (e.g. /#main-content) should land on its section, not sit through the intro.
+    const skipIntro = reducedMotion || location.hash.length > 1;
+
+    // Everything after the hero (main, footer…). Made inert during the intro so
+    // Tab can't focus into it, because focusing an element would scroll the page
+    // even while scrolling is locked.
+    const belowHero = [...document.body.children].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && el !== hero && el.id !== 'site-header',
+    );
+    const unlock = () => {
+      belowHero.forEach((el) => (el.inert = false));
+      root.classList.add('hero-intro-done');
+    };
+    if (!skipIntro) belowHero.forEach((el) => (el.inert = true));
     const EASE_OUT = [0.22, 1, 0.36, 1] as const;
     const EASE_IN_OUT = [0.76, 0, 0.24, 1] as const;
     let expanded = false;
@@ -159,31 +181,37 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       nowPlaying.toggleAttribute('data-paused', paused);
     };
 
-    const finish = () => {
+    const fadeUp = (el: HTMLElement, duration: number) => {
+      el.style.visibility = 'visible';
+      return animate(el, { opacity: [0, 1], y: [16, 0] }, { duration, ease: EASE_OUT });
+    };
+
+    /** Jump to the end state: expanded, playing, everything visible, scrolling unlocked. */
+    const showAll = () => {
       expanded = true;
+      applyCover();
+      card.style.opacity = '1';
       chrome.style.opacity = '0';
       thumb.style.borderRadius = '0px';
+      [nowPlayingWrap, cue].forEach((el) => {
+        el.style.visibility = 'visible';
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      });
       play();
-      nowPlaying.style.visibility = 'visible';
-      // Reveals the site header (see the global styles above).
-      const showHeader = () => document.documentElement.classList.add('hero-intro-done');
-      if (reducedMotion) {
-        card.style.opacity = '1';
-        reveals.forEach((el) => (el.style.opacity = '1'));
-        showHeader();
-      } else {
-        animate(reveals, { opacity: [0, 1], y: [16, 0] }, { duration: 0.6, delay: stagger(0.12), ease: EASE_OUT }).then(
-          showHeader,
-        );
-      }
+      root.classList.add('hero-header-in');
+      unlock();
     };
 
     const intro = async () => {
-      if (reducedMotion) {
-        applyCover();
-        finish();
+      if (skipIntro) {
+        showAll();
         return;
       }
+
+      // Always run the intro from the top of the page.
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      window.scrollTo(0, 0);
 
       // 1. Fade the player in, with the fake seek bar creeping along.
       await animate(card, { opacity: [0, 1], y: [24, 0] }, { duration: 0.8, ease: EASE_OUT });
@@ -197,8 +225,20 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       animate(thumb, { borderRadius: '0px' }, { duration: 1.2, ease: EASE_IN_OUT });
       await animate(card, { x: t.x, y: t.y, scale: t.scale }, { duration: 1.2, ease: EASE_IN_OUT });
 
-      // 3. Play + reveal the overlay UI.
-      finish();
+      expanded = true;
+      chrome.style.opacity = '0';
+      thumb.style.borderRadius = '0px';
+
+      // 3. Play.
+      play();
+
+      // 4. "Now playing" card + header together (the header fades via CSS, 600ms).
+      root.classList.add('hero-header-in');
+      await fadeUp(nowPlayingWrap, 0.6);
+
+      // 5. Scroll-down button, then unlock scrolling.
+      await fadeUp(cue, 0.5);
+      unlock();
     };
 
     toggle.addEventListener('click', () => {
@@ -222,6 +262,12 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       if (expanded) applyCover();
     });
 
-    intro();
+    // Never leave the page locked: if the intro errors or stalls, jump to the end state.
+    const failsafe = window.setTimeout(showAll, 10000);
+    intro()
+      .catch(showAll)
+      .finally(() => {
+        if (root.classList.contains('hero-intro-done')) window.clearTimeout(failsafe);
+      });
   }
 </script>

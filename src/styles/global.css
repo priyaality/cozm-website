@@ -109,6 +109,9 @@
 
 @layer base {
   html {
+    /* Keep the scrollbar's space reserved, so unlocking scroll after the hero
+       intro doesn't shift the layout on systems with classic scrollbars. */
+    scrollbar-gutter: stable;
     background-color: var(--color-sand);
     color: var(--color-ink);
     font-family: var(--font-sans);
