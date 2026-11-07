@@ -146,7 +146,7 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
     if (!skipIntro) belowHero.forEach((el) => (el.inert = true));
     const EASE_OUT = [0.22, 1, 0.36, 1] as const;
     const EASE_IN_OUT = [0.76, 0, 0.24, 1] as const;
-    const MIN_LOADING_MS = 2000; // from the card starting to appear (includes its 0.8s fade-in)
+    const MIN_LOADING_MS = 1000; // from the card starting to appear (includes its 0.8s fade-in)
     const MAX_LOADING_MS = 5000;
     const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
 
