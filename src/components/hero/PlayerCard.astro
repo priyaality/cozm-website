@@ -1,0 +1,67 @@
+---
+/**
+ * PlayerCard — decorative music-player card (thumbnail, title, seek bar,
+ * transport and volume controls). The controls are for show only.
+ * The thumbnail area is a slot: HeroPlayer puts the hero <video> in it, so the
+ * same element becomes the full-screen video when the card expands.
+ */
+interface Props {
+  title: string;
+  subtitle: string;
+  elapsed: string;
+  duration: string;
+}
+
+const { title, subtitle, elapsed, duration } = Astro.props;
+---
+
+<div
+  data-player-card
+  class="relative flex w-[min(26rem,calc(100vw-2*var(--spacing-gutter)))] flex-col gap-5 rounded-player border border-sand/15 bg-ink p-5 text-sand"
+>
+  <div
+    data-player-thumb
+    class="relative aspect-video overflow-hidden rounded-player-media bg-black"
+  >
+    <slot />
+  </div>
+
+  <div data-player-chrome class="flex flex-col gap-5" aria-hidden="true">
+    <div class="flex flex-col gap-1">
+      <p class="text-title">{title}</p>
+      <p class="text-body text-sand/60">{subtitle}</p>
+    </div>
+
+    <!-- Seek bar -->
+    <div class="flex flex-col gap-2">
+      <div class="relative h-1 rounded-full bg-sand/25">
+        <div data-player-progress class="absolute inset-y-0 left-0 w-[22%] rounded-full bg-sand">
+          <span class="absolute top-1/2 right-0 size-3 translate-x-1/2 -translate-y-1/2 rounded-full bg-sand"></span>
+        </div>
+      </div>
+      <div class="flex justify-between font-mono text-caption text-sand/60">
+        <span>{elapsed}</span><span>{duration}</span>
+      </div>
+    </div>
+
+    <!-- Transport -->
+    <div class="flex items-center justify-center gap-10">
+      <svg viewBox="0 0 24 24" class="size-6 text-sand/50" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"></path></svg>
+      <svg viewBox="0 0 24 24" class="size-9" fill="currentColor"><path d="M7 4v16l13-8z"></path></svg>
+      <svg viewBox="0 0 24 24" class="size-6 text-sand/50" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"></path></svg>
+    </div>
+
+    <!-- Volume -->
+    <div class="flex items-center gap-4">
+      <svg viewBox="0 0 24 24" class="size-5 shrink-0" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"></path></svg>
+      <div class="relative h-1 flex-1 rounded-full bg-sand/25">
+        <div class="absolute inset-y-0 left-0 w-[70%] rounded-full bg-sand/60">
+          <span class="absolute top-1/2 right-0 size-4 translate-x-1/2 -translate-y-1/2 rounded-full bg-sand"></span>
+        </div>
+      </div>
+      <svg viewBox="0 0 24 24" class="size-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+        ><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="none"></path><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"></path></svg
+      >
+    </div>
+  </div>
+</div>

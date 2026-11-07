@@ -27,6 +27,8 @@ const {
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <!-- Lets CSS hide JS-animated elements before their intro, without hiding them when JS is off. -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body class="bg-sand text-ink">
     <slot />

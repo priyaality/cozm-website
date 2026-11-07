@@ -1,0 +1,89 @@
+---
+/**
+ * NowPlaying — "now playing" card shown once the hero video is playing.
+ * The Pause / Play button controls the hero video (wired up in HeroPlayer),
+ * which also gives visitors a way to stop the autoplaying video.
+ */
+import Logo from '../ui/Logo.astro';
+
+interface Props {
+  title: string;
+  subtitle: string;
+  poster?: string;
+  class?: string;
+}
+
+const { title, subtitle, poster, class: className } = Astro.props;
+---
+
+<div
+  data-now-playing
+  class:list={[
+    'relative flex items-center gap-4 rounded-player-media border border-sand/15 bg-ink/75 p-3 pr-12 text-sand backdrop-blur-md',
+    className,
+  ]}
+>
+  <div class="grid size-20 shrink-0 place-items-center overflow-hidden rounded-[0.625rem] bg-sand sm:size-24">
+    {poster ? <img src={poster} alt="" class="size-full object-cover" /> : <Logo class="w-14" />}
+  </div>
+
+  <div class="flex min-w-0 flex-col gap-1">
+    <p class="text-caption tracking-[0.04em] text-sand/60 uppercase">Now playing</p>
+    <p class="line-clamp-2 text-body font-semibold">{title}</p>
+    <p class="truncate text-caption text-sand/70">{subtitle}</p>
+    <button
+      type="button"
+      data-now-playing-toggle
+      class="mt-1 inline-flex w-fit items-center gap-1.5 rounded-full bg-sand/15 px-3 py-1.5 text-caption font-semibold"
+    >
+      <svg data-icon-pause viewBox="0 0 24 24" class="size-3.5" fill="currentColor" aria-hidden="true"
+        ><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg
+      >
+      <svg data-icon-play viewBox="0 0 24 24" class="hidden size-3.5" fill="currentColor" aria-hidden="true"
+        ><path d="M7 4v16l13-8z"></path></svg
+      >
+      <span data-now-playing-label>Pause</span>
+    </button>
+  </div>
+
+  <!-- Equalizer: animates while the video plays -->
+  <div class="equalizer absolute top-3 right-3 flex h-4 items-end gap-[3px]" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<style>
+  .equalizer span {
+    width: 3px;
+    height: 100%;
+    border-radius: 1px;
+    background: currentColor;
+    transform-origin: bottom;
+    animation: eq 0.9s ease-in-out infinite alternate;
+  }
+  .equalizer span:nth-child(2) {
+    animation-delay: -0.3s;
+  }
+  .equalizer span:nth-child(3) {
+    animation-delay: -0.6s;
+  }
+  [data-paused] .equalizer span {
+    animation-play-state: paused;
+  }
+
+  @keyframes eq {
+    from {
+      transform: scaleY(0.25);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .equalizer span {
+      animation: none;
+      transform: scaleY(0.6);
+    }
+  }
+</style>

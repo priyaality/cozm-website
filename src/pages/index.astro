@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
-import HeroVideo from '../components/HeroVideo.astro';
+import HeroPlayer from '../components/hero/HeroPlayer.astro';
 import ServicesTicker from '../components/ServicesTicker.astro';
 import ScrollWordReveal from '../components/ScrollWordReveal.astro';
 import MediaFeature from '../components/MediaFeature.astro';
@@ -18,9 +18,9 @@ const [uncovered, capmint, paisasmart, masaba] = featuredWork;
 <BaseLayout>
   <Header />
 
-  <HeroVideo {...heroVideo} />
+  <HeroPlayer {...heroVideo} next="main-content" />
 
-  <main>
+  <main id="main-content">
     <!-- Intro + services ticker together fill one viewport -->
     <div class="flex min-h-svh flex-col">
       <Section rule class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">

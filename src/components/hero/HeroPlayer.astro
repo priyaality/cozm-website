@@ -1,0 +1,205 @@
+---
+/**
+ * HeroPlayer — full-viewport hero with an intro sequence:
+ *
+ *   1. A music-player card fades in. Its thumbnail is the hero video, paused.
+ *   2. The card scales up around the thumbnail until the thumbnail covers the
+ *      viewport (the frame and controls move off-screen and fade out).
+ *   3. Once it's full-screen, the video plays (muted, looping), a "now playing"
+ *      card appears bottom-left and a scroll-down button bottom-right.
+ *
+ * The video is the same element throughout, so there's no jump when it starts.
+ * With prefers-reduced-motion the intro is skipped and it starts in step 3.
+ * Without JS the card is shown, unexpanded.
+ */
+import PlayerCard from './PlayerCard.astro';
+import NowPlaying from './NowPlaying.astro';
+
+interface Props {
+  src?: string;
+  type?: string;
+  poster?: string;
+  title: string;
+  subtitle: string;
+  elapsed: string;
+  duration: string;
+  /** Element id the scroll-down button scrolls to. */
+  next: string;
+}
+
+const { src, type = 'video/mp4', poster, title, subtitle, elapsed, duration, next } = Astro.props;
+---
+
+<div data-hero data-hero-player class="relative h-svh overflow-hidden bg-black">
+  <div class="absolute inset-0 grid place-items-center">
+    <PlayerCard title={title} subtitle={subtitle} elapsed={elapsed} duration={duration}>
+      {
+        src && (
+          <video
+            data-hero-video
+            class="absolute inset-0 size-full object-cover"
+            muted
+            loop
+            playsinline
+            preload="auto"
+            poster={poster}
+            disablepictureinpicture
+            aria-hidden="true"
+          >
+            <source src={src} type={type} />
+          </video>
+        )
+      }
+    </PlayerCard>
+  </div>
+
+  <div class="hero-reveal absolute bottom-6 left-gutter max-w-[calc(100%-2*var(--spacing-gutter)-4.5rem)] sm:max-w-sm">
+    <NowPlaying title={title} subtitle={subtitle} poster={poster} />
+  </div>
+
+  <a
+    href={`#${next}`}
+    data-scroll-cue
+    aria-label="Scroll to content"
+    class="hero-reveal absolute right-gutter bottom-6 grid size-14 place-items-center rounded-full border border-sand/40 bg-ink/60 text-sand backdrop-blur-md transition-colors hover:bg-ink"
+  >
+    <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"
+      ><path d="M12 4v16M5 13l7 7 7-7"></path></svg
+    >
+  </a>
+</div>
+
+<style is:global>
+  /* Global: these target elements rendered by child components. */
+  /* Hidden until the intro reveals them (only when JS is running). */
+  html.js [data-hero-player] [data-player-card],
+  html.js [data-hero-player] .hero-reveal {
+    opacity: 0;
+  }
+  html.js [data-hero-player] [data-now-playing] {
+    visibility: hidden;
+  }
+  /* Without JS the video never plays, so the "now playing" card is meaningless. */
+  html:not(.js) [data-hero-player] [data-now-playing] {
+    display: none;
+  }
+</style>
+
+<script>
+  import { animate, stagger } from 'motion';
+
+  const hero = document.querySelector<HTMLElement>('[data-hero-player]');
+
+  if (hero) {
+    const card = hero.querySelector<HTMLElement>('[data-player-card]')!;
+    const thumb = hero.querySelector<HTMLElement>('[data-player-thumb]')!;
+    const chrome = hero.querySelector<HTMLElement>('[data-player-chrome]')!;
+    const progress = hero.querySelector<HTMLElement>('[data-player-progress]')!;
+    const video = hero.querySelector<HTMLVideoElement>('[data-hero-video]');
+    const nowPlaying = hero.querySelector<HTMLElement>('[data-now-playing]')!;
+    const toggle = hero.querySelector<HTMLButtonElement>('[data-now-playing-toggle]')!;
+    const cue = hero.querySelector<HTMLAnchorElement>('[data-scroll-cue]')!;
+    const reveals = hero.querySelectorAll<HTMLElement>('.hero-reveal');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+    const EASE_IN_OUT = [0.76, 0, 0.24, 1] as const;
+    let expanded = false;
+
+    /** Transform that scales the card about the thumbnail's centre until the thumbnail covers the hero. */
+    const coverTransform = () => {
+      // offset* values ignore transforms, so this measures the card's resting layout.
+      // thumb.offset* are measured from inside the card's border; transform-origin and
+      // card.offset* use its border box, so add the border width (clientLeft/Top).
+      const cx = card.clientLeft + thumb.offsetLeft + thumb.offsetWidth / 2;
+      const cy = card.clientTop + thumb.offsetTop + thumb.offsetHeight / 2;
+      const scale =
+        Math.max(hero.clientWidth / thumb.offsetWidth, hero.clientHeight / thumb.offsetHeight) * 1.002;
+      return {
+        origin: `${cx}px ${cy}px`,
+        x: hero.clientWidth / 2 - (card.offsetLeft + cx),
+        y: hero.clientHeight / 2 - (card.offsetTop + cy),
+        scale,
+      };
+    };
+
+    const applyCover = () => {
+      const t = coverTransform();
+      card.style.transformOrigin = t.origin;
+      card.style.transform = `translateX(${t.x}px) translateY(${t.y}px) scale(${t.scale})`;
+    };
+
+    const play = () => {
+      if (!video) return;
+      video.muted = true;
+      video.play().catch(() => {});
+    };
+
+    const syncToggle = () => {
+      const paused = !video || video.paused;
+      toggle.querySelector('[data-now-playing-label]')!.textContent = paused ? 'Play' : 'Pause';
+      toggle.querySelector('[data-icon-pause]')!.classList.toggle('hidden', paused);
+      toggle.querySelector('[data-icon-play]')!.classList.toggle('hidden', !paused);
+      nowPlaying.toggleAttribute('data-paused', paused);
+    };
+
+    const finish = () => {
+      expanded = true;
+      chrome.style.opacity = '0';
+      thumb.style.borderRadius = '0px';
+      play();
+      nowPlaying.style.visibility = 'visible';
+      if (reducedMotion) {
+        card.style.opacity = '1';
+        reveals.forEach((el) => (el.style.opacity = '1'));
+      } else {
+        animate(reveals, { opacity: [0, 1], y: [16, 0] }, { duration: 0.6, delay: stagger(0.12), ease: EASE_OUT });
+      }
+    };
+
+    const intro = async () => {
+      if (reducedMotion) {
+        applyCover();
+        finish();
+        return;
+      }
+
+      // 1. Fade the player in, with the fake seek bar creeping along.
+      await animate(card, { opacity: [0, 1], y: [24, 0] }, { duration: 0.8, ease: EASE_OUT });
+      animate(progress, { width: ['22%', '27%'] }, { duration: 1.4, ease: 'linear' });
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      // 2. Expand: scale the card about the thumbnail until it covers the viewport.
+      const t = coverTransform();
+      card.style.transformOrigin = t.origin;
+      animate(chrome, { opacity: 0 }, { duration: 0.4, ease: 'easeOut' });
+      animate(thumb, { borderRadius: '0px' }, { duration: 1.2, ease: EASE_IN_OUT });
+      await animate(card, { x: t.x, y: t.y, scale: t.scale }, { duration: 1.2, ease: EASE_IN_OUT });
+
+      // 3. Play + reveal the overlay UI.
+      finish();
+    };
+
+    toggle.addEventListener('click', () => {
+      if (!video) return;
+      if (video.paused) video.play().catch(() => {});
+      else video.pause();
+    });
+    video?.addEventListener('play', syncToggle);
+    video?.addEventListener('pause', syncToggle);
+    syncToggle();
+
+    cue.addEventListener('click', (event) => {
+      const target = document.getElementById(cue.hash.slice(1));
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+    });
+
+    // Keep the expanded video covering the viewport when it resizes.
+    window.addEventListener('resize', () => {
+      if (expanded) applyCover();
+    });
+
+    intro();
+  }
+</script>
