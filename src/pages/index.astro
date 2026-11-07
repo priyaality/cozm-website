@@ -7,6 +7,7 @@ import HeroPlayer from '../components/hero/HeroPlayer.astro';
 import ServicesTicker from '../components/ServicesTicker.astro';
 import ScrollWordReveal from '../components/ScrollWordReveal.astro';
 import MediaFeature from '../components/MediaFeature.astro';
+import HorizontalScroll from '../components/HorizontalScroll.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
 import WorkRow from '../components/WorkRow.astro';
 import Footer from '../components/Footer.astro';
@@ -45,8 +46,8 @@ const [uncovered, capmint, paisasmart, masaba] = featuredWork;
     <!-- Statement: words reveal on scroll -->
     <ScrollWordReveal paragraphs={statement} />
 
-    <!-- Originals -->
-    <Section rule={false} padded={false} class="flex flex-col gap-10 pb-10">
+    <!-- Originals: scroll sideways through the cards -->
+    <HorizontalScroll>
       <MediaFeature
         title="All Risk is creative"
         description="We spend 90 days building it with your team, from the format to the launch, and leave you with everything you need to keep making it yourselves."
@@ -57,7 +58,7 @@ const [uncovered, capmint, paisasmart, masaba] = featuredWork;
         description="We spend 90 days building it with your team, from the format to the launch, and leave you with everything you need to keep making it yourselves."
         cta={{ label: 'Watch on YouTube', href: '#' }}
       />
-    </Section>
+    </HorizontalScroll>
 
     <!-- Approach -->
     <Section class="grid-split items-start gap-y-12">

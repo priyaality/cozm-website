@@ -1,0 +1,132 @@
+---
+/**
+ * HorizontalScroll — turns vertical scrolling into horizontal movement for the
+ * items inside it (modelled on motion.dev's "Scroll horizontal" example).
+ *
+ * The section is made as tall as one viewport plus the horizontal distance to
+ * travel. While it's on screen, a full-viewport stage sticks to the top and the
+ * track of items slides left in step with the scroll (1px down = 1px across).
+ * Once the last item is in place the stage unpins and the page carries on.
+ *
+ * Items are sized to fit the viewport below the fixed header, so a whole card
+ * is always visible, and centred when narrower than the page grid.
+ *
+ * Without JS, or with prefers-reduced-motion, the items simply stack vertically.
+ */
+interface Props {
+  /** Width ÷ height of each item at desktop, used to fit items to the viewport height. */
+  aspect?: number;
+  class?: string;
+}
+
+const { aspect = 1352 / 800, class: className } = Astro.props;
+---
+
+<section data-hscroll class:list={['hscroll relative bg-sand', className]} style={`--hs-aspect: ${aspect}`}>
+  <div class="hscroll__stage">
+    <div class="hscroll__track">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Fallback (no JS / reduced motion): items stacked like regular sections. */
+  .hscroll__track {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    padding: 0 var(--spacing-gutter) 2.5rem;
+  }
+
+  /* Horizontal mode */
+  .hscroll[data-active] .hscroll__stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    height: 100svh;
+    overflow: hidden;
+    /* the fixed header covers the top --spacing-nav */
+    padding-top: var(--spacing-nav);
+    container-type: inline-size;
+  }
+
+  .hscroll[data-active] .hscroll__track {
+    --hs-item-w: min(
+      100cqw - 2 * var(--spacing-gutter),
+      (100svh - var(--spacing-nav) - 5rem) * var(--hs-aspect)
+    );
+    flex-direction: row;
+    gap: var(--spacing-gutter);
+    width: max-content;
+    padding: 0 max(var(--spacing-gutter), (100cqw - var(--hs-item-w)) / 2);
+    will-change: transform;
+  }
+
+  .hscroll[data-active] .hscroll__track > :global(*) {
+    width: var(--hs-item-w);
+    flex-shrink: 0;
+  }
+</style>
+
+<script>
+  import { scroll } from 'motion';
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-hscroll]').forEach((root) => {
+    const stage = root.querySelector<HTMLElement>('.hscroll__stage')!;
+    const track = root.querySelector<HTMLElement>('.hscroll__track')!;
+    const items = () => [...track.children] as HTMLElement[];
+    let cancel: VoidFunction | undefined;
+    let distance = 0;
+
+    const setup = () => {
+      cancel?.();
+      cancel = undefined;
+      track.style.transform = '';
+
+      if (reducedMotion.matches || items().length < 2) {
+        delete root.dataset.active;
+        root.style.height = '';
+        return;
+      }
+
+      root.dataset.active = '';
+      const [first, ...rest] = items();
+      const last = rest[rest.length - 1];
+      // Travel until the last item sits where the first one starts.
+      distance = last.offsetLeft - first.offsetLeft;
+      root.style.height = `${stage.offsetHeight + distance}px`;
+
+      cancel = scroll(
+        (progress: number) => {
+          track.style.transform = `translate3d(${-progress * distance}px, 0, 0)`;
+        },
+        { target: root, offset: ['start start', 'end end'] },
+      );
+    };
+
+    // Keyboard: tabbing into an off-screen item scrolls the page to bring it into view
+    // (the browser would otherwise try to scroll the clipped stage sideways).
+    track.addEventListener('focusin', (event) => {
+      if (!root.hasAttribute('data-active')) return;
+      stage.scrollLeft = 0;
+      const item = items().find((el) => el.contains(event.target as Node));
+      if (!item) return;
+      const offset = item.offsetLeft - items()[0].offsetLeft;
+      const sectionTop = root.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: sectionTop + offset, behavior: 'smooth' });
+    });
+
+    let resizeTimer: number | undefined;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(setup, 150);
+    });
+    reducedMotion.addEventListener('change', setup);
+    document.fonts.ready.then(setup);
+    setup();
+  });
+</script>
