@@ -18,7 +18,7 @@ All tokens live in `src/styles/global.css` (`@theme`). Each one is both a CSS va
 | Colour  | `ink` `sand` `paper` `graphite` `black` `ink-muted` (70%) `ink-faint` (40%) `scrim` (60%) |
 | Font    | `font-sans` (Arimo), `font-mono` (IBM Plex Mono), `font-hand` (Caveat, stand-in for Figma Hand) |
 | Type    | `text-display` `text-headline` `text-statement` `text-title` `text-body` `text-label` `text-eyebrow` `text-nav` `text-caption` |
-| Spacing | `gutter` (80px) `section` (80px) `aside` (554px column) |
+| Spacing | `gutter` (80px) `section` (80px) `aside` (554px column) `nav` (85px fixed header) |
 | Effect  | `drop-shadow-paper` |
 | Layout  | `grid-split`: flexible column + 554px aside |
 
@@ -26,7 +26,10 @@ All tokens live in `src/styles/global.css` (`@theme`). Each one is both a CSS va
 
 - `ui/Button`: `primary` / `secondary` / `inverse` variants, `lg` / `sm` sizes
 - `ui/Logo`, `ui/NavLinks`, `ui/Section`
-- `Header`, `Footer`, `Ticker`
+- `Header` (fixed; turns into a sand bar once the hero scrolls away), `Footer`
+- `HeroVideo`: full-viewport muted autoplay video (drop the file at `public/video/hero.mp4`)
+- `ServicesTicker`: infinite horizontal marquee
+- `ScrollWordReveal`: statement copy that fades in word by word on scroll (uses `motion`)
 - `MediaFeature`: bordered media card with a bottom-right CTA (media goes in the `media` slot)
 - `WorkCard`, `WorkRow`: featured-work tiles in 878/634 pairs
 - `script/ScriptPage`, `script/ScriptRevision`: the revised "agency script"

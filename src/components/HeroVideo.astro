@@ -1,0 +1,44 @@
+---
+/**
+ * HeroVideo — full-viewport background video. Autoplays muted, inline and
+ * looping as soon as it can. The script below calls play() as a fallback for
+ * browsers that ignore the autoplay attribute. Without a `src` it renders the
+ * black placeholder from the design.
+ */
+interface Props {
+  src?: string;
+  type?: string;
+  poster?: string;
+}
+
+const { src, type = 'video/mp4', poster } = Astro.props;
+---
+
+<div data-hero class="relative h-svh overflow-hidden bg-black">
+  {
+    src && (
+      <video
+        class="absolute inset-0 size-full object-cover"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        poster={poster}
+        disablepictureinpicture
+        aria-hidden="true"
+        data-autoplay
+      >
+        <source src={src} type={type} />
+      </video>
+    )
+  }
+  <slot />
+</div>
+
+<script>
+  document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
+    video.muted = true; // required for autoplay; set as a property too for Safari
+    if (video.paused) video.play().catch(() => {});
+  });
+</script>

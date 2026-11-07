@@ -1,7 +1,11 @@
 ---
 /**
- * Header — overlays the hero media. Logo left; nav + "Talk to us" aligned to
- * the right-hand 554px column. Below lg the links collapse into a menu.
+ * Header — fixed to the top of the viewport.
+ *
+ * Over the hero it's transparent with sand text (as designed). Once the hero
+ * has scrolled out from under it, `data-scrolled` is set and it becomes a sand
+ * bar with ink text so it stays legible over the sand sections.
+ * Pages without a [data-hero] element get the scrolled style immediately.
  */
 import Logo from './ui/Logo.astro';
 import NavLinks from './ui/NavLinks.astro';
@@ -9,7 +13,10 @@ import Button from './ui/Button.astro';
 import { contactHref, navLinks } from '../data/site';
 ---
 
-<header class="absolute inset-x-0 top-0 z-10 px-gutter pt-6">
+<header
+  id="site-header"
+  class="group/header fixed inset-x-0 top-0 z-50 h-nav border-b border-transparent px-gutter pt-6 text-sand transition-colors duration-300 data-scrolled:border-ink data-scrolled:bg-sand data-scrolled:text-ink"
+>
   <div class="grid-split items-start">
     <a href="/" class="block w-fit px-3 py-2" aria-label="Cozm home">
       <Logo class="w-[79px]" />
@@ -17,31 +24,47 @@ import { contactHref, navLinks } from '../data/site';
 
     <!-- Desktop -->
     <nav class="hidden items-start justify-between lg:flex" aria-label="Primary">
-      <NavLinks tone="sand" />
-      <Button href={contactHref} variant="inverse" size="sm">Talk to us</Button>
+      <NavLinks />
+      <Button href={contactHref} variant="ghost" size="sm">Talk to us</Button>
     </nav>
 
     <!-- Mobile -->
     <details class="group absolute top-6 right-gutter lg:hidden">
       <summary
-        class="cursor-pointer list-none border border-sand px-6 py-[9px] text-nav text-sand [&::-webkit-details-marker]:hidden"
+        class="cursor-pointer list-none border border-current px-6 py-[9px] text-nav [&::-webkit-details-marker]:hidden"
       >
         <span class="group-open:hidden">Menu</span>
         <span class="hidden group-open:inline">Close</span>
       </summary>
       <nav
-        class="absolute right-0 mt-2 flex w-56 flex-col border border-sand bg-ink p-4"
+        class="absolute right-0 mt-2 flex w-56 flex-col border border-current bg-ink p-4 text-sand group-data-scrolled/header:bg-sand group-data-scrolled/header:text-ink"
         aria-label="Primary"
       >
         {
           navLinks.map((link) => (
-            <a href={link.href} class="py-3 text-nav text-sand">
+            <a href={link.href} class="py-3 text-nav">
               {link.label}
             </a>
           ))
         }
-        <Button href={contactHref} variant="inverse" size="sm" class="mt-2">Talk to us</Button>
+        <Button href={contactHref} variant="ghost" size="sm" class="mt-2">Talk to us</Button>
       </nav>
     </details>
   </div>
 </header>
+
+<script>
+  const header = document.getElementById('site-header');
+  const hero = document.querySelector('[data-hero]');
+
+  if (header && hero) {
+    const observer = new IntersectionObserver(
+      ([entry]) => header.toggleAttribute('data-scrolled', !entry.isIntersecting),
+      // Treat the hero as "gone" once its bottom edge passes under the header.
+      { rootMargin: `-${header.offsetHeight}px 0px 0px 0px` },
+    );
+    observer.observe(hero);
+  } else {
+    header?.setAttribute('data-scrolled', '');
+  }
+</script>

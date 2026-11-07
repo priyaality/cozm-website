@@ -5,7 +5,8 @@
  * variant
  *   primary   ink fill, sand label            ("Talk to us", "Start a conversation")
  *   secondary sand fill, ink border + label    ("Learn our approach", "View all work"…)
- *   inverse   transparent, sand border + label (header "Talk to us" over dark media)
+ *   ghost     transparent, border + label in the current text colour
+ *             (header "Talk to us": sand over the hero, ink once scrolled)
  * size
  *   lg  full-width block CTA, 28/40 padding, label type
  *   sm  compact header button, 9/24 padding, nav type
@@ -14,7 +15,7 @@ import type { HTMLAttributes } from 'astro/types';
 
 type Props = HTMLAttributes<'a'> & {
   href: string;
-  variant?: 'primary' | 'secondary' | 'inverse';
+  variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'lg' | 'sm';
 };
 
@@ -23,7 +24,7 @@ const { href, variant = 'secondary', size = 'lg', class: className, ...rest } = 
 const variants = {
   primary: 'bg-ink text-sand border-ink',
   secondary: 'bg-sand text-ink border-ink',
-  inverse: 'bg-transparent text-sand border-sand',
+  ghost: 'bg-transparent text-current border-current',
 };
 
 const sizes = {

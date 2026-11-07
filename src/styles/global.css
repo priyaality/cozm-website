@@ -13,7 +13,9 @@
  * design width and scale down on smaller screens.
  */
 
-@theme {
+/* `static` emits every token as a CSS variable, even if no utility uses it,
+   so components and scripts can always rely on var(--…). */
+@theme static {
   /* ---------- Colour ---------- */
   --color-*: initial;
   --color-ink: #1c1c1c; /* primary text, borders, primary button */
@@ -92,6 +94,7 @@
   --spacing-gutter: clamp(1.25rem, -0.25rem + 6vw, 5rem); /* page side padding: 80px at desktop */
   --spacing-section: clamp(3rem, 1.75rem + 5vw, 5rem); /* section vertical padding: 80px */
   --spacing-aside: 34.625rem; /* 554px right-hand column */
+  --spacing-nav: 5.3125rem; /* 85px fixed header height */
 
   /* ---------- Effects ---------- */
   --drop-shadow-paper: 0 6px 10px rgb(0 0 0 / 0.12);

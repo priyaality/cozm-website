@@ -3,57 +3,47 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
-import Ticker from '../components/Ticker.astro';
+import HeroVideo from '../components/HeroVideo.astro';
+import ServicesTicker from '../components/ServicesTicker.astro';
+import ScrollWordReveal from '../components/ScrollWordReveal.astro';
 import MediaFeature from '../components/MediaFeature.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
 import WorkRow from '../components/WorkRow.astro';
 import Footer from '../components/Footer.astro';
-import { contactHref, featuredWork, services } from '../data/site';
+import { contactHref, featuredWork, heroVideo, services, statement } from '../data/site';
 
 const [uncovered, capmint, paisasmart, masaba] = featuredWork;
 ---
 
 <BaseLayout>
-  <!-- Hero media (black placeholder in Figma; video/image goes here) -->
-  <div class="relative h-[70svh] min-h-[480px] bg-black lg:h-[805px]">
-    <Header />
-  </div>
+  <Header />
+
+  <HeroVideo {...heroVideo} />
 
   <main>
-    <!-- Intro -->
-    <Section rule class="grid-split items-start">
-      <h1 class="text-display">
-        Cozm is a media studio that helps brands build original media for India’s top 10%.
-      </h1>
-      <div class="flex flex-col gap-6 lg:pt-5">
-        <p class="text-body">
-          We spend 90 days building it with your team, from the format to the launch, and leave you
-          with everything you need to keep making it yourselves.
-        </p>
-        <div class="flex flex-col gap-4">
-          <Button href={contactHref} variant="primary">Talk to us</Button>
-          <Button href="/approach" variant="secondary">Learn our approach</Button>
+    <!-- Intro + services ticker together fill one viewport -->
+    <div class="flex min-h-svh flex-col">
+      <Section rule class="grid-split flex-1 items-start pt-[calc(var(--spacing-nav)+2.5rem)]">
+        <h1 class="text-display">
+          Cozm is a media studio that helps brands build original media for India’s top 10%.
+        </h1>
+        <div class="flex flex-col gap-6 lg:pt-5">
+          <p class="text-body">
+            We spend 90 days building it with your team, from the format to the launch, and leave you
+            with everything you need to keep making it yourselves.
+          </p>
+          <div class="flex flex-col gap-4">
+            <Button href={contactHref} variant="primary">Talk to us</Button>
+            <Button href="/approach" variant="secondary">Learn our approach</Button>
+          </div>
         </div>
-      </div>
-    </Section>
+      </Section>
 
-    <Ticker items={services} />
+      <ServicesTicker items={services} />
+    </div>
 
-    <!-- Statement -->
-    <Section class="text-statement">
-      <p class="mb-10">India’s most curious audience has plenty to watch, just very little about India.</p>
-      <p class="mb-10 text-ink-faint">
-        <span class="text-ink">
-          India’s top 10% is about 140 million people, curious, ambitious and hungry for media that
-          makes them think. But Indian media has
-        </span>{' '}
-        mostly aimed for the widest audience, leaving them to fill the gap with shows from elsewhere.
-      </p>
-      <p class="text-ink-faint">
-        We think they deserve better, so we started making it ourselves. Our originals are where we
-        learn what this audience chooses, and everything we build with brands starts from there.
-      </p>
-    </Section>
+    <!-- Statement: words reveal on scroll -->
+    <ScrollWordReveal paragraphs={statement} />
 
     <!-- Originals -->
     <Section rule={false} padded={false} class="flex flex-col gap-10 pb-10">
