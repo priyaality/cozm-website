@@ -49,7 +49,7 @@
   --text-headline--font-weight: 500;
 
   /* statement — large reading copy. 56 / 120% / -2% / regular */
-  --text-statement: clamp(1.75rem, 1.15rem + 2.4vw, 3.5rem);
+  --text-statement: clamp(1.75rem, 1.14rem + 2.5vw, 3.5rem);
   --text-statement--line-height: 1.2;
   --text-statement--letter-spacing: -0.02em;
   --text-statement--font-weight: 400;

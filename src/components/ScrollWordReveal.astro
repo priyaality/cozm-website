@@ -1,18 +1,17 @@
 ---
 /**
  * ScrollWordReveal — large statement copy whose words fade from faint to full
- * opacity, one after another, as the section is scrolled.
+ * opacity, one after another, as the page scrolls (no pinning).
  *
- * Modelled on motion.dev's "Text scroll word reveal": a tall section (220svh)
- * with a sticky full-viewport stage, tracked with offset ["start start", "end end"].
- * Word i starts at (i / (n-1)) × SPREAD of the progress and takes WORD_DURATION to
- * reach full opacity.
+ * The per-word animation follows motion.dev's "Text scroll word reveal":
+ * word i starts at (i / (n-1)) × SPREAD of the scroll progress and takes
+ * WORD_DURATION of it to reach full opacity.
  *
- * While pinned, the whole statement must fit in the viewport. If it doesn't at
- * the design size, the type is scaled down to fit (to no less than MIN_SCALE).
- * If it still doesn't fit (e.g. phones), pinning would hide part of it, so the
- * section stays in normal flow at full size and words reveal as it passes
- * through the viewport.
+ * The scroll range is measured from the layout so that:
+ *  - by the time the section reaches the fixed header ("landing" on it), the
+ *    whole first paragraph is fully highlighted, and
+ *  - after that, words light up as they rise to that same line on screen,
+ *    finishing when the last line reaches it.
  *
  * Without JS, or with prefers-reduced-motion, all text is shown at full opacity.
  */
@@ -28,45 +27,26 @@ const { paragraphs, startOpacity = 0.4 } = Astro.props;
 <section
   data-word-reveal
   data-start-opacity={startOpacity}
-  class="word-reveal relative border-t border-ink bg-sand px-gutter"
+  class="border-t border-ink bg-sand px-gutter py-section"
 >
-  <div class="word-reveal__stage flex flex-col justify-center py-section">
-    <div data-reveal-content class="text-statement">
-      {
-        paragraphs.map((paragraph, i) => (
-          <p class:list={[i < paragraphs.length - 1 && 'mb-10']}>
-            {paragraph.split(/\s+/).map((word) => (
-              <>
-                <span class="word-reveal__word">{word}</span>{' '}
-              </>
-            ))}
-          </p>
-        ))
-      }
-    </div>
+  <div data-reveal-content class="text-statement">
+    {
+      paragraphs.map((paragraph, i) => (
+        <p class:list={[i < paragraphs.length - 1 && 'mb-10']}>
+          {paragraph.split(/\s+/).map((word) => (
+            <>
+              <span class="word-reveal__word">{word}</span>{' '}
+            </>
+          ))}
+        </p>
+      ))
+    }
   </div>
 </section>
 
 <style>
   .word-reveal__word {
     opacity: var(--word-opacity, 1);
-  }
-
-  .word-reveal[data-mode='sticky'] {
-    min-height: 220svh;
-  }
-
-  .word-reveal[data-mode='sticky'] .word-reveal__stage {
-    position: sticky;
-    top: 0;
-    min-height: 100svh;
-    /* keep the copy centred in the space below the fixed header */
-    padding-top: calc(var(--spacing-nav) + var(--spacing-section) / 2);
-    padding-bottom: calc(var(--spacing-section) / 2);
-  }
-
-  .word-reveal[data-mode='sticky'] [data-reveal-content] {
-    font-size: calc(var(--text-statement) * var(--reveal-scale, 1));
   }
 </style>
 
@@ -75,20 +55,24 @@ const { paragraphs, startOpacity = 0.4 } = Astro.props;
 
   const SPREAD = 0.8;
   const WORD_DURATION = 0.2;
-  const MIN_SCALE = 0.75;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   document.querySelectorAll<HTMLElement>('[data-word-reveal]').forEach((root) => {
-    const words = [...root.querySelectorAll<HTMLElement>('.word-reveal__word')];
     const content = root.querySelector<HTMLElement>('[data-reveal-content]')!;
+    const words = [...content.querySelectorAll<HTMLElement>('.word-reveal__word')];
+    const firstParagraphWords = content.querySelectorAll('p:first-child .word-reveal__word');
     const startOpacity = Number(root.dataset.startOpacity ?? 0.4);
     const count = words.length;
     let cancel: VoidFunction | undefined;
 
+    /** Progress at which word `index` becomes fully opaque. */
+    const wordEnd = (index: number) =>
+      Math.min(1, (count <= 1 ? 0 : (index / (count - 1)) * SPREAD) + WORD_DURATION);
+
     const render = (progress: number) => {
       words.forEach((word, index) => {
-        const start = count <= 1 ? 0 : (index / (count - 1)) * SPREAD;
-        const end = Math.min(1, start + WORD_DURATION);
+        const end = wordEnd(index);
+        const start = end - WORD_DURATION;
         const t = progress <= start ? 0 : progress >= end ? 1 : (progress - start) / (end - start);
         word.style.setProperty('--word-opacity', String(startOpacity + (1 - startOpacity) * t));
       });
@@ -99,33 +83,34 @@ const { paragraphs, startOpacity = 0.4 } = Astro.props;
       cancel = undefined;
 
       if (reducedMotion.matches) {
-        delete root.dataset.mode;
         words.forEach((word) => word.style.removeProperty('--word-opacity'));
         return;
       }
 
-      // Try pinned mode: shrink the type until the copy fits the stage.
-      root.dataset.mode = 'sticky';
-      root.style.removeProperty('--reveal-scale');
-      const stage = root.firstElementChild as HTMLElement;
-      const stageStyle = getComputedStyle(stage);
-      const available =
-        window.innerHeight - parseFloat(stageStyle.paddingTop) - parseFloat(stageStyle.paddingBottom);
+      const viewport = window.innerHeight;
+      const header = document.getElementById('site-header')?.offsetHeight ?? 0;
+      const contentRect = content.getBoundingClientRect();
+      const contentHeight = contentRect.height;
+      const lastFirstWord = firstParagraphWords[firstParagraphWords.length - 1] as HTMLElement;
+      // Distance from the top of the copy to the bottom of the first paragraph.
+      const firstParagraphDepth = lastFirstWord.getBoundingClientRect().bottom - contentRect.top;
 
-      let scale = 1;
-      for (let i = 0; i < 4 && content.offsetHeight > available; i++) {
-        // Height grows roughly with the square of font size (bigger type + more lines).
-        scale *= Math.sqrt(available / content.offsetHeight) * 0.98;
-        root.style.setProperty('--reveal-scale', String(scale));
-      }
+      // Where the copy's top sits on screen when the section lands under the header.
+      const landedTop = header + (contentRect.top - root.getBoundingClientRect().top);
+      // The "reading line": where the first paragraph ends at that moment.
+      const line = landedTop + firstParagraphDepth;
 
-      const fits = content.offsetHeight <= available && scale >= MIN_SCALE;
-      if (!fits) root.style.removeProperty('--reveal-scale');
+      // Progress at landing must equal the point where the first paragraph is fully lit.
+      const landedProgress = wordEnd(firstParagraphWords.length - 1);
+      // From landing to the end, the copy scrolls (contentHeight - firstParagraphDepth)
+      // while progress covers the remaining (1 - landedProgress).
+      const range = (contentHeight - firstParagraphDepth) / (1 - landedProgress);
+      const startTop = landedTop + landedProgress * range;
 
-      root.dataset.mode = fits ? 'sticky' : 'flow';
       cancel = scroll(render, {
-        target: root,
-        offset: fits ? ['start start', 'end end'] : ['start 0.85', 'end 0.6'],
+        target: content,
+        // [copy top at startTop px, copy bottom at the reading line], as viewport fractions.
+        offset: [`start ${startTop / viewport}`, `end ${line / viewport}`],
       });
     };
 
