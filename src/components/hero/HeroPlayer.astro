@@ -19,6 +19,8 @@ interface Props {
   src?: string;
   type?: string;
   poster?: string;
+  /** Seconds into the video to show first and start playing from (media fragment #t=). */
+  startAt?: number;
   title: string;
   subtitle: string;
   elapsed: string;
@@ -27,7 +29,8 @@ interface Props {
   next: string;
 }
 
-const { src, type = 'video/mp4', poster, title, subtitle, elapsed, duration, next } = Astro.props;
+const { src, type = 'video/mp4', poster, startAt, title, subtitle, elapsed, duration, next } = Astro.props;
+const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
 ---
 
 <div data-hero data-hero-player class="relative h-svh overflow-hidden bg-black">
@@ -46,7 +49,7 @@ const { src, type = 'video/mp4', poster, title, subtitle, elapsed, duration, nex
             disablepictureinpicture
             aria-hidden="true"
           >
-            <source src={src} type={type} />
+            <source src={videoSrc} type={type} />
           </video>
         )
       }

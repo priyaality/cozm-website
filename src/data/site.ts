@@ -22,7 +22,10 @@ export const contactHref = '/contact';
 export const heroVideo = {
   src: '/video/hero.mp4',
   type: 'video/mp4',
-  poster: undefined as string | undefined,
+  /** Frame of the video at `startAt` (the clip opens on black, so the first frame isn't usable). */
+  poster: '/video/hero.jpg' as string | undefined,
+  /** Seconds into the video to show in the card and start playing from. */
+  startAt: 3,
   title: 'All Risk is creative',
   subtitle: 'Cozm Originals',
   elapsed: '00:28',
