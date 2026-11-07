@@ -3,6 +3,10 @@
  * WorkCard — full-bleed project tile: cover image, scrim, title + description
  * anchored to the bottom. `edge` adds the 80px page gutter on the side that
  * touches the viewport edge (16px on the inner side), as in Figma.
+ *
+ * Overlay: a flat 60% scrim by default. On hover (or when something inside has
+ * keyboard focus) it crossfades to a bottom-up gradient that clears the top of
+ * the image, highlighting the card while keeping the text legible.
  */
 import { Image } from 'astro:assets';
 import type { WorkItem } from '../data/site';
@@ -17,7 +21,6 @@ const {
   description,
   image,
   position = '50% 50%',
-  overlay = 'solid',
   href,
   edge,
   class: className,
@@ -31,7 +34,7 @@ const Tag = href ? 'a' : 'article';
   class:list={[
     // Stacked (< lg): keep close to the desktop card proportion; several covers are
     // wide strips with baked-in text that a wider crop would reveal.
-    'relative flex aspect-[5/4] items-end overflow-hidden py-4 lg:aspect-auto lg:h-full',
+    'group/work relative flex aspect-[5/4] items-end overflow-hidden py-4 lg:aspect-auto lg:h-full',
     'px-gutter',
     edge === 'left' ? 'lg:pr-4' : 'lg:pl-4',
     className,
@@ -46,11 +49,13 @@ const Tag = href ? 'a' : 'article';
       widths={[640, 960, 1280, 1920]}
       sizes="(min-width: 64rem) 60vw, 100vw"
     />
+    <!-- Default: flat scrim. Hover/focus: crossfade to the gradient. -->
     <div
-      class:list={[
-        'absolute inset-0',
-        overlay === 'solid' ? 'bg-scrim' : 'bg-linear-to-b from-transparent to-scrim',
-      ]}
+      class="absolute inset-0 bg-scrim transition-opacity duration-500 ease-out group-hover/work:opacity-0 group-focus-within/work:opacity-0"
+    >
+    </div>
+    <div
+      class="absolute inset-0 bg-linear-to-b from-transparent to-scrim opacity-0 transition-opacity duration-500 ease-out group-hover/work:opacity-100 group-focus-within/work:opacity-100"
     >
     </div>
   </div>

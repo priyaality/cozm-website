@@ -59,7 +59,6 @@ export type WorkItem = {
   image: ImageMetadata;
   /** CSS object-position reproducing the Figma crop. */
   position?: string;
-  overlay?: 'solid' | 'gradient';
   href?: string;
 };
 
@@ -85,6 +84,5 @@ export const featuredWork: WorkItem[] = [
     title: 'How I Masaba',
     description: 'The world’s most accomplished women on their craft.',
     image: masaba,
-    overlay: 'gradient',
   },
 ];
