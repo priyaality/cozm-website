@@ -83,6 +83,20 @@ const { src, type = 'video/mp4', poster, title, subtitle, elapsed, duration, nex
   html:not(.js) [data-hero-player] [data-now-playing] {
     display: none;
   }
+
+  /*
+   * Site header: hidden during the intro, fades in once the "now playing" card is
+   * up (HeroPlayer adds .hero-intro-done to <html>). If the visitor scrolls past
+   * the hero first (header gets [data-scrolled]), it shows straight away.
+   */
+  html.js body:has([data-hero-player]) #site-header {
+    transition-property: color, background-color, border-color, opacity, visibility;
+    transition-duration: 300ms, 300ms, 300ms, 600ms, 600ms;
+  }
+  html.js:not(.hero-intro-done) body:has([data-hero-player]) #site-header:not([data-scrolled]) {
+    opacity: 0;
+    visibility: hidden;
+  }
 </style>
 
 <script>
@@ -148,11 +162,16 @@ const { src, type = 'video/mp4', poster, title, subtitle, elapsed, duration, nex
       thumb.style.borderRadius = '0px';
       play();
       nowPlaying.style.visibility = 'visible';
+      // Reveals the site header (see the global styles above).
+      const showHeader = () => document.documentElement.classList.add('hero-intro-done');
       if (reducedMotion) {
         card.style.opacity = '1';
         reveals.forEach((el) => (el.style.opacity = '1'));
+        showHeader();
       } else {
-        animate(reveals, { opacity: [0, 1], y: [16, 0] }, { duration: 0.6, delay: stagger(0.12), ease: EASE_OUT });
+        animate(reveals, { opacity: [0, 1], y: [16, 0] }, { duration: 0.6, delay: stagger(0.12), ease: EASE_OUT }).then(
+          showHeader,
+        );
       }
     };
 
