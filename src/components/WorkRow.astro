@@ -1,6 +1,6 @@
 ---
 /**
- * WorkRow — two WorkCards side by side (wide 878 + narrow 634 at 1512px),
+ * WorkRow — two WorkCards side by side in a 7:5 split (5:7 when reversed),
  * separated by a 1px rule. `reverse` puts the narrow card first.
  * Stacks vertically below lg.
  */
@@ -21,8 +21,8 @@ const [first, second] = items;
   class:list={[
     'grid border-t border-ink bg-sand lg:h-[521px]',
     reverse
-      ? 'lg:grid-cols-[minmax(0,634fr)_auto_minmax(0,878fr)]'
-      : 'lg:grid-cols-[minmax(0,878fr)_auto_minmax(0,634fr)]',
+      ? 'lg:grid-cols-[minmax(0,5fr)_auto_minmax(0,7fr)]'
+      : 'lg:grid-cols-[minmax(0,7fr)_auto_minmax(0,5fr)]',
   ]}
 >
   <WorkCard {...first} edge="left" />
