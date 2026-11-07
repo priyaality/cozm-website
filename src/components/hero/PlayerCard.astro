@@ -3,7 +3,7 @@
  * PlayerCard — the music-player card shown while the site loads.
  * Square sand card with a 1px ink rule, like the rest of the site. The controls
  * are for show; while the card is up it sits in a loading state (spinner in
- * place of play, seek bar at 0:00 with a buffering stripe).
+ * place of play, seek bar parked at 0:00).
  * The thumbnail area is a slot: HeroPlayer puts the hero <video> in it, so the
  * same element becomes the full-screen video when the card expands.
  */
@@ -32,12 +32,9 @@ const icon = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejo
       <p class="text-body text-ink-muted">{subtitle}</p>
     </div>
 
-    <!-- Seek bar: parked at 0:00 with a buffering stripe while the video loads -->
+    <!-- Seek bar: parked at 0:00 while the video loads -->
     <div class="flex flex-col gap-2">
       <div class="relative h-0.5 bg-ink/15">
-        <div class="absolute inset-0 overflow-hidden">
-          <span class="player-buffer absolute inset-y-0 left-0 w-1/3 bg-ink/35"></span>
-        </div>
         <!-- playhead, parked at 0:00 -->
         <span class="absolute top-1/2 left-0 size-2.5 -translate-y-1/2 bg-ink"></span>
       </div>
@@ -82,18 +79,6 @@ const icon = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejo
 </div>
 
 <style>
-  .player-buffer {
-    animation: player-buffer 1.4s ease-in-out infinite;
-  }
-  @keyframes player-buffer {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(300%);
-    }
-  }
-
   .player-spinner {
     animation: player-spin 0.9s linear infinite;
   }
