@@ -8,8 +8,9 @@
  * WORD_DURATION of it to reach full opacity.
  *
  * The scroll range is measured from the layout so that:
- *  - by the time the section reaches the fixed header ("landing" on it), the
- *    whole first paragraph is fully highlighted, and
+ *  - by the time the section's top edge reaches `landAt` (a fraction of the
+ *    viewport height, 0.5 = middle of the screen), the whole first paragraph
+ *    is fully highlighted, and
  *  - after that, words light up as they rise to that same line on screen,
  *    finishing when the last line reaches it.
  *
@@ -19,14 +20,17 @@ interface Props {
   paragraphs: string[];
   /** Opacity of unrevealed words. Matches the design's faint ink (40%). */
   startOpacity?: number;
+  /** Where the section top sits (fraction of viewport height) when the first paragraph is fully lit. */
+  landAt?: number;
 }
 
-const { paragraphs, startOpacity = 0.4 } = Astro.props;
+const { paragraphs, startOpacity = 0.4, landAt = 0.5 } = Astro.props;
 ---
 
 <section
   data-word-reveal
   data-start-opacity={startOpacity}
+  data-land-at={landAt}
   class="border-t border-ink bg-sand px-gutter py-section"
 >
   <div data-reveal-content class="text-statement">
@@ -62,6 +66,7 @@ const { paragraphs, startOpacity = 0.4 } = Astro.props;
     const words = [...content.querySelectorAll<HTMLElement>('.word-reveal__word')];
     const firstParagraphWords = content.querySelectorAll('p:first-child .word-reveal__word');
     const startOpacity = Number(root.dataset.startOpacity ?? 0.4);
+    const landAt = Number(root.dataset.landAt ?? 0.5);
     const count = words.length;
     let cancel: VoidFunction | undefined;
 
@@ -88,17 +93,18 @@ const { paragraphs, startOpacity = 0.4 } = Astro.props;
       }
 
       const viewport = window.innerHeight;
-      const header = document.getElementById('site-header')?.offsetHeight ?? 0;
       const contentRect = content.getBoundingClientRect();
       const contentHeight = contentRect.height;
       const lastFirstWord = firstParagraphWords[firstParagraphWords.length - 1] as HTMLElement;
       // Distance from the top of the copy to the bottom of the first paragraph.
       const firstParagraphDepth = lastFirstWord.getBoundingClientRect().bottom - contentRect.top;
 
-      // Where the copy's top sits on screen when the section lands under the header.
-      const landedTop = header + (contentRect.top - root.getBoundingClientRect().top);
-      // The "reading line": where the first paragraph ends at that moment.
-      const line = landedTop + firstParagraphDepth;
+      // The "reading line": where the first paragraph ends when the section top is at
+      // `landAt`. Kept inside the viewport so the reveal is always visible.
+      const sectionToCopy = contentRect.top - root.getBoundingClientRect().top;
+      const line = Math.min(landAt * viewport + sectionToCopy + firstParagraphDepth, viewport * 0.9);
+      // Where the copy's top sits on screen at that moment.
+      const landedTop = line - firstParagraphDepth;
 
       // Progress at landing must equal the point where the first paragraph is fully lit.
       const landedProgress = wordEnd(firstParagraphWords.length - 1);
