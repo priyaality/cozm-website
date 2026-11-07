@@ -26,7 +26,15 @@ import { contactHref, navLinks } from '../data/site';
     <!-- Desktop -->
     <nav class="hidden items-start justify-between lg:flex" aria-label="Primary">
       <NavLinks />
-      <Button href={contactHref} variant="primary" size="sm">Talk to us</Button>
+      <!-- Sand over the hero; switches to primary (ink) once the header turns sand. -->
+      <Button
+        href={contactHref}
+        variant="secondary"
+        size="sm"
+        class="transition-colors duration-300 group-data-scrolled/header:border-ink group-data-scrolled/header:bg-ink group-data-scrolled/header:text-sand"
+      >
+        Talk to us
+      </Button>
     </nav>
 
     <!-- Mobile -->
