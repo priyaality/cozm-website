@@ -17,7 +17,7 @@ export const contactHref = '/contact';
  * Hero video. Drop the file at public/video/hero.mp4 (optionally a poster image
  * too, e.g. public/video/hero.jpg — shown in the player card before playback
  * and as the "now playing" artwork).
- * title / subtitle / times are the labels shown on the player and "now playing" cards.
+ * title / subtitle are the labels shown on the player and "now playing" cards.
  */
 export const heroVideo = {
   src: '/video/hero.mp4',
@@ -28,8 +28,8 @@ export const heroVideo = {
   startAt: 3,
   title: 'All Risk is creative',
   subtitle: 'Cozm Originals',
-  elapsed: '00:28',
-  duration: '04:03',
+  /** Shown until the video's real duration loads. */
+  duration: '0:47',
 };
 
 export const statement = [

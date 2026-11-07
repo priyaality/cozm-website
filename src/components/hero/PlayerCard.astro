@@ -1,67 +1,105 @@
 ---
 /**
- * PlayerCard — decorative music-player card (thumbnail, title, seek bar,
- * transport and volume controls). The controls are for show only.
+ * PlayerCard — the music-player card shown while the site loads.
+ * Square sand card with a 1px ink rule, like the rest of the site. The controls
+ * are for show; while the card is up it sits in a loading state (spinner in
+ * place of play, seek bar at 0:00 with a buffering stripe).
  * The thumbnail area is a slot: HeroPlayer puts the hero <video> in it, so the
  * same element becomes the full-screen video when the card expands.
  */
 interface Props {
   title: string;
   subtitle: string;
-  elapsed: string;
+  /** Fallback total time, replaced by the video's real duration once it's known. */
   duration: string;
 }
 
-const { title, subtitle, elapsed, duration } = Astro.props;
+const { title, subtitle, duration } = Astro.props;
+const icon = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"';
 ---
 
 <div
   data-player-card
-  class="relative flex w-[min(26rem,calc(100vw-2*var(--spacing-gutter)))] flex-col gap-5 rounded-player border border-sand/15 bg-ink p-5 text-sand"
+  class="relative flex w-[min(26rem,calc(100vw-2*var(--spacing-gutter)))] flex-col gap-6 border border-ink bg-sand p-5 text-ink"
 >
-  <div
-    data-player-thumb
-    class="relative aspect-video overflow-hidden rounded-player-media bg-black"
-  >
+  <div data-player-thumb class="relative aspect-video overflow-hidden bg-ink">
     <slot />
   </div>
 
-  <div data-player-chrome class="flex flex-col gap-5" aria-hidden="true">
+  <div data-player-chrome class="flex flex-col gap-6" aria-hidden="true">
     <div class="flex flex-col gap-1">
       <p class="text-title">{title}</p>
-      <p class="text-body text-sand/60">{subtitle}</p>
+      <p class="text-body text-ink-muted">{subtitle}</p>
     </div>
 
-    <!-- Seek bar -->
+    <!-- Seek bar: parked at 0:00 with a buffering stripe while the video loads -->
     <div class="flex flex-col gap-2">
-      <div class="relative h-1 rounded-full bg-sand/25">
-        <div data-player-progress class="absolute inset-y-0 left-0 w-[22%] rounded-full bg-sand">
-          <span class="absolute top-1/2 right-0 size-3 translate-x-1/2 -translate-y-1/2 rounded-full bg-sand"></span>
+      <div class="relative h-0.5 bg-ink/15">
+        <div class="absolute inset-0 overflow-hidden">
+          <span class="player-buffer absolute inset-y-0 left-0 w-1/3 bg-ink/35"></span>
         </div>
+        <!-- playhead, parked at 0:00 -->
+        <span class="absolute top-1/2 left-0 size-2.5 -translate-y-1/2 bg-ink"></span>
       </div>
-      <div class="flex justify-between font-mono text-caption text-sand/60">
-        <span>{elapsed}</span><span>{duration}</span>
+      <div class="flex justify-between text-caption text-ink-muted tabular-nums">
+        <span>0:00</span><span data-player-duration>{duration}</span>
       </div>
     </div>
 
-    <!-- Transport -->
-    <div class="flex items-center justify-center gap-10">
-      <svg viewBox="0 0 24 24" class="size-6 text-sand/50" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"></path></svg>
-      <svg viewBox="0 0 24 24" class="size-9" fill="currentColor"><path d="M7 4v16l13-8z"></path></svg>
-      <svg viewBox="0 0 24 24" class="size-6 text-sand/50" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"></path></svg>
+    <!-- Transport: loading spinner in place of play -->
+    <div class="flex items-center justify-center gap-12">
+      <svg viewBox="0 0 24 24" class="size-6 text-ink-muted" set:html={`<path ${icon} d="M6 5v14M19 5v14l-10-7z"/>`} />
+      <svg viewBox="0 0 36 36" class="player-spinner size-9" role="presentation">
+        <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1.5"></circle>
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-dasharray="24 100"
+          stroke-linecap="square"></circle>
+      </svg>
+      <svg viewBox="0 0 24 24" class="size-6 text-ink-muted" set:html={`<path ${icon} d="M18 5v14M5 5v14l10-7z"/>`} />
     </div>
 
     <!-- Volume -->
     <div class="flex items-center gap-4">
-      <svg viewBox="0 0 24 24" class="size-5 shrink-0" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"></path></svg>
-      <div class="relative h-1 flex-1 rounded-full bg-sand/25">
-        <div class="absolute inset-y-0 left-0 w-[70%] rounded-full bg-sand/60">
-          <span class="absolute top-1/2 right-0 size-4 translate-x-1/2 -translate-y-1/2 rounded-full bg-sand"></span>
+      <svg viewBox="0 0 24 24" class="size-5 shrink-0" set:html={`<path ${icon} d="M4 9h4l5-4v14l-5-4H4z"/>`} />
+      <div class="relative h-0.5 flex-1 bg-ink/15">
+        <div class="absolute inset-y-0 left-0 w-[70%] bg-ink">
+          <span class="absolute top-1/2 right-0 size-2.5 translate-x-1/2 -translate-y-1/2 bg-ink"></span>
         </div>
       </div>
-      <svg viewBox="0 0 24 24" class="size-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-        ><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="none"></path><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"></path></svg
-      >
+      <svg
+        viewBox="0 0 24 24"
+        class="size-5 shrink-0"
+        set:html={`<path ${icon} d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>`}
+      />
     </div>
   </div>
 </div>
+
+<style>
+  .player-buffer {
+    animation: player-buffer 1.4s ease-in-out infinite;
+  }
+  @keyframes player-buffer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+
+  .player-spinner {
+    animation: player-spin 0.9s linear infinite;
+  }
+  @keyframes player-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

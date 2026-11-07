@@ -1,49 +1,40 @@
 ---
 /**
  * NowPlaying — "now playing" card shown once the hero video is playing.
- * The Pause / Play button controls the hero video (wired up in HeroPlayer),
- * which also gives visitors a way to stop the autoplaying video.
+ * Square sand card with a 1px ink rule. The Pause / Play button controls the
+ * hero video (wired up in HeroPlayer), which also gives visitors a way to stop
+ * the autoplaying video.
  */
 import Logo from '../ui/Logo.astro';
+import Button from '../ui/Button.astro';
 
 interface Props {
   title: string;
   subtitle: string;
   poster?: string;
-  class?: string;
 }
 
-const { title, subtitle, poster, class: className } = Astro.props;
+const { title, subtitle, poster } = Astro.props;
 ---
 
-<div
-  data-now-playing
-  class:list={[
-    'relative flex items-center gap-4 rounded-player-media border border-sand/15 bg-ink/75 p-3 pr-12 text-sand backdrop-blur-md',
-    className,
-  ]}
->
-  <div class="grid size-20 shrink-0 place-items-center overflow-hidden rounded-[0.625rem] bg-sand sm:size-24">
+<div data-now-playing class="relative flex items-center gap-4 border border-ink bg-sand p-3 pr-12 text-ink">
+  <div class="grid size-20 shrink-0 place-items-center overflow-hidden bg-ink sm:size-24">
     {poster ? <img src={poster} alt="" class="size-full object-cover" /> : <Logo class="w-14" />}
   </div>
 
   <div class="flex min-w-0 flex-col gap-1">
-    <p class="text-caption tracking-[0.04em] text-sand/60 uppercase">Now playing</p>
+    <p class="text-caption text-ink-muted uppercase">Now playing</p>
     <p class="line-clamp-2 text-body font-semibold">{title}</p>
-    <p class="truncate text-caption text-sand/70">{subtitle}</p>
-    <button
-      type="button"
-      data-now-playing-toggle
-      class="mt-1 inline-flex w-fit items-center gap-1.5 rounded-full bg-sand/15 px-3 py-1.5 text-caption font-semibold"
-    >
-      <svg data-icon-pause viewBox="0 0 24 24" class="size-3.5" fill="currentColor" aria-hidden="true"
+    <p class="truncate text-caption text-ink-muted">{subtitle}</p>
+    <Button variant="secondary" size="xs" class="mt-1 w-fit" data-now-playing-toggle>
+      <svg data-icon-pause viewBox="0 0 24 24" class="size-3" fill="currentColor" aria-hidden="true"
         ><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg
       >
-      <svg data-icon-play viewBox="0 0 24 24" class="hidden size-3.5" fill="currentColor" aria-hidden="true"
+      <svg data-icon-play viewBox="0 0 24 24" class="hidden size-3" fill="currentColor" aria-hidden="true"
         ><path d="M7 4v16l13-8z"></path></svg
       >
       <span data-now-playing-label>Pause</span>
-    </button>
+    </Button>
   </div>
 
   <!-- Equalizer: animates while the video plays -->
@@ -56,7 +47,6 @@ const { title, subtitle, poster, class: className } = Astro.props;
   .equalizer span {
     width: 3px;
     height: 100%;
-    border-radius: 1px;
     background: currentColor;
     transform-origin: bottom;
     animation: eq 0.9s ease-in-out infinite alternate;

@@ -19,6 +19,7 @@
  */
 import PlayerCard from './PlayerCard.astro';
 import NowPlaying from './NowPlaying.astro';
+import Button from '../ui/Button.astro';
 
 interface Props {
   src?: string;
@@ -28,19 +29,20 @@ interface Props {
   startAt?: number;
   title: string;
   subtitle: string;
-  elapsed: string;
+  /** Fallback total time for the player card; replaced by the video's real duration. */
   duration: string;
   /** Element id the scroll-down button scrolls to. */
   next: string;
 }
 
-const { src, type = 'video/mp4', poster, startAt, title, subtitle, elapsed, duration, next } = Astro.props;
+const { src, type = 'video/mp4', poster, startAt, title, subtitle, duration, next } = Astro.props;
 const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
 ---
 
-<div data-hero data-hero-player class="relative h-svh overflow-hidden bg-black">
+<!-- Sand while the player card loads; the video covers it once expanded. -->
+<div data-hero data-hero-player class="relative h-svh overflow-hidden bg-sand">
   <div class="absolute inset-0 grid place-items-center">
-    <PlayerCard title={title} subtitle={subtitle} elapsed={elapsed} duration={duration}>
+    <PlayerCard title={title} subtitle={subtitle} duration={duration}>
       {
         src && (
           <video
@@ -65,16 +67,18 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
     <NowPlaying title={title} subtitle={subtitle} poster={poster} />
   </div>
 
-  <a
+  <Button
     href={`#${next}`}
+    variant="secondary"
+    size="icon"
     data-scroll-cue
     aria-label="Scroll to content"
-    class="hero-reveal absolute right-gutter bottom-6 grid size-14 place-items-center rounded-full border border-sand/40 bg-ink/60 text-sand backdrop-blur-md transition-colors hover:bg-ink"
+    class="hero-reveal absolute right-gutter bottom-6"
   >
-    <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"
+    <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"
       ><path d="M12 4v16M5 13l7 7 7-7"></path></svg
     >
-  </a>
+  </Button>
 </div>
 
 <style is:global>
@@ -118,7 +122,7 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
     const card = hero.querySelector<HTMLElement>('[data-player-card]')!;
     const thumb = hero.querySelector<HTMLElement>('[data-player-thumb]')!;
     const chrome = hero.querySelector<HTMLElement>('[data-player-chrome]')!;
-    const progress = hero.querySelector<HTMLElement>('[data-player-progress]')!;
+    const durationLabel = hero.querySelector<HTMLElement>('[data-player-duration]')!;
     const video = hero.querySelector<HTMLVideoElement>('[data-hero-video]');
     const nowPlaying = hero.querySelector<HTMLElement>('[data-now-playing]')!;
     const toggle = hero.querySelector<HTMLButtonElement>('[data-now-playing-toggle]')!;
@@ -142,6 +146,27 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
     if (!skipIntro) belowHero.forEach((el) => (el.inert = true));
     const EASE_OUT = [0.22, 1, 0.36, 1] as const;
     const EASE_IN_OUT = [0.76, 0, 0.24, 1] as const;
+    const MIN_LOADING_MS = 2000; // from the card starting to appear (includes its 0.8s fade-in)
+    const MAX_LOADING_MS = 5000;
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
+
+    /** Resolves once the video has enough data to play (or fails to load, so we never hang). */
+    const videoReady = () =>
+      new Promise<void>((resolve) => {
+        if (!video || video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return resolve();
+        video.addEventListener('canplay', () => resolve(), { once: true });
+        video.addEventListener('error', () => resolve(), { once: true });
+        video.querySelector('source')?.addEventListener('error', () => resolve(), { once: true });
+      });
+
+    // Show the video's real length on the player card.
+    const showDuration = () => {
+      if (!video || !Number.isFinite(video.duration)) return;
+      const total = Math.round(video.duration);
+      durationLabel.textContent = `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+    };
+    if (video?.readyState) showDuration();
+    video?.addEventListener('loadedmetadata', showDuration);
     let expanded = false;
 
     /** Transform that scales the card about the thumbnail's centre until the thumbnail covers the hero. */
@@ -192,7 +217,6 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       applyCover();
       card.style.opacity = '1';
       chrome.style.opacity = '0';
-      thumb.style.borderRadius = '0px';
       [nowPlayingWrap, cue].forEach((el) => {
         el.style.visibility = 'visible';
         el.style.opacity = '1';
@@ -213,21 +237,21 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       window.scrollTo(0, 0);
 
-      // 1. Fade the player in, with the fake seek bar creeping along.
+      // 1. Fade the player in. It sits in its loading state (spinner, 0:00) until
+      //    the video can actually play: at least MIN_LOADING_MS, at most MAX_LOADING_MS.
+      const shownAt = performance.now();
       await animate(card, { opacity: [0, 1], y: [24, 0] }, { duration: 0.8, ease: EASE_OUT });
-      animate(progress, { width: ['22%', '27%'] }, { duration: 1.4, ease: 'linear' });
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await Promise.race([videoReady(), wait(MAX_LOADING_MS)]);
+      await wait(MIN_LOADING_MS - (performance.now() - shownAt));
 
       // 2. Expand: scale the card about the thumbnail until it covers the viewport.
       const t = coverTransform();
       card.style.transformOrigin = t.origin;
       animate(chrome, { opacity: 0 }, { duration: 0.4, ease: 'easeOut' });
-      animate(thumb, { borderRadius: '0px' }, { duration: 1.2, ease: EASE_IN_OUT });
       await animate(card, { x: t.x, y: t.y, scale: t.scale }, { duration: 1.2, ease: EASE_IN_OUT });
 
       expanded = true;
       chrome.style.opacity = '0';
-      thumb.style.borderRadius = '0px';
 
       // 3. Play.
       play();

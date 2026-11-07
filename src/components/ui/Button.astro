@@ -1,6 +1,7 @@
 ---
 /**
- * Button — the rectangular CTA used throughout the design.
+ * Button — the rectangular CTA used throughout the design. Renders a link when
+ * given an `href`, otherwise a <button type="button">.
  *
  * variant
  *   primary   ink fill, sand label            ("Talk to us", "Start a conversation")
@@ -8,15 +9,17 @@
  *   ghost     transparent, border + label in the current text colour
  *             (header "Talk to us": sand over the hero, ink once scrolled)
  * size
- *   lg  full-width block CTA, 28/40 padding, label type
- *   sm  compact header button, 9/24 padding, nav type
+ *   lg    full-width block CTA, 28/40 padding, label type
+ *   sm    compact button, 9/24 padding, nav type
+ *   xs    small inline control (e.g. the hero's Pause), caption type
+ *   icon  56px square for a single icon (e.g. the hero's scroll-down button)
  */
 import type { HTMLAttributes } from 'astro/types';
 
-type Props = HTMLAttributes<'a'> & {
-  href: string;
+type Props = Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> & {
+  href?: string;
   variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'lg' | 'sm';
+  size?: 'lg' | 'sm' | 'xs' | 'icon';
 };
 
 const { href, variant = 'secondary', size = 'lg', class: className, ...rest } = Astro.props;
@@ -30,18 +33,26 @@ const variants = {
 const sizes = {
   lg: 'w-full px-10 py-7 text-label',
   sm: 'px-6 py-[9px] text-nav',
+  xs: 'gap-1.5 px-3 py-1.5 text-caption font-semibold',
+  icon: 'size-14',
 };
+
+const classes = [
+  'inline-flex items-center justify-center border text-center whitespace-nowrap',
+  variants[variant],
+  sizes[size],
+  className,
+];
 ---
 
-<a
-  href={href}
-  class:list={[
-    'inline-flex items-center justify-center border text-center whitespace-nowrap',
-    variants[variant],
-    sizes[size],
-    className,
-  ]}
-  {...rest}
->
-  <slot />
-</a>
+{
+  href ? (
+    <a href={href} class:list={classes} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <button type="button" class:list={classes} {...rest}>
+      <slot />
+    </button>
+  )
+}
