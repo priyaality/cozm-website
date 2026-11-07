@@ -1,8 +1,12 @@
 ---
 /**
- * WorkRow — two WorkCards side by side in a 7:5 split (5:7 when reversed),
- * separated by a 1px rule. `reverse` puts the narrow card first.
- * Stacks vertically below lg.
+ * WorkRow — a wide and a narrow WorkCard side by side, split by a 1px rule.
+ *
+ * The narrow card is `aside-bleed` wide (column gap + 554px aside + page gutter),
+ * so the seam sits on the page's column gap and the narrow card's text (16px in
+ * from the seam) lands exactly on the same keyline as the header nav, CTAs and
+ * other aside content, at every desktop width. The wide card takes the rest.
+ * `reverse` mirrors the row (narrow card first). Stacks vertically below lg.
  */
 import WorkCard from './WorkCard.astro';
 import divider from '../assets/icons/divider-vertical.svg';
@@ -19,20 +23,24 @@ const [first, second] = items;
 
 <div
   class:list={[
-    'grid border-t border-ink bg-sand lg:h-[521px]',
+    'relative grid border-t border-ink bg-sand lg:h-[521px]',
     reverse
-      ? 'lg:grid-cols-[minmax(0,5fr)_auto_minmax(0,7fr)]'
-      : 'lg:grid-cols-[minmax(0,7fr)_auto_minmax(0,5fr)]',
+      ? 'lg:grid-cols-[var(--spacing-aside-bleed)_minmax(0,1fr)]'
+      : 'lg:grid-cols-[minmax(0,1fr)_var(--spacing-aside-bleed)]',
   ]}
 >
   <WorkCard {...first} edge="left" />
+  <WorkCard {...second} edge="right" class="border-t border-ink lg:border-t-0" />
+  <!-- 1px rule over the seam (absolutely positioned so it doesn't shift the columns) -->
   <img
     src={divider.src}
     width="1"
     height="520"
     alt=""
     aria-hidden="true"
-    class="hidden h-full w-px lg:block"
+    class:list={[
+      'pointer-events-none absolute inset-y-0 hidden h-full w-px lg:block',
+      reverse ? 'left-[var(--spacing-aside-bleed)]' : 'right-[var(--spacing-aside-bleed)]',
+    ]}
   />
-  <WorkCard {...second} edge="right" class="border-t border-ink lg:border-t-0" />
 </div>

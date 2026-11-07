@@ -94,6 +94,10 @@
   --spacing-gutter: clamp(1.25rem, -0.25rem + 6vw, 5rem); /* page side padding: 80px at desktop */
   --spacing-section: clamp(3rem, 1.75rem + 5vw, 5rem); /* section vertical padding: 80px */
   --spacing-aside: 34.625rem; /* 554px right-hand column */
+  --spacing-column-gap: 1rem; /* 16px gap between the main column and the aside */
+  /* Full-bleed width from the column gap to the viewport edge:
+     a block this wide, with column-gap padding, puts content on the aside keyline. */
+  --spacing-aside-bleed: calc(var(--spacing-column-gap) + var(--spacing-aside) + var(--spacing-gutter));
   --spacing-nav: 5.3125rem; /* 85px fixed header height */
 
   /* ---------- Effects ---------- */
@@ -113,10 +117,11 @@
   }
 }
 
-/* Two-column layout used across the page: flexible content + fixed 554px aside. */
+/* Two-column layout used across the page: flexible content + fixed 554px aside.
+   The aside's left edge is the page's right-hand keyline. */
 @utility grid-split {
   display: grid;
-  gap: 1rem;
+  gap: var(--spacing-column-gap);
   grid-template-columns: minmax(0, 1fr);
   @variant lg {
     grid-template-columns: minmax(0, 1fr) minmax(0, var(--spacing-aside));
