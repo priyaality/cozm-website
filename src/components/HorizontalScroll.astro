@@ -40,16 +40,18 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
     padding: 0 var(--spacing-gutter) 2.5rem;
   }
 
-  /* Horizontal mode */
+  /* Horizontal mode: the stage pins just below the fixed header and fills the
+     rest of the viewport, with a 16px (column-gap) margin above and below items. */
   .hscroll[data-active] .hscroll__stage {
     position: sticky;
-    top: 0;
+    top: var(--spacing-nav);
     display: flex;
-    align-items: center;
-    height: 100svh;
+    /* top-aligned, so items always sit 16px below the header (and below the
+       previous section) even when they're shorter than the viewport */
+    align-items: flex-start;
+    height: calc(100svh - var(--spacing-nav));
     overflow: hidden;
-    /* the fixed header covers the top --spacing-nav */
-    padding-top: var(--spacing-nav);
+    padding-block: var(--spacing-column-gap);
     container-type: inline-size;
   }
 
@@ -57,7 +59,7 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
     /* Items are always the full width of the page grid, as in the vertical layout. */
     --hs-item-w: calc(100cqw - 2 * var(--spacing-gutter));
     flex-direction: row;
-    gap: var(--spacing-gutter);
+    gap: var(--spacing-column-gap);
     width: max-content;
     padding: 0 var(--spacing-gutter);
     will-change: transform;
@@ -73,7 +75,10 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
   @media (width >= 64rem) {
     .hscroll[data-active] .hscroll__track > :global(*) {
       aspect-ratio: auto;
-      height: min(var(--hs-item-w) / var(--hs-aspect), 100svh - var(--spacing-nav) - 2rem);
+      height: min(
+        var(--hs-item-w) / var(--hs-aspect),
+        100svh - var(--spacing-nav) - 2 * var(--spacing-column-gap)
+      );
     }
   }
 </style>
@@ -89,6 +94,8 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
     const items = () => [...track.children] as HTMLElement[];
     let cancel: VoidFunction | undefined;
     let distance = 0;
+    /** Height of the fixed header, i.e. where the stage pins (its sticky `top`). */
+    const headerHeight = () => parseFloat(getComputedStyle(stage).top) || 0;
 
     const setup = () => {
       cancel?.();
@@ -108,11 +115,14 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
       distance = last.offsetLeft - first.offsetLeft;
       root.style.height = `${stage.offsetHeight + distance}px`;
 
+      // The stage pins when the section's top reaches the bottom of the fixed header,
+      // and unpins when the section's bottom reaches the bottom of the viewport.
+      const header = headerHeight();
       cancel = scroll(
         (progress: number) => {
           track.style.transform = `translate3d(${-progress * distance}px, 0, 0)`;
         },
-        { target: root, offset: ['start start', 'end end'] },
+        { target: root, offset: [`start ${header / window.innerHeight}`, 'end end'] },
       );
     };
 
@@ -125,7 +135,7 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
       if (!item) return;
       const offset = item.offsetLeft - items()[0].offsetLeft;
       const sectionTop = root.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: sectionTop + offset, behavior: 'smooth' });
+      window.scrollTo({ top: sectionTop - headerHeight() + offset, behavior: 'smooth' });
     });
 
     let resizeTimer: number | undefined;
