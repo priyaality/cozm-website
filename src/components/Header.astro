@@ -18,7 +18,8 @@ import { contactHref, navLinks } from '../data/site';
   class="group/header fixed inset-x-0 top-0 z-50 h-nav border-b border-transparent px-gutter pt-6 text-sand transition-colors duration-300 data-scrolled:border-ink data-scrolled:bg-sand data-scrolled:text-ink"
 >
   <div class="grid-split items-start">
-    <a href="/" class="block w-fit px-3 py-2" aria-label="Cozm home">
+    <!-- -mx-3 cancels the padding so the wordmark sits on the page gutter; the padding just enlarges the click target. -->
+    <a href="/" class="-mx-3 block w-fit px-3 py-2" aria-label="Cozm home">
       <Logo class="w-[79px]" />
     </a>
 
