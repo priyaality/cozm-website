@@ -1,0 +1,27 @@
+---
+/**
+ * Section — page band with the design's ink top rule and standard gutters.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'section'> & {
+  /** Draw the 1px ink rule along the top edge. */
+  rule?: boolean;
+  /** Apply the standard 80px vertical padding. */
+  padded?: boolean;
+};
+
+const { rule = true, padded = true, class: className, ...rest } = Astro.props;
+---
+
+<section
+  class:list={[
+    'bg-sand px-gutter',
+    rule && 'border-t border-ink',
+    padded && 'py-section',
+    className,
+  ]}
+  {...rest}
+>
+  <slot />
+</section>

@@ -1,0 +1,32 @@
+---
+/**
+ * MediaFeature — large bordered media card with a title, description and CTA
+ * pinned to the bottom-right (aligned to the 554px aside column).
+ * The media area is a white placeholder in Figma. Pass a video or image
+ * through the `media` slot when it's ready.
+ */
+import Button from './ui/Button.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  cta: { label: string; href: string };
+}
+
+const { title, description, cta } = Astro.props;
+---
+
+<article
+  class="relative flex flex-col overflow-hidden border border-ink bg-paper lg:block lg:aspect-[1352/800]"
+>
+  <div class="aspect-video w-full lg:absolute lg:inset-0 lg:aspect-auto">
+    <slot name="media" />
+  </div>
+  <div
+    class="flex flex-col gap-4 p-4 lg:absolute lg:right-[15px] lg:bottom-[15px] lg:w-[calc(var(--spacing-aside)-16px)] lg:p-0"
+  >
+    <h3 class="text-title">{title}</h3>
+    <p class="text-body text-ink-muted">{description}</p>
+    <Button href={cta.href} variant="secondary">{cta.label}</Button>
+  </div>
+</article>

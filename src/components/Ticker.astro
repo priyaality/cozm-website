@@ -1,0 +1,31 @@
+---
+/**
+ * Ticker — horizontal band of services separated by the cross icon.
+ * Static for now. The track is a single flex row, so turning it into a
+ * scrolling marquee later only needs a duplicated track and an animation.
+ */
+import tickerIcon from '../assets/icons/ticker-icon.svg';
+
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="overflow-hidden border-t border-ink bg-sand py-6" aria-label="What we make">
+  <ul class="flex w-max items-center gap-6 lg:relative lg:left-1/2 lg:-translate-x-1/2">
+    {
+      items.map((item, i) => (
+        <>
+          {i > 0 && (
+            <li aria-hidden="true" class="shrink-0">
+              <img src={tickerIcon.src} width="24" height="24" alt="" class="block size-6" />
+            </li>
+          )}
+          <li class="shrink-0 text-eyebrow whitespace-nowrap uppercase">{item}</li>
+        </>
+      ))
+    }
+  </ul>
+</div>

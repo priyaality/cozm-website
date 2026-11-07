@@ -1,0 +1,61 @@
+---
+/**
+ * WorkCard — full-bleed project tile: cover image, scrim, title + description
+ * anchored to the bottom. `edge` adds the 80px page gutter on the side that
+ * touches the viewport edge (16px on the inner side), as in Figma.
+ */
+import { Image } from 'astro:assets';
+import type { WorkItem } from '../data/site';
+
+type Props = WorkItem & {
+  edge: 'left' | 'right';
+  class?: string;
+};
+
+const {
+  title,
+  description,
+  image,
+  position = '50% 50%',
+  overlay = 'solid',
+  href,
+  edge,
+  class: className,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'article';
+---
+
+<Tag
+  href={href}
+  class:list={[
+    // Stacked (< lg): keep close to the desktop card proportion; several covers are
+    // wide strips with baked-in text that a wider crop would reveal.
+    'relative flex aspect-[5/4] items-end overflow-hidden py-4 lg:aspect-auto lg:h-full',
+    'px-gutter',
+    edge === 'left' ? 'lg:pr-4' : 'lg:pl-4',
+    className,
+  ]}
+>
+  <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+    <Image
+      src={image}
+      alt=""
+      class="size-full object-cover"
+      style={`object-position: ${position}`}
+      widths={[640, 960, 1280, 1920]}
+      sizes="(min-width: 64rem) 60vw, 100vw"
+    />
+    <div
+      class:list={[
+        'absolute inset-0',
+        overlay === 'solid' ? 'bg-scrim' : 'bg-linear-to-b from-transparent to-scrim',
+      ]}
+    >
+    </div>
+  </div>
+  <div class="relative flex flex-col gap-2 text-sand">
+    <h3 class="text-title">{title}</h3>
+    <p class="text-body">{description}</p>
+  </div>
+</Tag>

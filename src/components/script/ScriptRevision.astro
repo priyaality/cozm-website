@@ -1,0 +1,56 @@
+---
+/**
+ * ScriptRevision — a typewritten line that's been struck through by hand and
+ * rewritten underneath. Sizes use the ScriptPage's `--u` unit (1 design px),
+ * so strike-throughs stay aligned with the text as the page scales.
+ */
+export type Strike = {
+  src: string;
+  /** Box in design px, taken from Figma (the stroke's bounding box). */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  /** Natural SVG size (box + stroke overhang). */
+  svgWidth: number;
+  svgHeight: number;
+  flip?: boolean;
+};
+
+interface Props {
+  from: string;
+  to: string;
+  strikes: Strike[];
+}
+
+const { from, to, strikes } = Astro.props;
+const u = (n: number) => `calc(var(--u) * ${n})`;
+---
+
+<div class="relative flex w-full flex-col items-start">
+  <p class="w-full font-mono text-graphite" style={`font-size:${u(20)};line-height:1.2;letter-spacing:-0.02em`}>
+    <del class="no-underline">{from}</del>
+  </p>
+  <!-- Design: Figma Hand 20/24. Caveat (the Google Fonts stand-in) runs small, so it's
+       scaled up while keeping the 24px line box. Revert to u(20) if Figma Hand is licensed. -->
+  <p class="font-hand whitespace-nowrap text-ink" style={`font-size:${u(26)};line-height:${u(24)}`}>
+    <ins class="no-underline">{to}</ins>
+  </p>
+  {
+    strikes.map((s) => (
+      <img
+        src={s.src}
+        alt=""
+        aria-hidden="true"
+        class="absolute block max-w-none"
+        style={[
+          `left:${u(s.x - (s.svgWidth - s.width) / 2)}`,
+          `top:${u(s.y - (s.svgHeight - s.height) / 2)}`,
+          `width:${u(s.svgWidth)}`,
+          `height:${u(s.svgHeight)}`,
+          s.flip ? 'transform:scaleX(-1)' : '',
+        ].join(';')}
+      />
+    ))
+  }
+</div>

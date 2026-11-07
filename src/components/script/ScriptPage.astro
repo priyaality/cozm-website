@@ -1,0 +1,101 @@
+---
+/**
+ * ScriptPage — the "agency script" on paper, with handwritten revisions.
+ *
+ * The page is laid out in design pixels (782 × 636) and scales fluidly with its
+ * container. `--u` equals one design pixel, derived from container width.
+ */
+import { Image } from 'astro:assets';
+import ScriptRevision, { type Strike } from './ScriptRevision.astro';
+import paper from '../../assets/script/paper.png';
+import strike1 from '../../assets/script/strike-1.svg';
+import strike1b from '../../assets/script/strike-1b.svg';
+import strike2 from '../../assets/script/strike-2.svg';
+import strike3 from '../../assets/script/strike-3.svg';
+import strike4 from '../../assets/script/strike-4.svg';
+
+const revisions: { from: string; to: string; strikes: Strike[] }[] = [
+  {
+    from: 'They stay for as long as you keep paying.',
+    to: 'We stay for 90 days.',
+    strikes: [
+      { src: strike1.src, x: 0, y: 12.67, width: 375.91, height: 5.357, svgWidth: 377.411, svgHeight: 6.857 },
+      { src: strike1b.src, x: 0, y: 38.67, width: 91.272, height: 2.399, svgWidth: 92.7725, svgHeight: 3.89917, flip: true },
+    ],
+  },
+  {
+    from: 'Their team learns the craft.',
+    to: 'Your team learns the craft.',
+    strikes: [{ src: strike2.src, x: 0, y: 12, width: 317, height: 5, svgWidth: 318.5, svgHeight: 6.5 }],
+  },
+  {
+    from: 'The costs keep growing.',
+    to: 'Each episode gets cheaper to make.',
+    strikes: [{ src: strike3.src, x: 0, y: 12, width: 262, height: 5, svgWidth: 263.5, svgHeight: 6.5 }],
+  },
+];
+
+const finalRevision = {
+  from: 'Another invoice arrives.',
+  to: 'Your team runs it.',
+  strikes: [{ src: strike4.src, x: 0, y: 9, width: 273, height: 5, svgWidth: 274.5, svgHeight: 6.5 }],
+};
+
+const u = (n: number) => `calc(var(--u) * ${n})`;
+const mono = (size: number, lh = 1) =>
+  `font-size:${u(size)};line-height:${lh};letter-spacing:-0.02em`;
+---
+
+<figure class="script-page w-full max-w-[782px] drop-shadow-paper" aria-label="The usual agency script, revised">
+  <div class="relative font-mono text-ink">
+    <Image
+      src={paper}
+      alt=""
+      class="absolute left-0 max-w-none"
+      style={`top:${u(-13)};width:100%;height:${u(662)}`}
+      widths={[782, 1564]}
+      sizes="(min-width: 64rem) 782px, 100vw"
+    />
+
+    <p class="script-meta absolute whitespace-nowrap" style={`left:${u(40)};top:${u(40)};${mono(16)}`}>15</p>
+    <p class="script-meta absolute whitespace-nowrap text-right" style={`right:${u(40)};top:${u(40)};${mono(16)}`}>
+      REVISED 5/11/26
+    </p>
+
+    <div
+      class="absolute flex flex-col items-start text-graphite"
+      style={`left:${u(181)};top:${u(118)};width:${u(420)};gap:${u(20)}`}
+    >
+      <p class="w-full" style={mono(16)}>DAY 1. YOUR COMPANY.</p>
+      <p class="w-full" style={mono(20)}>A team arrives to make your media.</p>
+      {revisions.map((r) => <ScriptRevision {...r} />)}
+      <p class="w-full" style={mono(16, 1.2)}>DAY 91.</p>
+      <ScriptRevision {...finalRevision} />
+      <p class="w-full" style={mono(16, 1.2)}>FADE OUT.</p>
+    </div>
+  </div>
+</figure>
+
+<style>
+  .script-page {
+    container-type: inline-size;
+    overflow-x: clip;
+  }
+  /*
+   * --u = one design px. Desktop: the full 782px sheet fits the container.
+   * Narrow screens: never scale smaller than "500 design px fills the width",
+   * so the sheet's margins are cropped instead of the type becoming tiny.
+   */
+  .script-page > div {
+    --u: max(100cqw / 782, min(1px, 100cqw / 500));
+    width: calc(var(--u) * 782);
+    height: calc(var(--u) * 636);
+    margin-left: calc((100cqw - var(--u) * 782) / 2);
+  }
+  /* When the sheet's margins are cropped, the page number / revision stamp would be cut off. */
+  @container (width < 740px) {
+    .script-meta {
+      display: none;
+    }
+  }
+</style>

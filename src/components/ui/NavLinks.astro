@@ -1,0 +1,44 @@
+---
+/**
+ * NavLinks — the Approach / Work / Originals / About list.
+ * Used in the header (row, sand on dark) and the footer (column, ink on sand).
+ */
+import { navLinks } from '../../data/site';
+
+interface Props {
+  /**
+   * row: items flow into the parent flex container (display: contents), so the
+   *      header can space links + CTA evenly across its 554px column.
+   * column: stacked list.
+   */
+  direction?: 'row' | 'column';
+  tone?: 'sand' | 'ink';
+  class?: string;
+}
+
+const { direction = 'row', tone = 'ink', class: className } = Astro.props;
+---
+
+<ul
+  class:list={[
+    direction === 'row' ? 'contents' : 'flex flex-col items-start',
+    className,
+  ]}
+>
+  {
+    navLinks.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class:list={[
+            'block text-nav whitespace-nowrap',
+            direction === 'row' ? 'py-[9px]' : 'py-3',
+            tone === 'sand' ? 'text-sand' : 'text-ink',
+          ]}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))
+  }
+</ul>

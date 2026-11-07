@@ -1,0 +1,46 @@
+---
+/**
+ * Button — the rectangular CTA used throughout the design.
+ *
+ * variant
+ *   primary   ink fill, sand label            ("Talk to us", "Start a conversation")
+ *   secondary sand fill, ink border + label    ("Learn our approach", "View all work"…)
+ *   inverse   transparent, sand border + label (header "Talk to us" over dark media)
+ * size
+ *   lg  full-width block CTA, 28/40 padding, label type
+ *   sm  compact header button, 9/24 padding, nav type
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'> & {
+  href: string;
+  variant?: 'primary' | 'secondary' | 'inverse';
+  size?: 'lg' | 'sm';
+};
+
+const { href, variant = 'secondary', size = 'lg', class: className, ...rest } = Astro.props;
+
+const variants = {
+  primary: 'bg-ink text-sand border-ink',
+  secondary: 'bg-sand text-ink border-ink',
+  inverse: 'bg-transparent text-sand border-sand',
+};
+
+const sizes = {
+  lg: 'w-full px-10 py-7 text-label',
+  sm: 'px-6 py-[9px] text-nav',
+};
+---
+
+<a
+  href={href}
+  class:list={[
+    'inline-flex items-center justify-center border text-center whitespace-nowrap',
+    variants[variant],
+    sizes[size],
+    className,
+  ]}
+  {...rest}
+>
+  <slot />
+</a>

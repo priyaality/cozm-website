@@ -1,0 +1,46 @@
+---
+/**
+ * Footer — closing CTA (right) with logo, nav and legal (left), over a faded
+ * film-strip graphic.
+ */
+import { Image } from 'astro:assets';
+import Logo from './ui/Logo.astro';
+import NavLinks from './ui/NavLinks.astro';
+import Button from './ui/Button.astro';
+import filmStrip from '../assets/images/footer-film.png';
+import { contactHref } from '../data/site';
+---
+
+<footer class="relative overflow-hidden border-t border-ink bg-sand px-gutter py-section">
+  <Image
+    src={filmStrip}
+    alt=""
+    aria-hidden="true"
+    class="pointer-events-none absolute bottom-[-266px] left-0 h-[897px] w-[540px] max-w-none -scale-y-100 object-fill object-bottom opacity-60 max-lg:hidden"
+    widths={[577]}
+    sizes="540px"
+  />
+
+  <div class="relative flex flex-col-reverse gap-16 lg:flex-row lg:items-start lg:justify-between">
+    <div class="flex w-[285px] flex-col gap-16">
+      <div class="flex flex-col gap-6">
+        <Logo class="w-[158px]" />
+        <nav aria-label="Footer">
+          <NavLinks direction="column" />
+        </nav>
+      </div>
+      <div class="flex flex-col gap-2 text-caption whitespace-nowrap">
+        <p>© 2026 by COZM Entertainment Private Limited</p>
+        <p>Website by Supercollective Studio</p>
+      </div>
+    </div>
+
+    <div class="flex w-full flex-col gap-[22px] lg:w-aside">
+      <h2 class="text-headline lg:text-right">
+        If India’s top 10% is who you want to reach, let’s talk about what your first 90 days could
+        look like.
+      </h2>
+      <Button href={contactHref} variant="primary">Start a conversation</Button>
+    </div>
+  </div>
+</footer>
