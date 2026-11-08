@@ -43,7 +43,7 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
     <!-- Wheel: its right edge on the first column's right edge (column 5 on desktop) -->
     <div class:list={[cols, 'pointer-events-none absolute inset-0']} aria-hidden="true">
       <div class="relative lg:col-span-5">
-        <div class="absolute top-1/2 right-0 size-[560px] -translate-y-1/2 lg:size-[900px]">
+        <div class="day-dial__wheel absolute top-1/2 right-0 size-[560px] -translate-y-1/2">
           <img
             data-dial-wheel
             src={dial.src}
@@ -85,6 +85,16 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
 </section>
 
 <style>
+  /* Desktop wheel: Figma's proportion (a 900px circle in an 800px section), scaled
+     to the visible height below the fixed header, so it always overflows by the
+     same amount top and bottom. */
+  @media (width >= 64rem) {
+    .day-dial__wheel {
+      width: calc((100svh - var(--spacing-nav)) * 1.125);
+      height: calc((100svh - var(--spacing-nav)) * 1.125);
+    }
+  }
+
   /* Fallback (no JS / reduced motion): phases listed down a viewport-tall section. */
   .day-dial__stage {
     display: flex;
@@ -99,16 +109,17 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
     width: 100%;
   }
 
-  /* Pinned: the section is one viewport plus a segment per turn; the stage sticks
-     while the page scrolls through it, and the phases sit on top of each other. */
+  /* Pinned: the stage sticks just below the fixed header and fills the rest of
+     the viewport (so the wheel and text are centred in what's visible). The
+     section is that tall plus a segment per turn. Phases sit on top of each other. */
   @media (prefers-reduced-motion: no-preference) {
     :global(html.js) .day-dial {
-      height: calc(100svh + var(--dial-turns) * var(--dial-segment));
+      height: calc(100svh - var(--spacing-nav) + var(--dial-turns) * var(--dial-segment));
     }
     :global(html.js) .day-dial__stage {
       position: sticky;
-      top: 0;
-      height: 100svh;
+      top: var(--spacing-nav);
+      height: calc(100svh - var(--spacing-nav));
       min-height: 0;
       padding-block: 0;
     }
@@ -153,6 +164,7 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
 
   document.querySelectorAll<HTMLElement>('[data-day-dial]').forEach((root) => {
     const wheel = root.querySelector<HTMLElement>('[data-dial-wheel]')!;
+    const stage = root.querySelector<HTMLElement>('.day-dial__stage')!;
     const counter = root.querySelector<HTMLElement>('[data-dial-day]')!;
     const phases = [...root.querySelectorAll<HTMLElement>('[data-dial-phase]')];
     /** The day each phase starts on (1, 30, 60, 90); the wheel is at that phase's 90° mark on that day. */
@@ -197,12 +209,20 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
         return;
       }
       phases.forEach((phase, i) => (phase.inert = i !== current));
+      // Turning starts when the section's top reaches the bottom of the fixed header
+      // (where the stage pins: its sticky `top`) and ends when the section unpins.
+      const header = parseFloat(getComputedStyle(stage).top) || 0;
       cancel = scroll((progress: number) => render(progress * turns), {
         target: root,
-        offset: ['start start', 'end end'],
+        offset: [`start ${header / window.innerHeight}`, 'end end'],
       });
     };
 
+    let resizeTimer: number | undefined;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(setup, 150);
+    });
     motionOK.addEventListener('change', setup);
     setup();
   });
