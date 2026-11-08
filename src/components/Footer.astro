@@ -1,7 +1,8 @@
 ---
 /**
  * Footer — closing CTA (right) with logo, nav and legal (left), over a faded
- * film-strip graphic.
+ * film-strip graphic in the top-left corner. The graphic is a pre-treated
+ * export (grain, tone and transparency baked in) at 2× its 552×545 size.
  */
 import { Image } from 'astro:assets';
 import Logo from './ui/Logo.astro';
@@ -16,9 +17,9 @@ import { contactHref } from '../data/site';
     src={filmStrip}
     alt=""
     aria-hidden="true"
-    class="pointer-events-none absolute bottom-[-266px] left-0 h-[897px] w-[540px] max-w-none -scale-y-100 object-fill object-bottom opacity-60 max-lg:hidden"
-    widths={[577]}
-    sizes="540px"
+    class="pointer-events-none absolute top-0 left-0 w-[552px] max-w-none max-lg:hidden"
+    widths={[552, 1104]}
+    sizes="552px"
   />
 
   <!-- Desktop: 7/5 page grid. Mobile: stacked with the CTA first. -->
