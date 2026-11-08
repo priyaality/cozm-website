@@ -96,11 +96,29 @@ export interface ApproachStep {
   description: string;
 }
 
-/** Steps shown on the dial. Only the first is designed so far. */
+/** The four phases shown on the dial, one per 90° turn. */
 export const approachSteps: ApproachStep[] = [
   {
     day: '01',
     title: 'Create the format',
     description: 'We work out the idea, format, and voice with you and your team.',
+  },
+  {
+    day: '30',
+    title: 'Train the team',
+    description:
+      'Your team starts leading production, and we coach them through each episode until they’re confident.',
+  },
+  {
+    day: '60',
+    title: 'Set up workflows',
+    description:
+      'We put the templates, quality checks and publishing schedule in place, and write them down so nothing depends on us.',
+  },
+  {
+    day: '90',
+    title: 'Hand it over',
+    description:
+      'Your team runs it on its own, and each new episode costs less to make than the last.',
   },
 ];
