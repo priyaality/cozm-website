@@ -42,6 +42,12 @@
   --text-display--letter-spacing: -0.06em;
   --text-display--font-weight: 600;
 
+  /* display-sm — approach page headline and day numerals. 96 / 100% / -6% / semibold */
+  --text-display-sm: clamp(2.75rem, 1.4rem + 5vw, 6rem);
+  --text-display-sm--line-height: 1;
+  --text-display-sm--letter-spacing: -0.06em;
+  --text-display-sm--font-weight: 600;
+
   /* headline — section headings. 56 / 100% / -2% / medium */
   --text-headline: clamp(2.25rem, 1.65rem + 2.4vw, 3.5rem);
   --text-headline--line-height: 1;

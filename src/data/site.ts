@@ -86,3 +86,21 @@ export const featuredWork: WorkItem[] = [
     image: masaba,
   },
 ];
+
+/* ---------- Approach page ---------- */
+
+export interface ApproachStep {
+  /** Day of the 90-day programme, shown as a large numeral (e.g. '01'). */
+  day: string;
+  title: string;
+  description: string;
+}
+
+/** Steps shown on the dial. Only the first is designed so far. */
+export const approachSteps: ApproachStep[] = [
+  {
+    day: '01',
+    title: 'Create the format',
+    description: 'We work out the idea, format, and voice with you and your team.',
+  },
+];

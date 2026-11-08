@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Section from '../components/ui/Section.astro';
+import Button from '../components/ui/Button.astro';
+import DayDial from '../components/approach/DayDial.astro';
+import Footer from '../components/Footer.astro';
+import { approachSteps, contactHref } from '../data/site';
+---
+
+<BaseLayout>
+  <Header />
+
+  <main id="main-content">
+    <!-- Intro: full-width headline, then a 7/5 split of copy and CTA -->
+    <Section
+      rule={false}
+      padded={false}
+      class="flex flex-col gap-8 pt-[calc(var(--spacing-nav)+var(--spacing-section))] pb-[clamp(4rem,2.5rem+6vw,7.5rem)]"
+    >
+      <h1 class="text-display-sm">
+        Give us 90 days, and you’ll have your own media and a team that knows how to make it.
+      </h1>
+      <div class="grid-split items-center gap-y-6">
+        <p class="text-body">
+          Everything we do is meant to leave your team more capable, from the format and first
+          episodes to the workflows that keep it going.
+        </p>
+        <Button href={contactHref} variant="primary">Start a conversation</Button>
+      </div>
+    </Section>
+
+    <!-- The 90 days: 5/7 split around the dial -->
+    <DayDial step={approachSteps[0]} />
+
+    <!-- Day 91: what the team is left with (cards are placeholders in the design) -->
+    <Section padded={false} class="flex flex-col gap-6 pt-section pb-section lg:min-h-[800px]">
+      <h2 class="text-headline">On day 91, you’ll have:</h2>
+      <ul class="grid grid-cols-2 gap-px bg-ink lg:grid-cols-4">
+        {Array.from({ length: 4 }, () => <li class="h-[200px] bg-paper lg:h-[297px]" />)}
+      </ul>
+    </Section>
+  </main>
+
+  <Footer />
+</BaseLayout>

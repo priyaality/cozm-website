@@ -1,0 +1,44 @@
+---
+/**
+ * DayDial — the approach page's 90-day dial: a large ticked arc on the left,
+ * the current day numeral just inside it, and that day's step to the right.
+ *
+ * Desktop uses a 5/7 split of the page grid: the arc's outer edge sits on
+ * column 5's right edge, and the step copy starts on column 6.
+ * Static for now; the scroll animation will drive it later.
+ */
+import dial from '../../assets/approach/dial.svg';
+import type { ApproachStep } from '../../data/site';
+
+interface Props {
+  step: ApproachStep;
+}
+
+const { step } = Astro.props;
+---
+
+<section class="relative h-[560px] overflow-hidden border-t border-ink bg-sand px-gutter lg:h-[800px]">
+  <div class="grid h-full grid-cols-[auto_minmax(0,1fr)] items-center gap-x-column-gap lg:grid-12">
+    <!-- Arc + numeral (columns 1–5) -->
+    <div class="relative flex h-full items-center justify-end lg:col-span-5">
+      <img
+        src={dial.src}
+        width={dial.width}
+        height={dial.height}
+        alt=""
+        aria-hidden="true"
+        class="pointer-events-none absolute top-1/2 right-0 size-[560px] max-w-none -translate-y-1/2 lg:size-[900px]"
+      />
+      <p class="relative mr-6 flex flex-col lg:mr-10">
+        <span class="text-nav font-semibold text-ink-muted">DAY</span>
+        <span class="text-right text-display-sm">{step.day}</span>
+      </p>
+    </div>
+
+    <!-- Step (columns 6–12) -->
+    <div class="flex flex-col gap-1 lg:col-span-7">
+      <h2 class="text-title">{step.title}</h2>
+      <p class="max-w-[322px] text-body text-ink-muted">{step.description}</p>
+    </div>
+  </div>
+</section>
