@@ -4,11 +4,11 @@
  * the day numeral just inside it, and that phase's step to the right.
  *
  * Scroll behaviour: the section pins for one viewport while the page scrolls
- * through it. Each SEGMENT of scroll turns the wheel 90° and moves on to the
- * next phase (day 01 → 30 → 60 → 90). A phase's text is shown only while the
- * wheel is at (or near) its 90° mark. When scrolling stops between marks the
- * page glides to the nearest one, so the wheel always comes to rest snapped.
- * After the last phase the section unpins and the page carries on.
+ * through it. Each `segment` of scroll turns the wheel 90°, and the day counter
+ * counts along with it: 01 → 30 over the first turn, 30 → 60, then 60 → 90.
+ * The step text follows the day: days 1–29 show phase 1, 30–59 phase 2,
+ * 60–89 phase 3 and day 90 phase 4, crossfading in place as each starts.
+ * After day 90 the section unpins and the page carries on.
  *
  * Desktop uses a 5/7 split of the page grid: the wheel's outer edge sits on
  * column 5's right edge, and the step copy starts on column 6. The 900px
@@ -30,6 +30,8 @@ interface Props {
 const { steps, segment = '80svh' } = Astro.props;
 /** Two-column template shared by the wheel layer and every phase, so they line up. */
 const cols = 'grid grid-cols-[5rem_minmax(0,1fr)] gap-x-column-gap lg:grid-12';
+/** The "DAY / 01" block: right-aligned in the first column, just inside the wheel. */
+const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(102px+2.5rem)] lg:pr-10';
 ---
 
 <section
@@ -54,11 +56,20 @@ const cols = 'grid grid-cols-[5rem_minmax(0,1fr)] gap-x-column-gap lg:grid-12';
       </div>
     </div>
 
+    <!-- Live day counter (pinned mode only): counts up 01 → 90 as the wheel turns.
+         Screen readers get each phase's own day below instead. -->
+    <div class:list={[cols, 'day-dial__counter pointer-events-none absolute inset-0 items-center']} aria-hidden="true">
+      <p class={dayClass}>
+        <span class="text-nav font-semibold text-ink-muted">DAY</span>
+        <span data-dial-day class="text-right text-display-sm tabular-nums">{steps[0].day}</span>
+      </p>
+    </div>
+
     <ol class="day-dial__phases relative">
       {
-        steps.map((step) => (
-          <li data-dial-phase class:list={[cols, 'day-dial__phase items-center']}>
-            <p class="flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(102px+2.5rem)] lg:pr-10">
+        steps.map((step, i) => (
+          <li data-dial-phase data-day={Number(step.day)} data-current={i === 0 ? '' : undefined} class:list={[cols, 'day-dial__phase items-center']}>
+            <p class:list={[dayClass, 'day-dial__day']}>
               <span class="text-nav font-semibold text-ink-muted">DAY</span>
               <span class="text-right text-display-sm">{step.day}</span>
             </p>
@@ -104,94 +115,94 @@ const cols = 'grid grid-cols-[5rem_minmax(0,1fr)] gap-x-column-gap lg:grid-12';
     :global(html.js) .day-dial__phases {
       display: grid;
     }
+    /* Only the current phase's text shows; switching phases crossfades in place. */
     :global(html.js) .day-dial__phase {
       grid-area: 1 / 1;
-    }
-    /* Before the script runs, show only the first phase. */
-    :global(html.js) .day-dial__phase:not(:first-child) {
       opacity: 0;
       visibility: hidden;
+      transition:
+        opacity 0.4s ease,
+        visibility 0.4s;
     }
+    :global(html.js) .day-dial__phase[data-current] {
+      opacity: 1;
+      visibility: visible;
+    }
+    /* The shared counter replaces each phase's own (static) day numeral. Opacity,
+       not visibility, so screen readers still read each phase's day. */
+    :global(html.js) .day-dial__counter {
+      display: grid;
+    }
+    :global(html.js) .day-dial__day {
+      opacity: 0;
+    }
+  }
+
+  .day-dial__counter {
+    display: none;
   }
 </style>
 
 <script>
   import { scroll } from 'motion';
 
-  /** How far either side of a 90° mark (in turns) a phase stays fully visible, and where it has fully faded. */
-  const HOLD = 0.15;
-  const FADE_OUT = 0.45;
   /** Rotation per phase. Negative = anticlockwise, so the visible right-hand edge moves up as you scroll down. */
   const TURN_DEG = -90;
 
   const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)');
-  const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
   document.querySelectorAll<HTMLElement>('[data-day-dial]').forEach((root) => {
     const wheel = root.querySelector<HTMLElement>('[data-dial-wheel]')!;
+    const counter = root.querySelector<HTMLElement>('[data-dial-day]')!;
     const phases = [...root.querySelectorAll<HTMLElement>('[data-dial-phase]')];
+    /** The day each phase starts on (1, 30, 60, 90); the wheel is at that phase's 90° mark on that day. */
+    const marks = phases.map((phase) => Number(phase.dataset.day));
     const turns = phases.length - 1;
     let cancel: VoidFunction | undefined;
+    let current = 0;
 
-    /** t = 0 … turns: how far through the phases we are (1 = second phase, at 90°). */
+    const setCurrent = (index: number) => {
+      if (index === current) return;
+      phases[current].removeAttribute('data-current');
+      phases[current].inert = true;
+      phases[index].setAttribute('data-current', '');
+      phases[index].inert = false;
+      current = index;
+    };
+
+    /** t = 0 … turns: how far the wheel has turned, in quarter turns (1 = 90°, day 30). */
     const render = (t: number) => {
       wheel.style.transform = `rotate(${t * TURN_DEG}deg)`;
-      phases.forEach((phase, i) => {
-        const offset = t - i;
-        const opacity = clamp((FADE_OUT - Math.abs(offset)) / (FADE_OUT - HOLD), 0, 1);
-        phase.style.opacity = String(opacity);
-        phase.style.visibility = opacity > 0 ? 'visible' : 'hidden';
-        phase.toggleAttribute('inert', opacity < 0.5);
+
+      // Day: counts evenly between the marks (1 → 30 over the first turn, 30 → 60 …).
+      const k = Math.min(Math.floor(t), turns - 1);
+      const day = Math.floor(marks[k] + (marks[k + 1] - marks[k]) * (t - k) + 1e-6);
+      counter.textContent = String(day).padStart(2, '0');
+
+      // Text: the last phase whose start day has been reached.
+      let index = 0;
+      marks.forEach((mark, i) => {
+        if (day >= mark) index = i;
       });
-    };
-
-    /** Page position of the section, and how far it scrolls while pinned. */
-    const metrics = () => {
-      const top = root.getBoundingClientRect().top + window.scrollY;
-      return { top, range: root.offsetHeight - window.innerHeight };
-    };
-
-    /** When scrolling stops between two marks, glide to the nearest one. */
-    const snap = () => {
-      if (!cancel) return;
-      const { top, range } = metrics();
-      if (range <= 0) return;
-      const t = ((window.scrollY - top) / range) * turns;
-      // Only while pinned: before the first mark or after the last, scroll is free.
-      if (t <= 0 || t >= turns) return;
-      const target = Math.round(t);
-      if (Math.abs(t - target) < 0.005) return;
-      window.scrollTo({ top: top + (target / turns) * range, behavior: 'smooth' });
+      setCurrent(index);
     };
 
     const setup = () => {
       cancel?.();
       cancel = undefined;
       if (!motionOK.matches) {
+        // Static list: every phase readable, wheel at rest.
         wheel.style.transform = '';
-        phases.forEach((phase) => {
-          phase.style.cssText = '';
-          phase.removeAttribute('inert');
-        });
+        phases.forEach((phase) => (phase.inert = false));
         return;
       }
+      phases.forEach((phase, i) => (phase.inert = i !== current));
       cancel = scroll((progress: number) => render(progress * turns), {
         target: root,
         offset: ['start start', 'end end'],
       });
     };
 
-    const supportsScrollEnd = 'onscrollend' in window;
-    if (supportsScrollEnd) {
-      window.addEventListener('scrollend', snap);
-    } else {
-      // Safari: treat a short pause in scroll events as the end of scrolling.
-      let timer: number | undefined;
-      window.addEventListener('scroll', () => {
-        clearTimeout(timer);
-        timer = window.setTimeout(snap, 150);
-      }, { passive: true });
-    }
     motionOK.addEventListener('change', setup);
     setup();
   });
