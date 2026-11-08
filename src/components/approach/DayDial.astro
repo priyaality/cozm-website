@@ -121,8 +121,6 @@ const cols = 'grid grid-cols-[5rem_minmax(0,1fr)] gap-x-column-gap lg:grid-12';
   /** How far either side of a 90° mark (in turns) a phase stays fully visible, and where it has fully faded. */
   const HOLD = 0.15;
   const FADE_OUT = 0.45;
-  /** How far (px) the text drifts as it fades in or out. */
-  const DRIFT = 32;
   /** Rotation per phase. Negative = anticlockwise, so the visible right-hand edge moves up as you scroll down. */
   const TURN_DEG = -90;
 
@@ -143,7 +141,6 @@ const cols = 'grid grid-cols-[5rem_minmax(0,1fr)] gap-x-column-gap lg:grid-12';
         const opacity = clamp((FADE_OUT - Math.abs(offset)) / (FADE_OUT - HOLD), 0, 1);
         phase.style.opacity = String(opacity);
         phase.style.visibility = opacity > 0 ? 'visible' : 'hidden';
-        phase.style.transform = `translateY(${clamp(-offset / FADE_OUT, -1, 1) * DRIFT}px)`;
         phase.toggleAttribute('inert', opacity < 0.5);
       });
     };
