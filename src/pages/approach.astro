@@ -11,7 +11,8 @@ import { approachSteps, contactHref } from '../data/site';
 <BaseLayout>
   <Header />
 
-  <main id="main-content">
+  <!-- overflow-x-clip: the dial's circle runs off the left edge; clip (not hidden) so it can't scroll sideways. -->
+  <main id="main-content" class="overflow-x-clip">
     <!-- Intro: full-width headline, then a 7/5 split of copy and CTA -->
     <Section
       rule={false}
@@ -34,7 +35,7 @@ import { approachSteps, contactHref } from '../data/site';
     <DayDial step={approachSteps[0]} />
 
     <!-- Day 91: what the team is left with (cards are placeholders in the design) -->
-    <Section padded={false} class="flex flex-col gap-6 pt-section pb-section lg:min-h-[800px]">
+    <Section rule={false} padded={false} class="flex flex-col gap-6 pt-section pb-section lg:min-h-[800px]">
       <h2 class="text-headline">On day 91, you’ll have:</h2>
       <ul class="grid grid-cols-2 gap-px bg-ink lg:grid-cols-4">
         {Array.from({ length: 4 }, () => <li class="h-[200px] bg-paper lg:h-[297px]" />)}
