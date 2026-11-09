@@ -2,9 +2,9 @@
 /**
  * WhatWeDo — the studio's offerings as tabs, with a stack of image cards.
  *
- * Left (5 columns): the offerings as a tab list. The current one is ink with a
+ * Left (4 columns): heading and the offerings as a tab list. The current one is ink with a
  * dot before it; the others are faint. Its description sits at the bottom of
- * the column. Right (7 columns): a stack of cards, one per offering. The
+ * the column. Right (8 columns, centred): a stack of cards, one per offering. The
  * current offering's card is in front and straight; the others fan out behind
  * it, tilted ±15° (Figma's layout).
  *
@@ -36,30 +36,35 @@ const id = (i: number, part: string) => `offering-${i}-${part}`;
 const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ? 'right' : 'back');
 ---
 
-<section data-offerings class="border-t border-ink bg-sand px-gutter py-section">
-  <h2 class="text-headline">What we do</h2>
-
-  <div class="mt-4 grid gap-y-10 lg:grid-12">
-    <!-- List + description (columns 1–5) -->
-    <div class="flex flex-col justify-between gap-8 lg:col-span-5">
-      <div role="tablist" aria-label="What we do" aria-orientation="vertical" class="flex flex-col items-start gap-2">
-        {
-          items.map((item, i) => (
-            <button
-              type="button"
-              role="tab"
-              id={id(i, 'tab')}
-              aria-controls={id(i, 'panel')}
-              aria-selected={i === 0 ? 'true' : 'false'}
-              tabindex={i === 0 ? 0 : -1}
-              data-offering-tab
-              class="offering-tab flex cursor-pointer items-center text-left text-title text-ink-faint transition-colors duration-300 aria-selected:text-ink"
-            >
-              <span aria-hidden="true" class="offering-tab__dot block size-3 shrink-0 rounded-full bg-ink" />
-              {item.name}
-            </button>
-          ))
-        }
+<!-- Desktop: fills the visible area below the fixed header (100svh − nav). -->
+<section
+  data-offerings
+  class="border-t border-ink bg-sand px-gutter py-section lg:h-[calc(100svh-var(--spacing-nav))] lg:min-h-[36rem]"
+>
+  <div class="grid gap-y-10 lg:h-full lg:grid-12">
+    <!-- Heading + list at the top, description at the bottom (columns 1–4) -->
+    <div class="flex flex-col justify-between gap-8 lg:col-span-4">
+      <div class="flex flex-col gap-4">
+        <h2 class="text-headline">What we do</h2>
+        <div role="tablist" aria-label="What we do" aria-orientation="vertical" class="flex flex-col items-start gap-2">
+          {
+            items.map((item, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={id(i, 'tab')}
+                aria-controls={id(i, 'panel')}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+                data-offering-tab
+                class="offering-tab flex cursor-pointer items-center text-left text-title text-ink-faint transition-colors duration-300 aria-selected:text-ink"
+              >
+                <span aria-hidden="true" class="offering-tab__dot block size-3 shrink-0 rounded-full bg-ink" />
+                {item.name}
+              </button>
+            ))
+          }
+        </div>
       </div>
 
       <div>
@@ -73,14 +78,14 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
       </div>
     </div>
 
-    <!-- Image stack (columns 6–12, right-aligned at Figma's 694px) -->
-    <div class="lg:col-span-7 lg:flex lg:justify-end">
-      <div class="offering-stack grid w-full max-w-[694px] place-items-center" aria-hidden="true">
+    <!-- Image stack (columns 5–12), centred and as large as the column allows -->
+    <div class="lg:col-span-8 lg:flex lg:min-h-0 lg:items-center lg:justify-center">
+      <div class="offering-stack grid w-full place-items-center" aria-hidden="true">
         {
           items.map((item, i) => (
             <div data-offering-card data-slot={slotFor(i)} class="offering-card relative overflow-hidden border border-ink bg-sand">
               {item.image ? (
-                <Image src={item.image} alt="" class="size-full object-cover grayscale" widths={[480, 960]} sizes="(min-width: 64rem) 468px, 70vw" />
+                <Image src={item.image} alt="" class="size-full object-cover grayscale" widths={[480, 960]} sizes="(min-width: 64rem) 40vw, 70vw" />
               ) : (
                 <span class="absolute inset-0 grid place-items-center text-body">{item.name.toLowerCase()} image</span>
               )}
@@ -114,6 +119,13 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
      of the width, 3:2), tilted ±15° and shifted 80px (17.1% of a card) behind. */
   .offering-stack {
     aspect-ratio: 693.6 / 422.5;
+  }
+  /* Desktop: as wide as the column, but no taller than the section's content
+     box (100svh − nav − 2 × section padding), keeping the fan's proportion. */
+  @media (min-width: 64rem) {
+    .offering-stack {
+      width: min(100%, (max(100svh - var(--spacing-nav), 36rem) - 2 * var(--spacing-section)) * 693.6 / 422.5);
+    }
   }
   .offering-card {
     grid-area: 1 / 1;
