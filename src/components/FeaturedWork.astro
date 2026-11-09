@@ -1,0 +1,23 @@
+---
+/**
+ * FeaturedWork — "Featured work" heading + "View all work", then two WorkRows
+ * (7:5, then 5:7). Shared by the home and approach pages.
+ */
+import Section from './ui/Section.astro';
+import Button from './ui/Button.astro';
+import WorkRow from './WorkRow.astro';
+import { featuredWork } from '../data/site';
+
+const [uncovered, capmint, paisasmart, masaba] = featuredWork;
+---
+
+<section aria-labelledby="featured-work">
+  <Section padded={false} class="pt-16 pb-[23px]">
+    <div class="grid-split items-end gap-y-6">
+      <h2 id="featured-work" class="text-headline">Featured work</h2>
+      <Button href="/work" variant="secondary">View all work</Button>
+    </div>
+  </Section>
+  <WorkRow items={[uncovered, capmint]} />
+  <WorkRow items={[paisasmart, masaba]} reverse />
+</section>

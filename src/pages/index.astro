@@ -9,11 +9,9 @@ import ScrollWordReveal from '../components/ScrollWordReveal.astro';
 import MediaFeature from '../components/MediaFeature.astro';
 import HorizontalScroll from '../components/HorizontalScroll.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
-import WorkRow from '../components/WorkRow.astro';
+import FeaturedWork from '../components/FeaturedWork.astro';
 import Footer from '../components/Footer.astro';
-import { contactHref, featuredWork, heroVideo, services, statement } from '../data/site';
-
-const [uncovered, capmint, paisasmart, masaba] = featuredWork;
+import { contactHref, heroVideo, services, statement } from '../data/site';
 ---
 
 <BaseLayout>
@@ -77,16 +75,7 @@ const [uncovered, capmint, paisasmart, masaba] = featuredWork;
     </Section>
 
     <!-- Featured work -->
-    <section aria-labelledby="featured-work">
-      <Section padded={false} class="pt-16 pb-[23px]">
-        <div class="grid-split items-end gap-y-6">
-          <h2 id="featured-work" class="text-headline">Featured work</h2>
-          <Button href="/work" variant="secondary">View all work</Button>
-        </div>
-      </Section>
-      <WorkRow items={[uncovered, capmint]} />
-      <WorkRow items={[paisasmart, masaba]} reverse />
-    </section>
+    <FeaturedWork />
   </main>
 
   <Footer />

@@ -1,0 +1,45 @@
+---
+/**
+ * DayNinetyOne — "On day 91, you'll have:" with the four outcomes.
+ *
+ * Desktop: a 4-column, 2-row zigzag (01 and 03 on the top row, 02 and 04 on
+ * the bottom row, each one column across), as in Figma. The list stays in
+ * reading order (01–04) in the markup; only its grid placement zigzags.
+ * Smaller screens: two columns, then one.
+ */
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+---
+
+<section class="bg-sand px-gutter py-section">
+  <h2 class="text-headline">On day 91, you’ll have:</h2>
+  <ol class="day-91 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    {
+      items.map((item, i) => (
+        <li class="flex flex-col gap-1 p-4 lg:pb-6">
+          <span class="text-nav leading-[1.2] font-bold">{String(i + 1).padStart(2, '0')} //</span>
+          <span class="text-body">{item}</span>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  /* Zigzag: odd items on row 1, even items on row 2, each in its own column. */
+  @media (width >= 64rem) {
+    .day-91 > li {
+      grid-row: 1;
+    }
+    .day-91 > li:nth-child(even) {
+      grid-row: 2;
+    }
+    .day-91 > li:nth-child(1) { grid-column: 1; }
+    .day-91 > li:nth-child(2) { grid-column: 2; }
+    .day-91 > li:nth-child(3) { grid-column: 3; }
+    .day-91 > li:nth-child(4) { grid-column: 4; }
+  }
+</style>

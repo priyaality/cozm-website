@@ -1,6 +1,7 @@
 ---
 /**
- * WorkCard — full-bleed project tile: cover image, scrim, title + description
+ * WorkCard — full-bleed project tile: black-and-white cover (the colour source
+ * image with a greyscale filter, as in Figma), scrim, title + description
  * anchored to the bottom. `edge` adds the 80px page gutter on the side that
  * touches the viewport edge (16px on the inner side), as in Figma.
  *
@@ -44,7 +45,7 @@ const Tag = href ? 'a' : 'article';
     <Image
       src={image}
       alt=""
-      class="size-full object-cover"
+      class="size-full object-cover grayscale"
       style={`object-position: ${position}`}
       widths={[640, 960, 1280, 1920]}
       sizes="(min-width: 64rem) 60vw, 100vw"

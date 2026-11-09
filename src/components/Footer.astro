@@ -10,6 +10,15 @@ import NavLinks from './ui/NavLinks.astro';
 import Button from './ui/Button.astro';
 import filmStrip from '../assets/images/footer-film.png';
 import { contactHref } from '../data/site';
+
+interface Props {
+  /** The closing call to action; each page can tailor it. */
+  heading?: string;
+}
+
+const {
+  heading = 'If India’s top 10% is who you want to reach, let’s talk about what your first 90 days could look like.',
+} = Astro.props;
 ---
 
 <footer class="relative overflow-hidden border-t border-ink bg-sand px-gutter py-section">
@@ -38,10 +47,7 @@ import { contactHref } from '../data/site';
     </div>
 
     <div class="flex flex-col gap-[22px]">
-      <h2 class="text-headline lg:text-right">
-        If India’s top 10% is who you want to reach, let’s talk about what your first 90 days could
-        look like.
-      </h2>
+      <h2 class="text-headline lg:text-right">{heading}</h2>
       <Button href={contactHref} variant="primary">Start a conversation</Button>
     </div>
   </div>

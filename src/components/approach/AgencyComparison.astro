@@ -1,0 +1,49 @@
+---
+/**
+ * AgencyComparison — heading, two intro paragraphs (6/6 split), then a
+ * two-column comparison table: "A typical agency" vs "Cozm".
+ *
+ * A real <table>, so screen readers announce each row against its column
+ * header. Columns and rows are 16px apart (border-spacing, cancelled at the
+ * outer edges with a negative margin). Headers have a 4px rule, rows a 2px one.
+ */
+import { agencyComparison } from '../../data/site';
+
+const { heading, intro, columns, rows } = agencyComparison;
+---
+
+<section class="border-t border-ink bg-sand px-gutter py-section">
+  <div class="flex flex-col gap-4">
+    <h2 class="text-headline">{heading}</h2>
+    <div class="grid gap-4 lg:grid-cols-2">
+      {intro.map((paragraph) => <p class="text-body">{paragraph}</p>)}
+    </div>
+  </div>
+
+  <div class="mt-10">
+    <table class="-m-4 w-[calc(100%+2rem)] table-fixed border-separate border-spacing-4 text-left">
+      <thead>
+        <tr>
+          {
+            columns.map((column) => (
+              <th scope="col" class="border-b-4 border-ink pb-2 align-bottom text-eyebrow uppercase">
+                {column}
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr>
+              {row.map((cell) => (
+                <td class="border-b-2 border-ink pb-4 align-top text-lead">{cell}</td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,196 @@
+---
+/**
+ * WhatWeDo — the studio's offerings as tabs, with a stack of image cards.
+ *
+ * Left (5 columns): the offerings as a tab list. The current one is ink with a
+ * dot before it; the others are faint. Its description sits at the bottom of
+ * the column. Right (7 columns): a stack of cards, one per offering. The
+ * current offering's card is in front and straight; the others fan out behind
+ * it, tilted ±15° (Figma's layout).
+ *
+ * Hovering (with a mouse) or clicking an offering selects it; so do the arrow
+ * keys, Home and End once the list has focus (WAI-ARIA tabs pattern, automatic
+ * activation, roving tabindex).
+ *
+ * The stack: every card sits in the same grid cell, and a `data-slot`
+ * (front / left / right) on each says where it is. Each slot is just a CSS
+ * transform, so changing slots animates with a CSS transition. The selected
+ * card jumps to the top of the stack straight away and then straightens as it
+ * moves to the front. The cards are decorative (the tabs carry the content),
+ * so they're hidden from assistive tech.
+ *
+ * Without JS the first offering shows, and the other descriptions are listed
+ * below it.
+ */
+import { Image } from 'astro:assets';
+import type { Offering } from '../../data/site';
+
+interface Props {
+  items: Offering[];
+}
+
+const { items } = Astro.props;
+const id = (i: number, part: string) => `offering-${i}-${part}`;
+/** Initial slot for card i when the first offering is selected. */
+const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ? 'right' : 'back');
+---
+
+<section data-offerings class="border-t border-ink bg-sand px-gutter py-section">
+  <h2 class="text-headline">What we do</h2>
+
+  <div class="mt-4 grid gap-y-10 lg:grid-12">
+    <!-- List + description (columns 1–5) -->
+    <div class="flex flex-col justify-between gap-8 lg:col-span-5">
+      <div role="tablist" aria-label="What we do" aria-orientation="vertical" class="flex flex-col items-start gap-2">
+        {
+          items.map((item, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={id(i, 'tab')}
+              aria-controls={id(i, 'panel')}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              tabindex={i === 0 ? 0 : -1}
+              data-offering-tab
+              class="offering-tab flex cursor-pointer items-center text-left text-title text-ink-faint transition-colors duration-300 aria-selected:text-ink"
+            >
+              <span aria-hidden="true" class="offering-tab__dot block size-3 shrink-0 rounded-full bg-ink" />
+              {item.name}
+            </button>
+          ))
+        }
+      </div>
+
+      <div>
+        {
+          items.map((item, i) => (
+            <div role="tabpanel" id={id(i, 'panel')} aria-labelledby={id(i, 'tab')} data-offering-panel class="offering-panel">
+              <p class="max-w-[554px] text-body">{item.description}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Image stack (columns 6–12, right-aligned at Figma's 694px) -->
+    <div class="lg:col-span-7 lg:flex lg:justify-end">
+      <div class="offering-stack grid w-full max-w-[694px] place-items-center" aria-hidden="true">
+        {
+          items.map((item, i) => (
+            <div data-offering-card data-slot={slotFor(i)} class="offering-card relative overflow-hidden border border-ink bg-sand">
+              {item.image ? (
+                <Image src={item.image} alt="" class="size-full object-cover grayscale" widths={[480, 960]} sizes="(min-width: 64rem) 468px, 70vw" />
+              ) : (
+                <span class="absolute inset-0 grid place-items-center text-body">{item.name.toLowerCase()} image</span>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Tab dot: collapsed (no space) on inactive tabs, so their labels sit on the
+     left edge; grows in and pushes the label 20px right on the active one. */
+  .offering-tab__dot {
+    width: 0;
+    margin-right: 0;
+    opacity: 0;
+    transition:
+      width 0.3s ease,
+      margin 0.3s ease,
+      opacity 0.3s ease;
+  }
+  .offering-tab[aria-selected='true'] .offering-tab__dot {
+    width: 0.75rem;
+    margin-right: 0.5rem;
+    opacity: 1;
+  }
+
+  /* Stack: Figma's proportions. Container 694 × 422.5; cards 468 × 312 (67.5%
+     of the width, 3:2), tilted ±15° and shifted 80px (17.1% of a card) behind. */
+  .offering-stack {
+    aspect-ratio: 693.6 / 422.5;
+  }
+  .offering-card {
+    grid-area: 1 / 1;
+    width: 67.5%;
+    aspect-ratio: 3 / 2;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .offering-card[data-slot='front'] {
+    z-index: 3;
+    transform: none;
+  }
+  .offering-card[data-slot='left'] {
+    z-index: 2;
+    transform: translateX(-17.1%) rotate(-15deg);
+  }
+  .offering-card[data-slot='right'] {
+    z-index: 1;
+    transform: translateX(17.1%) rotate(15deg);
+  }
+  .offering-card[data-slot='back'] {
+    z-index: 0;
+    transform: scale(0.9);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .offering-card,
+    .offering-tab,
+    .offering-tab__dot {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-offerings]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-offering-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-offering-panel]')];
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-offering-card]')];
+    let current = 0;
+
+    const select = (index: number, focus = false) => {
+      current = index;
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('aria-selected', String(i === index));
+        tab.tabIndex = i === index ? 0 : -1;
+      });
+      panels.forEach((panel, i) => (panel.hidden = i !== index));
+      // Selected card to the front; the rest fan out behind, in list order.
+      const behind = ['left', 'right'];
+      let n = 0;
+      cards.forEach((card, i) => {
+        card.dataset.slot = i === index ? 'front' : (behind[n++] ?? 'back');
+      });
+      if (focus) tabs[index].focus();
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(i));
+      // Hover selects with a mouse (touch taps already fire click).
+      tab.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'mouse') select(i);
+      });
+      tab.addEventListener('keydown', (event) => {
+        const last = tabs.length - 1;
+        const next = {
+          ArrowDown: current === last ? 0 : current + 1,
+          ArrowRight: current === last ? 0 : current + 1,
+          ArrowUp: current === 0 ? last : current - 1,
+          ArrowLeft: current === 0 ? last : current - 1,
+          Home: 0,
+          End: last,
+        }[event.key];
+        if (next === undefined) return;
+        event.preventDefault();
+        select(next, true);
+      });
+    });
+
+    select(0);
+  });
+</script>

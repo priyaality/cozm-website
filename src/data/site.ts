@@ -122,3 +122,55 @@ export const approachSteps: ApproachStep[] = [
       'Your team runs it on its own, and each new episode costs less to make than the last.',
   },
 ];
+
+/** "On day 91, you'll have:" — what the team is left with. */
+export const dayNinetyOne = [
+  'A written playbook of workflows, templates and quality checks.',
+  'A publishing schedule your team can keep up, and the numbers to track.',
+  'Your own format, with the idea, voice and first episodes made alongside your team.',
+  'A team that has already produced episodes themselves.',
+];
+
+/** Typical agency vs Cozm comparison table. */
+export const agencyComparison = {
+  heading: 'Media only pays off if you keep showing up, and that’s hard to do through an agency.',
+  intro: [
+    'The brands that win with media show up every week, for years. That’s hard when your voice lives inside someone else’s company, where you pay their margin and their team gets better instead of yours.',
+    'Built in-house, the capability compounds: each episode gets easier and cheaper to make, and over time your media becomes one of your biggest advantages.',
+  ],
+  columns: ['A typical agency', 'Cozm'] as const,
+  rows: [
+    ['Stays as long as you pay', 'Works with you for 90 days'],
+    ['Only delivers the episodes', 'Delivers the episodes and the skills to make more'],
+    ['Their team learns the craft', 'Your team learns the craft'],
+    ['Costs keep growing', 'Each episode gets cheaper to make'],
+    ['Works to keep you coming back', 'Works to make you independent'],
+    ['After day 90, sends another invoice', 'After day 90, your team runs it'],
+  ] as const,
+};
+
+export interface Offering {
+  name: string;
+  description: string;
+  /** Image for the stack. Until real images exist, a labelled placeholder card is shown. */
+  image?: ImageMetadata;
+}
+
+/** "What we do" — the studio's offerings. */
+export const offerings: Offering[] = [
+  {
+    name: 'Audio',
+    description:
+      'Narrative and conversation podcasts. Format, research, recording, edit, mix and release.',
+  },
+  {
+    name: 'Video',
+    description:
+      'Long-form interviews, documentaries and short-form. Research and script through shoot, edit, finishing and Shorts.',
+  },
+  {
+    name: 'Creative consulting',
+    description:
+      'Content strategy, format and IP development, editorial direction, and building your in-house team.',
+  },
+];

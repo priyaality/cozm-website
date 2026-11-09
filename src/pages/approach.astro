@@ -4,8 +4,12 @@ import Header from '../components/Header.astro';
 import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
 import DayDial from '../components/approach/DayDial.astro';
+import DayNinetyOne from '../components/approach/DayNinetyOne.astro';
+import AgencyComparison from '../components/approach/AgencyComparison.astro';
+import WhatWeDo from '../components/approach/WhatWeDo.astro';
+import FeaturedWork from '../components/FeaturedWork.astro';
 import Footer from '../components/Footer.astro';
-import { approachSteps, contactHref } from '../data/site';
+import { approachSteps, contactHref, dayNinetyOne, offerings } from '../data/site';
 ---
 
 <BaseLayout>
@@ -34,14 +38,17 @@ import { approachSteps, contactHref } from '../data/site';
     <!-- The 90 days: 5/7 split around the dial -->
     <DayDial steps={approachSteps} />
 
-    <!-- Day 91: what the team is left with (cards are placeholders in the design) -->
-    <Section rule={false} padded={false} class="flex flex-col gap-6 pt-section pb-section lg:min-h-[800px]">
-      <h2 class="text-headline">On day 91, you’ll have:</h2>
-      <ul class="grid grid-cols-2 gap-px bg-ink lg:grid-cols-4">
-        {Array.from({ length: 4 }, () => <li class="h-[200px] bg-paper lg:h-[297px]" />)}
-      </ul>
-    </Section>
+    <!-- Day 91: what the team is left with -->
+    <DayNinetyOne items={dayNinetyOne} />
+
+    <!-- Typical agency vs Cozm -->
+    <AgencyComparison />
+
+    <!-- What we do: offerings as tabs with an image stack -->
+    <WhatWeDo items={offerings} />
+
+    <FeaturedWork />
   </main>
 
-  <Footer />
+  <Footer heading="Let’s talk about what your team could be making 90 days from now." />
 </BaseLayout>

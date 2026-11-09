@@ -66,6 +66,12 @@
   --text-title--letter-spacing: -0.02em;
   --text-title--font-weight: 600;
 
+  /* lead — larger reading copy (comparison table rows). 24 / 130% / -2% / regular */
+  --text-lead: clamp(1.125rem, 0.975rem + 0.6vw, 1.5rem);
+  --text-lead--line-height: 1.3;
+  --text-lead--letter-spacing: -0.02em;
+  --text-lead--font-weight: 400;
+
   /* body — paragraph copy. 20 / 120% / -2% / regular */
   --text-body: clamp(1.125rem, 1.075rem + 0.2vw, 1.25rem);
   --text-body--line-height: 1.2;
