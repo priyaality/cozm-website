@@ -1,0 +1,80 @@
+---
+/**
+ * ProjectDetails — one project's details panel, shared by /work and
+ * /originals: title (with an optional tag, e.g. "Coming soon!"), one-line
+ * description, longer copy, label/value facts two per row, an optional note
+ * and credit line, then the actions: link buttons (side by side when there
+ * are two), and/or whatever is passed in the default slot (e.g. a form).
+ *
+ * It's the role="tabpanel" for row `index` of a ProjectList with the same
+ * `idPrefix`; initProjectTabs shows the selected one. Text follows the current
+ * colour, so it works in ink on sand and in sand over video.
+ */
+import Button from './Button.astro';
+
+export interface ProjectDetailsContent {
+  title: string;
+  /** Small tag beside the title. */
+  tag?: string;
+  description: string;
+  about?: string;
+  facts: { label: string; value: string }[];
+  /** A line before the actions. */
+  note?: string;
+  /** Credit line, e.g. "Produced by COZM". */
+  credit?: string;
+  /** Link buttons; they open in a new tab. */
+  links?: { label: string; href: string }[];
+}
+
+interface Props extends ProjectDetailsContent {
+  idPrefix: string;
+  index: number;
+}
+
+const { idPrefix, index, title, tag, description, about, facts, note, credit, links = [] } = Astro.props;
+const hasSlot = Astro.slots.has('default');
+---
+
+<div
+  role="tabpanel"
+  id={`${idPrefix}-${index}-panel`}
+  aria-labelledby={`${idPrefix}-${index}-tab`}
+  data-project-panel
+  data-active={index === 0 ? '' : undefined}
+  class="flex flex-col gap-4 self-end"
+>
+  <div class="flex items-start gap-3">
+    <h2 class="min-w-0 flex-1 text-title">{title}</h2>
+    {tag && <span class="mt-1 bg-ink px-1 text-caption leading-[1.3] whitespace-nowrap text-sand">{tag}</span>}
+  </div>
+  <p class="text-small">{description}</p>
+  {about && <p class="text-small">{about}</p>}
+  {
+    facts.length > 0 && (
+      <dl class="grid grid-cols-2 gap-4">
+        {facts.map((fact, f) => (
+          // An odd last fact (e.g. notable guests) gets the full row.
+          <div class:list={['flex flex-col gap-0.5', f === facts.length - 1 && f % 2 === 0 && 'col-span-2 max-w-[409px]']}>
+            <dt class="text-caption leading-[1.2] font-semibold uppercase opacity-60">{fact.label}</dt>
+            <dd class="text-small">{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+  {note && <p class="text-small">{note}</p>}
+  {credit && <p class="text-label">{credit}</p>}
+  {
+    links.length > 0 && (
+      <div class:list={['grid gap-2', links.length > 1 && 'sm:grid-cols-2']}>
+        {links.map((link) => (
+          <Button href={link.href} target="_blank" rel="noopener">
+            {link.label}
+          </Button>
+        ))}
+      </div>
+    )
+  }
+  {hasSlot && <slot />}
+</div>

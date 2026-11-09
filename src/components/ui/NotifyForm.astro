@@ -1,0 +1,67 @@
+---
+/**
+ * NotifyForm — "Enter your email ID" + "Notify me". A dummy for now: it isn't
+ * sent anywhere. On submit it checks the address (type="email" plus a pattern
+ * that needs a dot in the domain), shows an error or a thank-you below, and
+ * clears the field when it's valid.
+ */
+import Button from './Button.astro';
+
+interface Props {
+  /** Unique id prefix for the field and its status line. */
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<form data-notify class="flex flex-col gap-2" novalidate>
+  <label for={`${id}-email`} class="sr-only">Email address</label>
+  <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+    <input
+      id={`${id}-email`}
+      type="email"
+      name="email"
+      required
+      autocomplete="email"
+      inputmode="email"
+      spellcheck="false"
+      pattern="[^@\s]+@[^@\s]+\.[^@\s]{2,}"
+      placeholder="Enter your email ID"
+      aria-describedby={`${id}-status`}
+      class="min-w-0 border border-ink bg-sand px-6 py-7 text-label text-ink placeholder:text-ink/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current sm:px-10"
+    />
+    <Button type="submit" variant="primary">Notify me</Button>
+  </div>
+  <p id={`${id}-status`} data-notify-status aria-live="polite" class="text-small empty:hidden"></p>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-notify]').forEach((form) => {
+    const input = form.querySelector<HTMLInputElement>('input[type=email]')!;
+    const status = form.querySelector<HTMLElement>('[data-notify-status]')!;
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!input.checkValidity()) {
+        input.setAttribute('aria-invalid', 'true');
+        status.textContent = input.value.trim()
+          ? 'That doesn’t look like an email address. Try something like name@example.com.'
+          : 'Enter your email address and we’ll let you know when it’s out.';
+        input.focus();
+        return;
+      }
+      input.removeAttribute('aria-invalid');
+      status.textContent = 'Thanks! We’ll email you when the first episode is out.';
+      form.reset();
+    });
+
+    // Clear the error as soon as the address becomes valid.
+    input.addEventListener('input', () => {
+      if (input.getAttribute('aria-invalid') && input.checkValidity()) {
+        input.removeAttribute('aria-invalid');
+        status.textContent = '';
+      }
+    });
+  });
+</script>

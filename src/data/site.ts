@@ -179,6 +179,8 @@ export interface Original {
   note?: string;
   /** Where to listen / watch. A coming-soon original shows the notify form instead. */
   links?: { label: string; href: string }[];
+  /** Background video while this original is selected. */
+  video: { src: string; poster?: string; startAt?: number };
 }
 
 /** Cozm's own shows, in Figma's order. The first is selected by default. */
@@ -198,6 +200,7 @@ export const originals: Original[] = [
       { label: 'Listen on Spotify', href: '#' },
       { label: 'Watch on Youtube', href: '#' },
     ],
+    video: heroVideo,
   },
   {
     title: 'The Craft',
@@ -210,6 +213,8 @@ export const originals: Original[] = [
       { label: 'Platform', value: 'TBD' },
     ],
     note: 'A new COZM original. Get the first episode the day it’s out.',
+    // TODO: its own video; for now the same one, restarted.
+    video: heroVideo,
   },
 ];
 

@@ -12,13 +12,18 @@
  * global.css); the other panels are made inert so their links and fields
  * can't be reached.
  */
-export function initProjectTabs(root: HTMLElement) {
+export function initProjectTabs(
+  root: HTMLElement,
+  /** Called when the user selects a different row (not on the initial selection). */
+  onSelect?: (index: number) => void,
+) {
   const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-project-tab]')];
   const panels = [...root.querySelectorAll<HTMLElement>('[data-project-panel]')];
   const media = [...root.querySelectorAll<HTMLElement>('[data-project-media]')];
   let current = 0;
 
   const select = (index: number, focus = false) => {
+    if (index !== current) onSelect?.(index);
     current = index;
     tabs.forEach((tab, i) => {
       tab.setAttribute('aria-selected', String(i === index));

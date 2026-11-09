@@ -9,15 +9,15 @@
  *
  * Clicking a project in the list (or arrow keys / Home / End once the list has
  * focus) selects it: its cover crossfades in and its details replace the
- * previous ones. The list and its behaviour are shared with /originals
- * (ProjectList + initProjectTabs).
+ * previous ones. The list, details and behaviour are shared with /originals
+ * (ProjectList, ProjectDetails, initProjectTabs).
  *
  * Covers and detail panels share one grid cell each, so switching never
  * changes the layout. Without JS they all show, one after another.
  */
 import { Image } from 'astro:assets';
 import ProjectList from '../ui/ProjectList.astro';
-import Button from '../ui/Button.astro';
+import ProjectDetails from '../ui/ProjectDetails.astro';
 import type { WorkProject } from '../../data/site';
 
 interface Props {
@@ -26,7 +26,6 @@ interface Props {
 }
 
 const { heading, projects } = Astro.props;
-const id = (i: number, part: string) => `work-${i}-${part}`;
 ---
 
 <section
@@ -66,33 +65,16 @@ const id = (i: number, part: string) => `work-${i}-${part}`;
   <div class="work-panels grid gap-y-16 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:self-end">
     {
       projects.map(({ item, about, facts, credit = 'Produced by COZM', watch }, i) => (
-        <div
-          role="tabpanel"
-          id={id(i, 'panel')}
-          aria-labelledby={id(i, 'tab')}
-          data-project-panel
-          data-active={i === 0 ? '' : undefined}
-          class="flex flex-col gap-4 self-end"
-        >
-          <h2 class="text-title">{item.title}</h2>
-          <p class="text-small">{item.description}</p>
-          <p class="text-small">{about}</p>
-          {facts.length > 0 && (
-            <dl class="grid grid-cols-2 gap-x-4 gap-y-4">
-              {facts.map((fact, f) => (
-                // An odd last fact (e.g. notable guests) gets the full row.
-                <div class:list={['flex flex-col gap-0.5', f === facts.length - 1 && f % 2 === 0 && 'col-span-2 max-w-[409px]']}>
-                  <dt class="text-caption leading-[1.2] font-semibold text-ink/60 uppercase">{fact.label}</dt>
-                  <dd class="text-small">{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-          <p class="text-label">{credit}</p>
-          <Button href={watch} target="_blank" rel="noopener">
-            Watch on Youtube
-          </Button>
-        </div>
+        <ProjectDetails
+          idPrefix="work"
+          index={i}
+          title={item.title}
+          description={item.description}
+          about={about}
+          facts={facts}
+          credit={credit}
+          links={[{ label: 'Watch on Youtube', href: watch }]}
+        />
       ))
     }
   </div>
@@ -101,5 +83,5 @@ const id = (i: number, part: string) => `work-${i}-${part}`;
 <script>
   import { initProjectTabs } from '../../scripts/project-tabs';
 
-  document.querySelectorAll<HTMLElement>('[data-work-showcase]').forEach(initProjectTabs);
+  document.querySelectorAll<HTMLElement>('[data-work-showcase]').forEach((root) => initProjectTabs(root));
 </script>

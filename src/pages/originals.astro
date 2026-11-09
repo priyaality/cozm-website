@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import OriginalsShowcase from '../components/originals/OriginalsShowcase.astro';
 import Footer from '../components/Footer.astro';
-import { heroVideo, originals } from '../data/site';
+import { originals } from '../data/site';
 ---
 
 <BaseLayout title="Originals — Cozm">
@@ -13,7 +13,6 @@ import { heroVideo, originals } from '../data/site';
     <OriginalsShowcase
       heading="Cozm Originals are the shows we bet on ourselves."
       items={originals}
-      video={heroVideo}
     />
   </main>
 
