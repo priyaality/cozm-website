@@ -112,7 +112,7 @@
   --spacing-gutter: clamp(1.25rem, -0.25rem + 6vw, 5rem); /* page side padding: 80px at desktop */
   --spacing-section: clamp(3rem, 1.75rem + 5vw, 5rem); /* section vertical padding: 80px */
   --spacing-column-gap: 1rem; /* 16px gap between the 12 grid columns */
-  --spacing-nav: 5.3125rem; /* 85px fixed header height */
+  --spacing-nav: 4.375rem; /* 70px fixed header height: 16px above and below the 38px CTA */
 
   /* ---------- Effects ---------- */
   --drop-shadow-paper: 0 6px 10px rgb(0 0 0 / 0.12);
