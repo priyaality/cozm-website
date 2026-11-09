@@ -1,0 +1,74 @@
+---
+/**
+ * Team — Palash's bio (Figma 235:2542). 7/5 split: "TEAM" label, the bio in
+ * large body type with an inline link, and X / LinkedIn / Substack links on
+ * the left (vertically centred); his photo fills the right column, framed in
+ * ink. On desktop it fills the visible area below the header.
+ */
+import { Image } from 'astro:assets';
+import { team } from '../../data/site';
+import photo from '../../assets/about/palash.png';
+import xIcon from '../../assets/icons/x.svg';
+import linkedinIcon from '../../assets/icons/linkedin.svg';
+import substackIcon from '../../assets/icons/substack.svg';
+
+const social = [
+  { label: `${team.name} on X`, href: team.social.x, icon: xIcon },
+  { label: `${team.name} on LinkedIn`, href: team.social.linkedin, icon: linkedinIcon },
+  { label: `${team.name} on Substack`, href: team.social.substack, icon: substackIcon },
+];
+---
+
+<section
+  class="grid-split gap-y-10 border-t border-ink bg-sand px-gutter py-8 lg:min-h-[calc(100svh-var(--spacing-nav))]"
+>
+  <div class="flex flex-col justify-center gap-4">
+    <h2 class="text-caption leading-[1.2] font-semibold uppercase opacity-60">Team</h2>
+    <div class="flex flex-col gap-6 text-large">
+      {
+        team.bio.map((paragraph) => (
+          <p>
+            {typeof paragraph === 'string'
+              ? paragraph
+              : paragraph.map((part) =>
+                  typeof part === 'string' ? (
+                    part
+                  ) : (
+                    <a href={part.href} class="text-rust underline-offset-4 hover:underline focus-visible:underline">
+                      {part.label}
+                    </a>
+                  ),
+                )}
+          </p>
+        ))
+      }
+    </div>
+    <ul class="flex gap-2">
+      {
+        social.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener"
+              aria-label={link.label}
+              class="grid size-8 place-items-center transition-opacity hover:opacity-60"
+            >
+              <img src={link.icon.src} width={link.icon.width} height={link.icon.height} alt="" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="relative aspect-[554/613] overflow-hidden border border-ink lg:aspect-auto">
+    <Image
+      src={photo}
+      alt={`${team.name}`}
+      class="absolute inset-0 size-full object-cover"
+      widths={[400]}
+      sizes="(min-width: 64rem) 37vw, 100vw"
+    />
+  </div>
+</section>

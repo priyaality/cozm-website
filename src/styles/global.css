@@ -28,6 +28,7 @@
   --color-scrim: rgb(28 28 28 / 0.6); /* overlay on work imagery */
   --color-transparent: transparent;
   --color-current: currentColor;
+  --color-rust: #af480e; /* inline links in large body copy (about page bio) */
 
   /* ---------- Font families ---------- */
   --font-sans: "Arimo", ui-sans-serif, system-ui, sans-serif;
@@ -41,6 +42,7 @@
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   /* Figma uses "Figma Hand", which isn't on Google Fonts. Caveat is the stand-in. */
   --font-hand: "Caveat", "Figma Hand", cursive;
+  --font-signature: "Sacramento", cursive; /* handwritten sign-off */
 
   /* ---------- Type scale (Arimo) ---------- */
   /* display — hero headline. 104 / 100% / -6% / semibold */
@@ -103,6 +105,12 @@
   --text-small--line-height: 1.2;
   --text-small--letter-spacing: -0.02em;
   --text-small--font-weight: 400;
+
+  /* Large body copy (about page bio) — 32 / 136% / -2% / medium. Body face. */
+  --text-large: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+  --text-large--line-height: 1.36;
+  --text-large--letter-spacing: -0.02em;
+  --text-large--font-weight: 500;
 
   --text-nav: 1rem;
   --text-nav--line-height: 1.1;

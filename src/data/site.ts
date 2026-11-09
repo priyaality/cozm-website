@@ -218,6 +218,49 @@ export const originals: Original[] = [
   },
 ];
 
+/* ---------- About page ---------- */
+
+export const aboutIntro = {
+  heading: 'India’s most ambitious people deserve media as ambitious as they are.',
+  subheading: 'COZM exists to make it, and to enable India’s companies able to make it themselves.',
+  body: [
+    'Indian media has long underestimated its audience. From films to podcasts, the instinct has been to serve the lowest common denominator.',
+    'So the most curious and ambitious Indians, hungry to learn and to grow, spend their attention elsewhere. Their media diet is mostly Western, and mostly not about them.',
+    'A country cannot grow creatively by alienating its best minds. We want to make media that is original to India, not a copy of the West, and good enough to travel anywhere.',
+    'It is also a sound business. India’s top 10% is about 140 million people, and they are its emerging consumer class. Get a piece of their mind and you get a piece of their wallet.',
+    'We do it two ways: with companies, by building media capability inside them, and on our own, through COZM Originals.',
+  ],
+  signature: 'Palash Kulkarni',
+};
+
+/** "Our philosophy" — four principles, shown 2 × 2. */
+export const philosophy = [
+  { title: 'Media is a capability', description: 'Build it once and it keeps paying off for years' },
+  { title: 'Consistency beats virality', description: 'Showing up every week matters more than one lucky hit' },
+  {
+    title: 'Own what you make',
+    description: 'Every rupee spent renting creativity is a rupee not spent building your own',
+  },
+  { title: 'Craft is the strategy', description: 'India’s top 10% can tell the difference' },
+];
+
+/** Bio paragraphs; a paragraph can be a list of text and link parts. */
+type BioPart = string | { label: string; href: string };
+export const team = {
+  name: 'Palash Kulkarni',
+  bio: [
+    'Palash Kulkarni is the founder of COZM. He is a writer, producer and creator who works where business and storytelling meet.',
+    'He studied engineering at IIT Bombay and has worked with Bain & Company, Disney+ Hotstar and Rainshine Entertainment, a media investment fund. That mix of consultant, investor and creator is COZM’s edge: he translates business goals into creative ones.',
+    [
+      'Palash hosts ',
+      { label: 'All Risk Is Creative', href: '/originals' },
+      ', writes about the business of creativity on Substack, and makes documentaries and short films.',
+    ],
+  ] as (string | BioPart[])[],
+  // TODO: real profile links.
+  social: { x: '#', linkedin: '#', substack: '#' },
+};
+
 /* ---------- Approach page ---------- */
 
 export interface ApproachStep {

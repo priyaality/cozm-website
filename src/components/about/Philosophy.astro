@@ -1,0 +1,41 @@
+---
+/**
+ * Philosophy — "Our philosophy" (Figma 228:2476). The heading sits in a ruled
+ * column over the first 4 grid columns; the four principles fill the rest as a
+ * 2 × 2 grid of ruled cells. On desktop it fills the visible area below the
+ * header and the cells stretch to share it. Each principle has a white square
+ * placeholder for its icon. Below lg, everything stacks with rules between.
+ */
+import { philosophy } from '../../data/site';
+---
+
+<!-- 4 of 12 grid columns, including the gaps between them. -->
+<section
+  class="flex flex-col border-t border-ink bg-sand px-gutter [--four-cols:calc((100%-11*var(--spacing-column-gap))/3+3*var(--spacing-column-gap))] lg:min-h-[calc(100svh-var(--spacing-nav))] lg:flex-row"
+>
+  <div class="border-ink py-8 max-lg:border-b lg:w-(--four-cols) lg:shrink-0 lg:border-r lg:pr-10">
+    <h2 class="text-headline">Our philosophy</h2>
+  </div>
+
+  <div class="flex flex-1 flex-col">
+    {
+      [philosophy.slice(0, 2), philosophy.slice(2, 4)].map((row, r) => (
+        <div class:list={['flex flex-1 flex-col sm:flex-row', r === 0 && 'border-b border-ink']}>
+          {row.map((item, c) => (
+            <div
+              class:list={[
+                'flex flex-1 flex-col gap-2 sm:px-4',
+                r === 0 ? 'pt-8 pb-4' : 'pt-4 pb-8',
+                c === 0 && 'border-ink max-sm:border-b sm:border-r',
+              ]}
+            >
+              <div aria-hidden="true" class="size-[124px] bg-paper" />
+              <h3 class="text-title leading-none font-medium">{item.title}</h3>
+              <p class="text-body">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</section>
