@@ -11,6 +11,7 @@ import Logo from './ui/Logo.astro';
 import NavLinks from './ui/NavLinks.astro';
 import Button from './ui/Button.astro';
 import { contactHref, navLinks } from '../data/site';
+import { withBase } from '../lib/paths';
 ---
 
 <header
@@ -19,7 +20,7 @@ import { contactHref, navLinks } from '../data/site';
 >
   <div class="grid-split items-start">
     <!-- -mx-3 cancels the padding so the wordmark sits on the page gutter; the padding just enlarges the click target. -->
-    <a href="/" class="-mx-3 block w-fit px-3 py-2" aria-label="Cozm home">
+    <a href={withBase('/')} class="-mx-3 block w-fit px-3 py-2" aria-label="Cozm home">
       <Logo class="w-[79px]" />
     </a>
 
@@ -51,7 +52,7 @@ import { contactHref, navLinks } from '../data/site';
       >
         {
           navLinks.map((link) => (
-            <a href={link.href} class="py-3 text-nav">
+            <a href={withBase(link.href)} class="py-3 text-nav">
               {link.label}
             </a>
           ))

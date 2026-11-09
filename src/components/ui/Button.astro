@@ -15,6 +15,7 @@
  *   icon  56px square for a single icon (e.g. the hero's scroll-down button)
  */
 import type { HTMLAttributes } from 'astro/types';
+import { withBase } from '../../lib/paths';
 
 type Props = Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> & {
   href?: string;
@@ -49,7 +50,7 @@ const classes = [
 
 {
   href ? (
-    <a href={href} class:list={classes} {...rest}>
+    <a href={withBase(href)} class:list={classes} {...rest}>
       <slot />
     </a>
   ) : (

@@ -6,6 +6,7 @@
  * with a 2px rule above and below (Figma node 111:2503).
  */
 import { navLinks } from '../../data/site';
+import { withBase, withoutBase } from '../../lib/paths';
 
 interface Props {
   /**
@@ -19,7 +20,7 @@ interface Props {
 
 const { direction = 'row', class: className } = Astro.props;
 /** The link for the page being viewed (trailing slash ignored). */
-const here = Astro.url.pathname.replace(/\/$/, '') || '/';
+const here = withoutBase(Astro.url.pathname);
 ---
 
 <ul class:list={[direction === 'row' ? 'contents' : 'flex flex-col items-start', className]}>
@@ -27,7 +28,7 @@ const here = Astro.url.pathname.replace(/\/$/, '') || '/';
     navLinks.map((link) => (
       <li>
         <a
-          href={link.href}
+          href={withBase(link.href)}
           aria-current={link.href === here ? 'page' : undefined}
           class:list={[
             'block text-nav whitespace-nowrap',

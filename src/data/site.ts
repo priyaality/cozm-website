@@ -3,6 +3,7 @@ import uncovered from '../assets/images/work-uncovered.png';
 import capmint from '../assets/images/work-capmint.png';
 import paisasmart from '../assets/images/work-paisasmart.png';
 import masaba from '../assets/images/work-masaba.png';
+import { withBase } from '../lib/paths';
 
 export const navLinks = [
   { label: 'Approach', href: '/approach' },
@@ -20,10 +21,10 @@ export const contactHref = '/contact';
  * title / subtitle are the labels shown on the player and "now playing" cards.
  */
 export const heroVideo = {
-  src: '/video/hero.mp4',
+  src: withBase('/video/hero.mp4'),
   type: 'video/mp4',
   /** Frame of the video at `startAt` (the clip opens on black, so the first frame isn't usable). */
-  poster: '/video/hero.jpg' as string | undefined,
+  poster: withBase('/video/hero.jpg') as string | undefined,
   /** Seconds into the video to show in the card and start playing from. */
   startAt: 3,
   title: 'All Risk is creative',
