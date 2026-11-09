@@ -9,13 +9,13 @@
  * Each option is shown in its own face (only the letters of the font names are
  * fetched for the previews, when the panel first opens).
  */
-import { fontOptions } from '../../data/fonts';
+import { fontsByRole, type FontOption } from '../../data/fonts';
 
 const roles = [
   { role: 'heading', label: 'Heading' },
   { role: 'body', label: 'Body' },
 ] as const;
-const stack = (o: (typeof fontOptions)[number]) =>
+const stack = (o: FontOption) =>
   `"${o.name}", ${o.fallback === 'serif' ? 'ui-serif, Georgia, serif' : 'ui-sans-serif, system-ui, sans-serif'}`;
 ---
 
@@ -46,7 +46,7 @@ const stack = (o: (typeof fontOptions)[number]) =>
         roles.map(({ role, label }) => (
           <fieldset class="flex flex-col gap-1">
             <legend class="mb-2 text-caption font-semibold text-ink/60 uppercase">{label}</legend>
-            {fontOptions.map((o) => (
+            {fontsByRole[role].map((o) => (
               <label class="flex cursor-pointer items-center gap-2 py-0.5 text-small has-checked:font-semibold">
                 <input type="radio" name={`font-${role}`} value={o.name} class="accent-ink" />
                 <span style={`font-family: ${stack(o)}`}>{o.name}</span>
@@ -82,7 +82,7 @@ const stack = (o: (typeof fontOptions)[number]) =>
 <script>
   type Role = 'heading' | 'body';
   interface CozmFonts {
-    options: { name: string; google?: string }[];
+    fontsByRole: Record<Role, { name: string; google?: string }[]>;
     current: () => Record<Role, string>;
     set: (role: Role, name: string) => void;
     reset: () => void;
@@ -111,7 +111,7 @@ const stack = (o: (typeof fontOptions)[number]) =>
     panel.addEventListener('toggle', (event) => {
       if ((event as ToggleEvent).newState !== 'open' || previewsLoaded) return;
       previewsLoaded = true;
-      const google = fonts.options.filter((o) => o.google);
+      const google = [...fonts.fontsByRole.heading, ...fonts.fontsByRole.body].filter((o) => o.google);
       const letters = [...new Set(google.map((o) => o.name).join(''))].join('');
       const families = google.map((o) => `family=${o.google!.split(':')[0]}`).join('&');
       const link = Object.assign(document.createElement('link'), {

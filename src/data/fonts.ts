@@ -11,16 +11,32 @@ export interface FontOption {
   fallback: 'sans-serif' | 'serif';
 }
 
+export type FontRole = 'heading' | 'body';
+
 export const DEFAULT_FONT = 'Arimo';
 
-export const fontOptions: FontOption[] = [
-  { name: 'Arimo', fallback: 'sans-serif' },
-  { name: 'Inter', google: 'Inter:wght@400;500;600', fallback: 'sans-serif' },
-  { name: 'Inter Tight', google: 'Inter+Tight:wght@400;500;600', fallback: 'sans-serif' },
-  { name: 'DM Sans', google: 'DM+Sans:wght@400;500;600', fallback: 'sans-serif' },
-  { name: 'Space Grotesk', google: 'Space+Grotesk:wght@400;500;600', fallback: 'sans-serif' },
-  { name: 'IBM Plex Sans', google: 'IBM+Plex+Sans:wght@400;500;600', fallback: 'sans-serif' },
-  { name: 'Fraunces', google: 'Fraunces:wght@400;500;600', fallback: 'serif' },
-  { name: 'Source Serif 4', google: 'Source+Serif+4:wght@400;500;600', fallback: 'serif' },
-  { name: 'Playfair Display', google: 'Playfair+Display:wght@400;500;600', fallback: 'serif' },
-];
+const arimo: FontOption = { name: 'Arimo', fallback: 'sans-serif' };
+const google = (name: string, fallback: FontOption['fallback']): FontOption => ({
+  name,
+  google: `${name.replace(/ /g, '+')}:wght@400;500;600`,
+  fallback,
+});
+
+/** The choices for each role, in the order the picker lists them. */
+export const fontsByRole: Record<FontRole, FontOption[]> = {
+  heading: [
+    arimo,
+    google('Playfair Display', 'serif'),
+    google('Literata', 'serif'),
+    google('EB Garamond', 'serif'),
+    google('Fraunces', 'serif'),
+  ],
+  body: [
+    arimo,
+    google('Instrument Sans', 'sans-serif'),
+    google('Jost', 'sans-serif'),
+    google('DM Sans', 'sans-serif'),
+    google('Raleway', 'sans-serif'),
+    google('Manrope', 'sans-serif'),
+  ],
+};

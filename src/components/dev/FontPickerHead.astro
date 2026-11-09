@@ -8,12 +8,12 @@
  * page with `?fonts` turns it on for that browser (remembered), `?fonts=off`
  * turns it off again. Saved choices only apply while it's on.
  */
-import { DEFAULT_FONT, fontOptions } from '../../data/fonts';
+import { DEFAULT_FONT, fontsByRole } from '../../data/fonts';
 
 const isDev = import.meta.env.DEV;
 ---
 
-<script is:inline define:vars={{ fontOptions, DEFAULT_FONT, isDev }}>
+<script is:inline define:vars={{ fontsByRole, DEFAULT_FONT, isDev }}>
   (() => {
     const KEY = 'cozm-fonts';
     const ENABLED = 'cozm-fonts-enabled';
@@ -65,7 +65,7 @@ const isDev = import.meta.env.DEV;
 
     /** role: 'heading' | 'body'. */
     const apply = (role, name) => {
-      const option = fontOptions.find((o) => o.name === name);
+      const option = fontsByRole[role].find((o) => o.name === name);
       if (!option || name === DEFAULT_FONT) {
         root.style.removeProperty(`--font-${role}`);
       } else {
@@ -74,13 +74,12 @@ const isDev = import.meta.env.DEV;
       }
     };
 
-    const current = () => ({
-      heading: saved.heading || DEFAULT_FONT,
-      body: saved.body || DEFAULT_FONT,
-    });
+    // A saved font that's no longer offered for its role falls back to the default.
+    const pick = (role) => (fontsByRole[role].some((o) => o.name === saved[role]) ? saved[role] : DEFAULT_FONT);
+    const current = () => ({ heading: pick('heading'), body: pick('body') });
 
     window.cozmFonts = {
-      options: fontOptions,
+      fontsByRole,
       current,
       set(role, name) {
         saved = { ...current(), [role]: name };
