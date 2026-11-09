@@ -95,7 +95,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
           data-active={i === 0 ? '' : undefined}
           class="work-panel flex flex-col gap-4 self-end"
         >
-          <h2 class="text-lead leading-[1.2] font-semibold">{item.title}</h2>
+          <h2 class="text-title">{item.title}</h2>
           <p class="text-small">{item.description}</p>
           <p class="text-small">{about}</p>
           {facts.length > 0 && (
