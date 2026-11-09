@@ -1,0 +1,169 @@
+---
+/**
+ * OriginalsShowcase — the /originals page's opening screen (Figma 201:1262,
+ * second state 201:1637).
+ *
+ * One viewport tall, over the home page's background video (same file, start
+ * time, poster; muted, looping, inline). The header sits transparent over it
+ * ([data-hero]), the heading is at the top, and along the bottom are the
+ * originals list (the shared ProjectList, left) and the selected original's
+ * details (right, 5 columns). A light gradient at the top and bottom keeps the
+ * sand text readable whatever the video shows.
+ *
+ * Selecting a list row crossfades its details in (initProjectTabs). A
+ * coming-soon original gets a "Coming soon!" tag and, instead of listen/watch
+ * links, a "Notify me" email form. The form isn't connected to anything yet:
+ * it checks the address (type="email" plus a pattern that needs a dot in the
+ * domain) and thanks the visitor.
+ */
+import ProjectList from '../ui/ProjectList.astro';
+import Button from '../ui/Button.astro';
+import type { Original } from '../../data/site';
+
+interface Props {
+  heading: string;
+  items: Original[];
+  video: { src: string; type?: string; poster?: string; startAt?: number };
+}
+
+const { heading, items, video } = Astro.props;
+const videoSrc = video.startAt ? `${video.src}#t=${video.startAt}` : video.src;
+const id = (i: number, part: string) => `original-${i}-${part}`;
+---
+
+<section
+  data-hero
+  data-originals
+  class="relative isolate flex min-h-svh flex-col justify-between gap-16 overflow-hidden bg-black px-gutter pt-[calc(var(--spacing-nav)+2rem)] pb-8 text-sand lg:h-svh lg:min-h-[44rem]"
+>
+  <video
+    class="absolute inset-0 -z-10 size-full object-cover"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    poster={video.poster}
+    disablepictureinpicture
+    aria-hidden="true"
+  >
+    <source src={videoSrc} type={video.type ?? 'video/mp4'} />
+  </video>
+  <div aria-hidden="true" class="absolute inset-0 -z-10 bg-linear-to-b from-black/60 via-black/10 via-45% to-black/75"></div>
+
+  <h1 class="text-headline">{heading}</h1>
+
+  <div class="grid-split items-end gap-y-12">
+    <ProjectList
+      items={items}
+      idPrefix="original"
+      label="Originals"
+      class="lg:w-max lg:min-w-[326px]"
+    />
+
+    <div class="grid">
+      {
+        items.map((item, i) => (
+          <div
+            role="tabpanel"
+            id={id(i, 'panel')}
+            aria-labelledby={id(i, 'tab')}
+            data-project-panel
+            data-active={i === 0 ? '' : undefined}
+            class="flex flex-col gap-3 self-end"
+          >
+            <div class="flex items-start gap-3">
+              <h2 class="min-w-0 flex-1 text-title">{item.title}</h2>
+              {item.comingSoon && (
+                <span class="mt-1 bg-ink px-1 text-caption leading-[1.3] whitespace-nowrap text-sand">Coming soon!</span>
+              )}
+            </div>
+            <p class="text-small">{item.description}</p>
+            {item.about && <p class="text-small">{item.about}</p>}
+            <dl class="grid grid-cols-2 gap-4">
+              {item.facts.map((fact) => (
+                <div class="flex flex-col gap-0.5">
+                  <dt class="text-caption leading-[1.2] uppercase">{fact.label}</dt>
+                  <dd class="text-small">{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+            {item.note && <p class="text-small">{item.note}</p>}
+
+            {item.links && (
+              <div class="grid gap-2 sm:grid-cols-2">
+                {item.links.map((link) => (
+                  <Button href={link.href} target="_blank" rel="noopener">
+                    {link.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+
+            {item.comingSoon && (
+              <form data-notify class="flex flex-col gap-2" novalidate>
+                <label for={id(i, 'email')} class="sr-only">
+                  Email address
+                </label>
+                <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+                  <input
+                    id={id(i, 'email')}
+                    type="email"
+                    name="email"
+                    required
+                    autocomplete="email"
+                    inputmode="email"
+                    spellcheck="false"
+                    pattern="[^@\s]+@[^@\s]+\.[^@\s]{2,}"
+                    placeholder="Enter your email ID"
+                    aria-describedby={id(i, 'status')}
+                    class="min-w-0 border border-ink bg-sand px-6 py-7 text-label text-ink placeholder:text-ink/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sand sm:px-10"
+                  />
+                  <Button type="submit" variant="primary">
+                    Notify me
+                  </Button>
+                </div>
+                <p id={id(i, 'status')} data-notify-status aria-live="polite" class="text-small empty:hidden" />
+              </form>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initProjectTabs } from '../../scripts/project-tabs';
+
+  document.querySelectorAll<HTMLElement>('[data-originals]').forEach(initProjectTabs);
+
+  // Notify forms: a dummy for now. Validate the address, then thank the visitor.
+  document.querySelectorAll<HTMLFormElement>('[data-notify]').forEach((form) => {
+    const input = form.querySelector<HTMLInputElement>('input[type=email]')!;
+    const status = form.querySelector<HTMLElement>('[data-notify-status]')!;
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!input.checkValidity()) {
+        input.setAttribute('aria-invalid', 'true');
+        status.textContent = input.value.trim()
+          ? 'That doesn’t look like an email address. Try something like name@example.com.'
+          : 'Enter your email address and we’ll let you know when it’s out.';
+        input.focus();
+        return;
+      }
+      input.removeAttribute('aria-invalid');
+      status.textContent = 'Thanks! We’ll email you when the first episode is out.';
+      form.reset();
+    });
+
+    // Clear the error as soon as the address becomes valid.
+    input.addEventListener('input', () => {
+      if (input.getAttribute('aria-invalid') && input.checkValidity()) {
+        input.removeAttribute('aria-invalid');
+        status.textContent = '';
+      }
+    });
+  });
+</script>

@@ -1,0 +1,58 @@
+---
+/**
+ * ProjectList — the numbered project list used on /work and /originals:
+ * "01  Title  Category ↗", one row per project, divided by 1px rules. The
+ * selected row is full strength and the others are faded.
+ *
+ * It's the tab list of a WAI-ARIA tabs widget. Rows are role="tab" buttons
+ * (data-project-tab) controlling the panels `${idPrefix}-${i}-panel`; wire it up
+ * with initProjectTabs() from src/scripts/project-tabs.ts.
+ *
+ * Colours follow the text colour (`currentColor`), so the same list works in ink
+ * on sand (/work) and in sand over video (/originals). The arrow is the Figma
+ * icon used as a mask, so it takes the text colour too.
+ */
+import arrowUpRight from '../../assets/icons/arrow-up-right.svg';
+
+interface Props {
+  items: { title: string; category: string }[];
+  /** Prefix for the tab and panel ids. */
+  idPrefix: string;
+  label: string;
+  class?: string;
+}
+
+const { items, idPrefix, label, class: className } = Astro.props;
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<div
+  role="tablist"
+  aria-label={label}
+  aria-orientation="vertical"
+  class:list={['flex flex-col divide-y divide-current', className]}
+>
+  {
+    items.map(({ title, category }, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`${idPrefix}-${i}-tab`}
+        aria-controls={`${idPrefix}-${i}-panel`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        data-project-tab
+        class="flex cursor-pointer items-center gap-4 py-2 text-left text-small leading-[1.3] opacity-40 transition-opacity duration-300 first:pt-0 last:pb-0 hover:opacity-70 aria-selected:opacity-100"
+      >
+        <span>{pad(i)}</span>
+        <span class="min-w-0 flex-1">{title}</span>
+        <span class="whitespace-nowrap">{category}</span>
+        <span
+          aria-hidden="true"
+          class="m-px size-4 shrink-0 bg-current"
+          style={`mask: url(${arrowUpRight.src}) center / contain no-repeat`}
+        />
+      </button>
+    ))
+  }
+</div>

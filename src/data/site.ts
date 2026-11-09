@@ -162,6 +162,57 @@ export const workProjects: WorkProject[] = [
   },
 ];
 
+/* ---------- Originals page ---------- */
+
+export interface Original {
+  title: string;
+  /** Format, shown in the list. */
+  category: string;
+  /** Shows a "Coming soon!" tag next to the title. */
+  comingSoon?: boolean;
+  /** One-line premise. */
+  description: string;
+  /** Longer description. */
+  about?: string;
+  facts: { label: string; value: string }[];
+  /** A line above the actions (e.g. what the notify form is for). */
+  note?: string;
+  /** Where to listen / watch. A coming-soon original shows the notify form instead. */
+  links?: { label: string; href: string }[];
+}
+
+/** Cozm's own shows, in Figma's order. The first is selected by default. */
+export const originals: Original[] = [
+  {
+    title: 'All Risk is Creative',
+    category: 'Podcast',
+    description: 'Stories of people who bet everything on an idea.',
+    about:
+      'Documentary-style video essays and long-form conversations about risk-takers in technology, business and ideas, from Lee Kuan Yew and Ren Zhengfei to Jensen Huang, Jim Simons and Ramanujan. Made in India, watched around the world.',
+    facts: [
+      { label: 'Host', value: 'Palash Kulkarni' },
+      { label: 'Platform', value: 'Spotify, Youtube' },
+    ],
+    // TODO: real links.
+    links: [
+      { label: 'Listen on Spotify', href: '#' },
+      { label: 'Watch on Youtube', href: '#' },
+    ],
+  },
+  {
+    title: 'The Craft',
+    category: 'Documentaries',
+    comingSoon: true,
+    // TODO: placeholder copy from Figma.
+    description: 'Add a few lines here about what The Craft is, and why one should check it out',
+    facts: [
+      { label: 'Host', value: 'Palash Kulkarni' },
+      { label: 'Platform', value: 'TBD' },
+    ],
+    note: 'A new COZM original. Get the first episode the day it’s out.',
+  },
+];
+
 /* ---------- Approach page ---------- */
 
 export interface ApproachStep {

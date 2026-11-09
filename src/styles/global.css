@@ -161,3 +161,28 @@
     }
   }
 }
+
+/*
+ * Project tabs (/work, /originals — see src/scripts/project-tabs.ts): with JS,
+ * each set of panels / media shares one grid cell and the selected one
+ * (data-active) crossfades in, so switching never moves the layout. Without JS
+ * they're all shown, one after another.
+ */
+html.js [data-project-panel],
+html.js [data-project-media] {
+  grid-area: 1 / 1;
+  transition:
+    opacity 0.4s ease-in-out,
+    visibility 0.4s;
+}
+html.js [data-project-panel]:not([data-active]),
+html.js [data-project-media]:not([data-active]) {
+  opacity: 0;
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-project-panel],
+  [data-project-media] {
+    transition: none !important;
+  }
+}

@@ -18,11 +18,13 @@ import type { HTMLAttributes } from 'astro/types';
 
 type Props = Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> & {
   href?: string;
+  /** For the <button> form (no href): 'submit' inside a form. */
+  type?: 'button' | 'submit';
   variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'lg' | 'sm' | 'xs' | 'icon';
 };
 
-const { href, variant = 'secondary', size = 'lg', class: className, ...rest } = Astro.props;
+const { href, type = 'button', variant = 'secondary', size = 'lg', class: className, ...rest } = Astro.props;
 
 const variants = {
   primary: 'bg-ink text-sand border-ink',
@@ -51,7 +53,7 @@ const classes = [
       <slot />
     </a>
   ) : (
-    <button type="button" class:list={classes} {...rest}>
+    <button type={type} class:list={classes} {...rest}>
       <slot />
     </button>
   )

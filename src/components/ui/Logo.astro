@@ -1,10 +1,11 @@
 ---
 /**
- * Logo — the COZM wordmark. The source PNG has transparent padding, so it is
- * cropped exactly as in Figma (79×20 visible area). Scale it with `class`
+ * Logo — the COZM wordmark, in the current text colour (ink on sand, sand over
+ * video). The source PNG is used as a mask over a currentColor fill, so one
+ * asset works on any background. It has transparent padding, so the mask is
+ * placed exactly as Figma crops it (79×20 visible area). Scale it with `class`
  * (e.g. w-[79px] for the header, w-[158px] for the footer).
  */
-import { Image } from 'astro:assets';
 import logo from '../../assets/images/logo.png';
 
 interface Props {
@@ -14,12 +15,10 @@ interface Props {
 const { class: className } = Astro.props;
 ---
 
-<span class:list={['relative block aspect-[79/20] overflow-hidden', className]}>
-  <Image
-    src={logo}
-    alt="Cozm"
-    class="absolute top-[-120.34%] left-[-22.75%] h-[352.54%] w-[145.06%] max-w-none"
-    widths={[240, 338]}
-    sizes="240px"
-  />
+<span role="img" aria-label="Cozm" class:list={['relative block aspect-[79/20] overflow-hidden', className]}>
+  <span
+    aria-hidden="true"
+    class="absolute top-[-120.34%] left-[-22.75%] h-[352.54%] w-[145.06%] bg-current"
+    style={`mask: url(${logo.src}) 0 0 / 100% 100% no-repeat`}
+  ></span>
 </span>

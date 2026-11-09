@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import OriginalsShowcase from '../components/originals/OriginalsShowcase.astro';
+import Footer from '../components/Footer.astro';
+import { heroVideo, originals } from '../data/site';
+---
+
+<BaseLayout title="Originals — Cozm">
+  <Header />
+
+  <main id="main-content">
+    <OriginalsShowcase
+      heading="Cozm Originals are the shows we bet on ourselves."
+      items={originals}
+      video={heroVideo}
+    />
+  </main>
+
+  <Footer heading="Let’s talk about what your team could be making 90 days from now." />
+</BaseLayout>

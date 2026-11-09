@@ -9,14 +9,14 @@
  *
  * Clicking a project in the list (or arrow keys / Home / End once the list has
  * focus) selects it: its cover crossfades in and its details replace the
- * previous ones. WAI-ARIA tabs pattern with automatic activation and a roving
- * tabindex, like WhatWeDo.
+ * previous ones. The list and its behaviour are shared with /originals
+ * (ProjectList + initProjectTabs).
  *
  * Covers and detail panels share one grid cell each, so switching never
  * changes the layout. Without JS they all show, one after another.
  */
 import { Image } from 'astro:assets';
-import arrowUpRight from '../../assets/icons/arrow-up-right.svg';
+import ProjectList from '../ui/ProjectList.astro';
 import Button from '../ui/Button.astro';
 import type { WorkProject } from '../../data/site';
 
@@ -27,7 +27,6 @@ interface Props {
 
 const { heading, projects } = Astro.props;
 const id = (i: number, part: string) => `work-${i}-${part}`;
-const pad = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
 <section
@@ -41,7 +40,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
     <div class="work-covers relative grid aspect-[4/3] overflow-hidden border border-ink bg-ink lg:aspect-auto lg:h-full">
       {
         projects.map(({ item }, i) => (
-          <div data-work-cover data-active={i === 0 ? '' : undefined} class="work-cover relative aspect-[4/3] lg:aspect-auto">
+          <div data-project-media data-active={i === 0 ? '' : undefined} class="relative aspect-[4/3] lg:aspect-auto">
             <Image
               src={item.image}
               alt=""
@@ -55,32 +54,12 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
       }
     </div>
 
-    <div
-      role="tablist"
-      aria-label="Projects"
-      aria-orientation="vertical"
-      class="flex flex-col divide-y divide-ink lg:absolute lg:bottom-2 lg:left-2 lg:w-max lg:min-w-[326px] lg:bg-sand lg:p-2"
-    >
-      {
-        projects.map(({ item, category }, i) => (
-          <button
-            type="button"
-            role="tab"
-            id={id(i, 'tab')}
-            aria-controls={id(i, 'panel')}
-            aria-selected={i === 0 ? 'true' : 'false'}
-            tabindex={i === 0 ? 0 : -1}
-            data-work-tab
-            class="flex cursor-pointer items-center gap-4 py-2 text-left text-small leading-[1.3] opacity-40 transition-opacity duration-300 first:pt-0 last:pb-0 hover:opacity-70 aria-selected:opacity-100"
-          >
-            <span>{pad(i)}</span>
-            <span class="min-w-0 flex-1">{item.title}</span>
-            <span class="whitespace-nowrap">{category}</span>
-            <img src={arrowUpRight.src} width={16} height={16} alt="" class="m-px shrink-0" />
-          </button>
-        ))
-      }
-    </div>
+    <ProjectList
+      items={projects.map(({ item, category }) => ({ title: item.title, category }))}
+      idPrefix="work"
+      label="Projects"
+      class="lg:absolute lg:bottom-2 lg:left-2 lg:w-max lg:min-w-[326px] lg:bg-sand lg:p-2"
+    />
   </div>
 
   <!-- Details of the selected project -->
@@ -91,9 +70,9 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
           role="tabpanel"
           id={id(i, 'panel')}
           aria-labelledby={id(i, 'tab')}
-          data-work-panel
+          data-project-panel
           data-active={i === 0 ? '' : undefined}
-          class="work-panel flex flex-col gap-4 self-end"
+          class="flex flex-col gap-4 self-end"
         >
           <h2 class="text-title">{item.title}</h2>
           <p class="text-small">{item.description}</p>
@@ -119,68 +98,8 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
   </div>
 </section>
 
-<style>
-  /* With JS: covers and panels stack in one cell and crossfade; only the
-     active one is visible. */
-  :global(html.js) .work-cover,
-  :global(html.js) .work-panel {
-    grid-area: 1 / 1;
-    transition:
-      opacity 0.4s ease,
-      visibility 0.4s;
-  }
-  :global(html.js) .work-cover:not([data-active]),
-  :global(html.js) .work-panel:not([data-active]) {
-    opacity: 0;
-    visibility: hidden;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .work-cover,
-    .work-panel {
-      transition: none !important;
-    }
-  }
-</style>
-
 <script>
-  document.querySelectorAll<HTMLElement>('[data-work-showcase]').forEach((root) => {
-    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-work-tab]')];
-    const panels = [...root.querySelectorAll<HTMLElement>('[data-work-panel]')];
-    const covers = [...root.querySelectorAll<HTMLElement>('[data-work-cover]')];
-    let current = 0;
+  import { initProjectTabs } from '../../scripts/project-tabs';
 
-    const select = (index: number, focus = false) => {
-      current = index;
-      tabs.forEach((tab, i) => {
-        tab.setAttribute('aria-selected', String(i === index));
-        tab.tabIndex = i === index ? 0 : -1;
-      });
-      [...panels, ...covers].forEach((el) => el.toggleAttribute('data-active', false));
-      panels[index].toggleAttribute('data-active', true);
-      covers[index].toggleAttribute('data-active', true);
-      // Hidden panels stay out of the tab order and the accessibility tree.
-      panels.forEach((panel, i) => (panel.inert = i !== index));
-      if (focus) tabs[index].focus();
-    };
-
-    tabs.forEach((tab, i) => {
-      tab.addEventListener('click', () => select(i));
-      tab.addEventListener('keydown', (event) => {
-        const last = tabs.length - 1;
-        const next = {
-          ArrowDown: current === last ? 0 : current + 1,
-          ArrowRight: current === last ? 0 : current + 1,
-          ArrowUp: current === 0 ? last : current - 1,
-          ArrowLeft: current === 0 ? last : current - 1,
-          Home: 0,
-          End: last,
-        }[event.key];
-        if (next === undefined) return;
-        event.preventDefault();
-        select(next, true);
-      });
-    });
-
-    select(0);
-  });
+  document.querySelectorAll<HTMLElement>('[data-work-showcase]').forEach(initProjectTabs);
 </script>
