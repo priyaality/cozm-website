@@ -12,15 +12,16 @@ import { philosophy } from '../../data/site';
 ---
 
 <!--
-  --col: one of the 12 page-grid columns (the section has no side padding, so
-  the gutters are subtracted here). The grid is gutter + 7 columns + 7 gaps wide.
+  Same 12-column grid as the manifesto above (grid-split: 7 + 5 columns), so the
+  vertical rule — the heading column's left border in both sections — is laid
+  out identically and lines up at every width. The principles' grid extends
+  into the left page margin (-ml-gutter) and across the column gap (-mr-gap),
+  so it meets the heading column exactly.
 -->
 <section
-  class="flex flex-col border-t border-ink bg-sand [--col:calc((100%-2*var(--spacing-gutter)-11*var(--spacing-column-gap))/12)] lg:min-h-[calc(100svh-var(--spacing-nav))] lg:flex-row"
+  class="grid-split border-t border-ink bg-sand px-gutter lg:min-h-[calc(100svh-var(--spacing-nav))]"
 >
-  <div
-    class="flex flex-col border-ink lg:w-[calc(var(--spacing-gutter)+7*var(--col)+7*var(--spacing-column-gap))] lg:shrink-0 lg:border-r"
-  >
+  <div class="-mx-gutter flex flex-col lg:mr-[calc(-1*var(--spacing-column-gap))]">
     {
       [philosophy.slice(0, 2), philosophy.slice(2, 4)].map((row, r) => (
         <div class:list={['flex flex-1 flex-col sm:flex-row', r === 0 && 'border-b border-ink']}>
@@ -45,7 +46,7 @@ import { philosophy } from '../../data/site';
     }
   </div>
 
-  <div class="px-gutter py-8 max-lg:order-first max-lg:border-b max-lg:border-ink lg:flex-1 lg:pl-4">
+  <div class="border-ink py-8 max-lg:order-first max-lg:-mx-gutter max-lg:border-b max-lg:px-gutter lg:border-l lg:pl-4">
     <h2 class="text-headline">Our philosophy</h2>
   </div>
 </section>
