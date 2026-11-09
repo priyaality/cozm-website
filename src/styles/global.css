@@ -86,8 +86,9 @@
   --text-label--letter-spacing: -0.02em;
   --text-label--font-weight: 600;
 
-  /* eyebrow — ticker items (use with `uppercase`). 20 / 120% / -2% / medium */
-  --text-eyebrow: clamp(1rem, 0.95rem + 0.2vw, 1.25rem);
+  /* eyebrow — ticker items, table headings (use with `uppercase`). 20 / 120% / -2% / medium.
+     16px on phones, scaling to 20px at 1512px wide (the Figma frame) and up. */
+  --text-eyebrow: clamp(1rem, 0.913rem + 0.357vw, 1.25rem);
   --text-eyebrow--line-height: 1.2;
   --text-eyebrow--letter-spacing: -0.02em;
   --text-eyebrow--font-weight: 500;
