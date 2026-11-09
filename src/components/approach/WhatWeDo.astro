@@ -68,7 +68,7 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
         </div>
       </div>
 
-      <div>
+      <div class="offering-panels grid">
         {
           items.map((item, i) => (
             <div role="tabpanel" id={id(i, 'panel')} aria-labelledby={id(i, 'tab')} data-offering-panel class="offering-panel">
@@ -151,7 +151,22 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
     transform: scale(0.9);
   }
 
+  /* Descriptions: with JS they share one cell (bottom-aligned, so a shorter one
+     doesn't jump) and crossfade; without JS they're listed one after another. */
+  :global(html.js) .offering-panel {
+    grid-area: 1 / 1;
+    align-self: end;
+    transition:
+      opacity 0.35s ease-in-out,
+      visibility 0.35s;
+  }
+  :global(html.js) .offering-panel:not([data-active]) {
+    opacity: 0;
+    visibility: hidden;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .offering-panel,
     .offering-card,
     .offering-tab,
     .offering-tab__dot {
@@ -173,7 +188,12 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
         tab.setAttribute('aria-selected', String(i === index));
         tab.tabIndex = i === index ? 0 : -1;
       });
-      panels.forEach((panel, i) => (panel.hidden = i !== index));
+      // Descriptions crossfade (CSS); the hidden ones stay out of the tab order
+      // and the accessibility tree.
+      panels.forEach((panel, i) => {
+        panel.toggleAttribute('data-active', i === index);
+        panel.inert = i !== index;
+      });
       // Selected card to the front; the rest fan out behind, in list order.
       const behind = ['left', 'right'];
       let n = 0;
