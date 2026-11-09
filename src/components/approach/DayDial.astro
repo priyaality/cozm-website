@@ -61,7 +61,7 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
     <div class:list={[cols, 'day-dial__counter pointer-events-none absolute inset-0 items-center']} aria-hidden="true">
       <p class={dayClass}>
         <span class="text-nav font-semibold text-ink-muted">DAY</span>
-        <span data-dial-day class="text-right text-display-sm tabular-nums">{steps[0].day}</span>
+        <span data-dial-day class="text-right text-display tabular-nums">{steps[0].day}</span>
       </p>
     </div>
 
@@ -71,7 +71,7 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
           <li data-dial-phase data-day={Number(step.day)} data-current={i === 0 ? '' : undefined} class:list={[cols, 'day-dial__phase items-center']}>
             <p class:list={[dayClass, 'day-dial__day']}>
               <span class="text-nav font-semibold text-ink-muted">DAY</span>
-              <span class="text-right text-display-sm">{step.day}</span>
+              <span class="text-right text-display">{step.day}</span>
             </p>
             <div class="flex flex-col gap-1 lg:col-span-7">
               <h2 class="text-title">{step.title}</h2>

@@ -74,7 +74,7 @@ const isDev = import.meta.env.DEV;
       }
       // Some heading fonts set the big display styles at their own weight.
       if (role === 'heading') {
-        for (const token of ['--text-display--font-weight', '--text-display-sm--font-weight']) {
+        for (const token of ['--text-display--font-weight']) {
           if (option?.displayWeight) root.style.setProperty(token, String(option.displayWeight));
           else root.style.removeProperty(token);
         }

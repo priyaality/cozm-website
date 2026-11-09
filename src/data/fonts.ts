@@ -9,7 +9,7 @@
  * then picks the cut for each text size (font-optical-sizing: auto), so large
  * headings get the high-contrast display design, as in Figma.
  *
- * `displayWeight`: weight for the display and display-sm styles when this is
+ * `displayWeight`: weight for the display style when this is
  * the heading font (the tokens' 600 suits Arimo; Figma sets the serifs Regular).
  */
 export interface FontOption {
