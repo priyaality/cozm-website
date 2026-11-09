@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import WorkShowcase from '../components/work/WorkShowcase.astro';
+import Footer from '../components/Footer.astro';
+import { workProjects } from '../data/site';
+---
+
+<BaseLayout title="Work — Cozm">
+  <Header />
+
+  <main id="main-content">
+    <WorkShowcase heading="Made for India’s most demanding audience." projects={workProjects} />
+  </main>
+
+  <Footer />
+</BaseLayout>

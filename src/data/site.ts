@@ -87,6 +87,46 @@ export const featuredWork: WorkItem[] = [
   },
 ];
 
+/* ---------- Work page ---------- */
+
+export interface WorkProject {
+  /** The cover, title and one-line description, shared with the featured work tiles. */
+  item: WorkItem;
+  /** Format, shown in the list (e.g. 'Podcast'). */
+  category: string;
+  /** Longer description. */
+  about?: string;
+  /** Label / value facts (host, views, guests…), two per row. */
+  facts?: { label: string; value: string }[];
+  /** Where to watch or listen. */
+  watch?: { label: string; href: string };
+}
+
+const work = (title: string) => featuredWork.find((w) => w.title === title)!;
+
+/**
+ * The /work page list, in Figma's order. Only Uncovered has full copy in the
+ * design so far; the others show what exists (fields left out aren't rendered).
+ */
+export const workProjects: WorkProject[] = [
+  {
+    item: work('Uncovered with Suketu Shah'),
+    category: 'Podcast',
+    about:
+      'Long, unhurried conversations that go past the press release: how India’s most consequential business leaders think, decide and live. Made for people who want the story behind the companies they invest in, work for and compete with.',
+    facts: [
+      { label: 'Host', value: 'Suketu Shah' },
+      { label: 'Views (till date)', value: '160,000' },
+      { label: 'Notable guests', value: 'Harsh Mariwala, Sajjan Jindal and Perizaad Zorabian' },
+    ],
+    // TODO: real link.
+    watch: { label: 'Watch on Youtube', href: '#' },
+  },
+  { item: work('CapMint Stories'), category: 'Documentaries' },
+  { item: work('How I Masaba'), category: 'Podcast (audio only)' },
+  { item: work('PaisaSmart'), category: 'Youtube channel' },
+];
+
 /* ---------- Approach page ---------- */
 
 export interface ApproachStep {

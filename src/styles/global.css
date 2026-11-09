@@ -91,6 +91,12 @@
   --text-eyebrow--font-weight: 500;
 
   /* nav — navigation links. 16 / 110% / -2% / medium */
+  /* Small body copy (work details) — 16px */
+  --text-small: 1rem;
+  --text-small--line-height: 1.2;
+  --text-small--letter-spacing: -0.02em;
+  --text-small--font-weight: 400;
+
   --text-nav: 1rem;
   --text-nav--line-height: 1.1;
   --text-nav--letter-spacing: -0.02em;
