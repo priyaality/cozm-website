@@ -2,6 +2,8 @@
 /**
  * NavLinks — the Approach / Work / Originals / About list. Links inherit the
  * surrounding text colour (sand/ink in the header, ink in the footer).
+ * In the header row, the hovered, focused and current-page links are marked
+ * with a 2px rule above and below (Figma node 111:2503).
  */
 import { navLinks } from '../../data/site';
 
@@ -16,6 +18,8 @@ interface Props {
 }
 
 const { direction = 'row', class: className } = Astro.props;
+/** The link for the page being viewed (trailing slash ignored). */
+const here = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 
 <ul class:list={[direction === 'row' ? 'contents' : 'flex flex-col items-start', className]}>
@@ -24,7 +28,16 @@ const { direction = 'row', class: className } = Astro.props;
       <li>
         <a
           href={link.href}
-          class:list={['block text-nav whitespace-nowrap', direction === 'row' ? 'py-[9px]' : 'py-3']}
+          aria-current={link.href === here ? 'page' : undefined}
+          class:list={[
+            'block text-nav whitespace-nowrap',
+            direction === 'row'
+              ? // Header: hover / focus / current page get a 2px rule above and below, in the
+                // text colour (sand over the hero, ink on the bar). The borders are always there,
+                // transparent, with 7px padding (9px in Figma minus the 2px rule) so nothing shifts.
+                'border-y-2 border-transparent py-[7px] transition-colors duration-200 hover:border-current focus-visible:border-current focus-visible:outline-none aria-[current=page]:border-current'
+              : 'py-3',
+          ]}
         >
           {link.label}
         </a>
