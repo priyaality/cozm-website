@@ -4,7 +4,8 @@
  * ruled 2 × 2 grid on the left, running from the left edge of the screen to
  * just past column 7; the heading sits to its right. On desktop the section
  * fills the visible area below the header and the cells stretch to share it.
- * Each principle has a white square placeholder for its icon. Below lg the
+ * In each cell the icon (a white square placeholder for now) is at the top
+ * and the title and description at the bottom. Below lg the
  * heading comes first and the principles stack with rules between.
  */
 import { philosophy } from '../../data/site';
@@ -26,15 +27,17 @@ import { philosophy } from '../../data/site';
           {row.map((item, c) => (
             <div
               class:list={[
-                'flex flex-1 flex-col gap-2 px-gutter',
+                'flex flex-1 flex-col justify-between gap-6 px-gutter',
                 r === 0 ? 'pt-8 pb-4' : 'pt-4 pb-8',
                 c === 0 ? 'border-ink max-sm:border-b sm:border-r sm:pr-4' : 'sm:pl-4',
                 c === 1 && 'lg:pr-4',
               ]}
             >
               <div aria-hidden="true" class="size-[124px] bg-paper" />
-              <h3 class="text-title leading-none font-medium">{item.title}</h3>
-              <p class="text-body">{item.description}</p>
+              <div class="flex flex-col gap-2">
+                <h3 class="text-title leading-none font-medium">{item.title}</h3>
+                <p class="text-body">{item.description}</p>
+              </div>
             </div>
           ))}
         </div>

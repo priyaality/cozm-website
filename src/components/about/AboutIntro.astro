@@ -1,8 +1,8 @@
 ---
 /**
  * AboutIntro — the about page's opening screen (Figma 241:2761): the
- * full-width headline and its one-line follow-up, centred in a screen-tall
- * section below the fixed header (it grows rather than clipping on short
+ * full-width headline and its one-line follow-up, centred in a section 80%
+ * of the screen tall, header included (it grows rather than clipping on short
  * screens).
  */
 import { aboutIntro } from '../../data/site';
@@ -11,7 +11,7 @@ const { heading, subheading } = aboutIntro;
 ---
 
 <section
-  class="flex flex-col justify-center gap-4 bg-sand px-gutter pt-[calc(var(--spacing-nav)+2rem)] pb-8 lg:min-h-svh"
+  class="flex flex-col justify-center gap-4 bg-sand px-gutter pt-[calc(var(--spacing-nav)+2rem)] pb-8 lg:min-h-[80svh]"
 >
   <h1 class="text-display-sm">{heading}</h1>
   <p class="text-body leading-[1.3]">{subheading}</p>
