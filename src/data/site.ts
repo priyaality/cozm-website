@@ -260,8 +260,11 @@ export const team = {
       ', writes about the business of creativity on Substack, and makes documentaries and short films.',
     ],
   ] as (string | BioPart[])[],
-  // TODO: real profile links.
-  social: { x: '#', linkedin: '#', substack: '#' },
+  social: {
+    x: 'https://x.com/ABiggerSpalash',
+    linkedin: 'https://www.linkedin.com/in/palash-kulkarni-a6696525/',
+    substack: 'https://substack.com/@palashk',
+  },
 };
 
 /* ---------- Approach page ---------- */
