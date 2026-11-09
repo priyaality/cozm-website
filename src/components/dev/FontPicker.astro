@@ -16,7 +16,7 @@ const roles = [
   { role: 'body', label: 'Body' },
 ] as const;
 const stack = (o: FontOption) =>
-  `"${o.name}", ${o.fallback === 'serif' ? 'ui-serif, Georgia, serif' : 'ui-sans-serif, system-ui, sans-serif'}`;
+  `"${o.family ?? o.name}", ${o.fallback === 'serif' ? 'ui-serif, Georgia, serif' : 'ui-sans-serif, system-ui, sans-serif'}`;
 ---
 
 <div data-font-picker class="font-picker-root">
@@ -37,7 +37,7 @@ const stack = (o: FontOption) =>
     <div class="flex items-baseline justify-between gap-4">
       <p class="text-label">Fonts</p>
       <button type="button" data-font-reset class="cursor-pointer text-caption underline underline-offset-2">
-        Reset to Arimo
+        Reset to defaults
       </button>
     </div>
 

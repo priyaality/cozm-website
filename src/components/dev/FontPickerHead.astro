@@ -8,12 +8,12 @@
  * page with `?fonts` turns it on for that browser (remembered), `?fonts=off`
  * turns it off again. Saved choices only apply while it's on.
  */
-import { DEFAULT_FONT, fontsByRole } from '../../data/fonts';
+import { DEFAULT_FONTS, fontsByRole } from '../../data/fonts';
 
 const isDev = import.meta.env.DEV;
 ---
 
-<script is:inline define:vars={{ fontsByRole, DEFAULT_FONT, isDev }}>
+<script is:inline define:vars={{ fontsByRole, DEFAULT_FONTS, isDev }}>
   (() => {
     const KEY = 'cozm-fonts';
     const ENABLED = 'cozm-fonts-enabled';
@@ -63,26 +63,33 @@ const isDev = import.meta.env.DEV;
       document.head.append(link);
     };
 
-    /** role: 'heading' | 'body'. */
+    const HEADING_STYLES = ['display', 'headline', 'title'];
+
+    /** role: 'heading' | 'body'. The defaults are in global.css, so picking one clears the overrides. */
     const apply = (role, name) => {
       const option = fontsByRole[role].find((o) => o.name === name);
-      if (!option || name === DEFAULT_FONT) {
+      const isDefault = !option || name === DEFAULT_FONTS[role];
+      if (isDefault) {
         root.style.removeProperty(`--font-${role}`);
       } else {
         load(option);
-        root.style.setProperty(`--font-${role}`, `"${option.name}", ${stacks[option.fallback]}`);
+        root.style.setProperty(`--font-${role}`, `"${option.family || option.name}", ${stacks[option.fallback]}`);
       }
-      // Some heading fonts set the big display styles at their own weight.
-      if (role === 'heading') {
-        for (const token of ['--text-display--font-weight']) {
-          if (option?.displayWeight) root.style.setProperty(token, String(option.displayWeight));
-          else root.style.removeProperty(token);
-        }
+      if (role !== 'heading') return;
+      // Heading weights and optical size: the font's own, or the defaults (Literata's).
+      const weights = !isDefault && option.headingWeights;
+      for (const style of HEADING_STYLES) {
+        const token = `--text-${style}--font-weight`;
+        if (weights) root.style.setProperty(token, String(weights[style]));
+        else root.style.removeProperty(token);
       }
+      if (!isDefault && option.headingOpsz) root.style.setProperty('--heading-opsz', String(option.headingOpsz));
+      else root.style.removeProperty('--heading-opsz');
     };
 
     // A saved font that's no longer offered for its role falls back to the default.
-    const pick = (role) => (fontsByRole[role].some((o) => o.name === saved[role]) ? saved[role] : DEFAULT_FONT);
+    const pick = (role) =>
+      fontsByRole[role].some((o) => o.name === saved[role]) ? saved[role] : DEFAULT_FONTS[role];
     const current = () => ({ heading: pick('heading'), body: pick('body') });
 
     window.cozmFonts = {
@@ -96,8 +103,8 @@ const isDev = import.meta.env.DEV;
       reset() {
         saved = {};
         store.set(KEY, null);
-        apply('heading', DEFAULT_FONT);
-        apply('body', DEFAULT_FONT);
+        apply('heading', DEFAULT_FONTS.heading);
+        apply('body', DEFAULT_FONTS.body);
       },
     };
 
