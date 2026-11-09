@@ -33,7 +33,7 @@
   /* ---------- Font families ---------- */
   --font-sans: "Arimo", ui-sans-serif, system-ui, sans-serif;
   /* Heading and body faces: Literata and Instrument Sans (self-hosted). The
-     font picker (dev / ?fonts) can swap either at runtime by setting these on
+     font picker can swap either at runtime by setting these on
      <html>. Headings are the
      display, headline and title styles (see the base layer);
      everything else, including large standalone text like the home page's

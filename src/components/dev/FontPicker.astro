@@ -3,7 +3,7 @@
  * FontPicker — a floating "Aa" button (bottom-right) that opens a panel for
  * choosing the heading and body fonts from a short list (src/data/fonts.ts).
  * The choice is saved in this browser and applied site-wide by
- * FontPickerHead. Only shown when the picker is on (dev, or `?fonts`).
+ * FontPickerHead. Shown on every page, in dev and on the deployed site.
  *
  * The panel is a native popover: it closes on Escape or a click outside.
  * Each option is shown in its own face (only the letters of the font names are
@@ -64,7 +64,8 @@ const stack = (o: FontOption) =>
 </div>
 
 <style is:global>
-  html:not(.font-picker) [data-font-picker] {
+  /* It needs JS to do anything. */
+  html:not(.js) [data-font-picker] {
     display: none;
   }
   /* Popovers are centred by default; anchor this one above the button. */

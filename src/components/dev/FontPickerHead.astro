@@ -4,19 +4,15 @@
  * paint (no flash of the default fonts) and exposes `window.cozmFonts` for the
  * picker (FontPicker.astro).
  *
- * The picker is on in dev. On a built site it's off for visitors; opening any
- * page with `?fonts` turns it on for that browser (remembered), `?fonts=off`
- * turns it off again. Saved choices only apply while it's on.
+ * The picker is shown to everyone, on every build (dev and the deployed site).
+ * Choices are saved per browser.
  */
 import { DEFAULT_FONTS, fontsByRole } from '../../data/fonts';
-
-const isDev = import.meta.env.DEV;
 ---
 
-<script is:inline define:vars={{ fontsByRole, DEFAULT_FONTS, isDev }}>
+<script is:inline define:vars={{ fontsByRole, DEFAULT_FONTS }}>
   (() => {
     const KEY = 'cozm-fonts';
-    const ENABLED = 'cozm-fonts-enabled';
     const root = document.documentElement;
     const store = {
       get: (k) => {
@@ -33,12 +29,6 @@ const isDev = import.meta.env.DEV;
         } catch {}
       },
     };
-
-    const flag = new URLSearchParams(location.search).get('fonts');
-    if (flag === 'off') store.set(ENABLED, null);
-    else if (flag !== null) store.set(ENABLED, '1');
-    if (!isDev && store.get(ENABLED) !== '1') return;
-    root.classList.add('font-picker');
 
     let saved = {};
     try {
