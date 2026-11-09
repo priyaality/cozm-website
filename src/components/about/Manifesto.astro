@@ -3,7 +3,7 @@
  * Manifesto — why COZM exists (Figma 241:2765). The copy fills the first 7
  * grid columns; a white frame (ink rule on its left) fills the last 5 and runs
  * out to the right edge of the screen, the full height of the section. On desktop the section
- * fills the visible area below the header, with the copy centred vertically.
+ * fills the visible area below the header, with the copy at the top.
  */
 import { manifesto } from '../../data/site';
 ---
@@ -11,7 +11,7 @@ import { manifesto } from '../../data/site';
 <section
   class="grid-split gap-y-8 border-t border-ink bg-sand px-gutter lg:min-h-[calc(100svh-var(--spacing-nav))]"
 >
-  <div class="flex flex-col justify-center gap-6 py-8">
+  <div class="flex flex-col gap-6 py-8">
     {manifesto.body.map((paragraph) => <p class="text-lead">{paragraph}</p>)}
   </div>
 
