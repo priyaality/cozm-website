@@ -55,7 +55,7 @@ const hasSlot = Astro.slots.has('default');
       <dl class="grid grid-cols-2 gap-4">
         {facts.map((fact, f) => (
           // An odd last fact (e.g. notable guests) gets the full row.
-          <div class:list={['flex flex-col gap-0.5', f === facts.length - 1 && f % 2 === 0 && 'col-span-2 max-w-[409px]']}>
+          <div class:list={['flex flex-col gap-0.5', f === facts.length - 1 && f % 2 === 0 && 'col-span-2']}>
             <dt class="text-caption leading-[1.2] font-semibold uppercase opacity-60">{fact.label}</dt>
             <dd class="text-small">{fact.value}</dd>
           </div>
