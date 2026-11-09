@@ -54,7 +54,11 @@ const { heading, projects } = Astro.props;
     </div>
 
     <ProjectList
-      items={projects.map(({ item, category }) => ({ title: item.title, category }))}
+      items={projects.map(({ item, category, watch }) => ({
+        title: item.title,
+        category,
+        link: { label: 'Watch on Youtube', href: watch },
+      }))}
       idPrefix="work"
       label="Projects"
       class="lg:absolute lg:bottom-2 lg:left-2 lg:w-max lg:min-w-[326px] lg:bg-sand lg:p-2"

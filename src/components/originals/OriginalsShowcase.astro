@@ -56,7 +56,13 @@ const first = items[0].video;
   <h1 class="text-headline">{heading}</h1>
 
   <div class="grid-split items-end gap-y-12">
-    <ProjectList items={items} idPrefix="original" label="Originals" class="lg:w-max lg:min-w-[326px]" />
+    <!-- The arrow links to an original's first CTA (none while it's coming soon). -->
+    <ProjectList
+      items={items.map((item) => ({ title: item.title, category: item.category, link: item.links?.[0] }))}
+      idPrefix="original"
+      label="Originals"
+      class="lg:w-max lg:min-w-[326px]"
+    />
 
     <div class="grid">
       {
