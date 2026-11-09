@@ -84,7 +84,7 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
       <div class="offering-stack grid w-full place-items-center" aria-hidden="true">
         {
           items.map((item, i) => (
-            <div data-offering-card data-slot={slotFor(i)} class="offering-card relative overflow-hidden border border-ink bg-sand">
+            <div data-offering-card data-slot={slotFor(i)} class="offering-card relative overflow-hidden border border-ink bg-paper">
               {item.image ? (
                 <Image src={item.image} alt="" class="size-full object-cover grayscale" widths={[480, 960]} sizes="(min-width: 64rem) 40vw, 70vw" />
               ) : (
