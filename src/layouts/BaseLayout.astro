@@ -5,6 +5,8 @@ import '@fontsource/arimo/600.css';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/caveat/400.css';
 import '../styles/global.css';
+import FontPickerHead from '../components/dev/FontPickerHead.astro';
+import FontPicker from '../components/dev/FontPicker.astro';
 
 interface Props {
   title?: string;
@@ -29,8 +31,10 @@ const {
     <title>{title}</title>
     <!-- Lets CSS hide JS-animated elements before their intro, without hiding them when JS is off. -->
     <script is:inline>document.documentElement.classList.add('js');</script>
+    <FontPickerHead />
   </head>
   <body class="bg-sand text-ink">
     <slot />
+    <FontPicker />
   </body>
 </html>

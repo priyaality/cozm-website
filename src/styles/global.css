@@ -31,6 +31,13 @@
 
   /* ---------- Font families ---------- */
   --font-sans: "Arimo", ui-sans-serif, system-ui, sans-serif;
+  /* Heading and body faces. Both Arimo; the font picker (dev / ?fonts) can
+     swap either at runtime by setting these on <html>. Headings are the
+     display, display-sm, headline and title styles (see the base layer);
+     everything else, including large standalone text like the home page's
+     statement, is body. */
+  --font-heading: var(--font-sans);
+  --font-body: var(--font-sans);
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   /* Figma uses "Figma Hand", which isn't on Google Fonts. Caveat is the stand-in. */
   --font-hand: "Caveat", "Figma Hand", cursive;
@@ -128,9 +135,17 @@
     scrollbar-gutter: stable;
     background-color: var(--color-sand);
     color: var(--color-ink);
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Heading styles use the heading face (a font-* utility still overrides). */
+  .text-display,
+  .text-display-sm,
+  .text-headline,
+  .text-title {
+    font-family: var(--font-heading);
   }
 }
 

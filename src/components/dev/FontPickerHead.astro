@@ -1,0 +1,101 @@
+---
+/**
+ * FontPickerHead — goes in <head>. Applies saved font choices before first
+ * paint (no flash of the default fonts) and exposes `window.cozmFonts` for the
+ * picker (FontPicker.astro).
+ *
+ * The picker is on in dev. On a built site it's off for visitors; opening any
+ * page with `?fonts` turns it on for that browser (remembered), `?fonts=off`
+ * turns it off again. Saved choices only apply while it's on.
+ */
+import { DEFAULT_FONT, fontOptions } from '../../data/fonts';
+
+const isDev = import.meta.env.DEV;
+---
+
+<script is:inline define:vars={{ fontOptions, DEFAULT_FONT, isDev }}>
+  (() => {
+    const KEY = 'cozm-fonts';
+    const ENABLED = 'cozm-fonts-enabled';
+    const root = document.documentElement;
+    const store = {
+      get: (k) => {
+        try {
+          return localStorage.getItem(k);
+        } catch {
+          return null;
+        }
+      },
+      set: (k, v) => {
+        try {
+          if (v === null) localStorage.removeItem(k);
+          else localStorage.setItem(k, v);
+        } catch {}
+      },
+    };
+
+    const flag = new URLSearchParams(location.search).get('fonts');
+    if (flag === 'off') store.set(ENABLED, null);
+    else if (flag !== null) store.set(ENABLED, '1');
+    if (!isDev && store.get(ENABLED) !== '1') return;
+    root.classList.add('font-picker');
+
+    let saved = {};
+    try {
+      saved = JSON.parse(store.get(KEY) || '{}') || {};
+    } catch {}
+
+    const stacks = {
+      'sans-serif': 'ui-sans-serif, system-ui, sans-serif',
+      serif: 'ui-serif, Georgia, serif',
+    };
+
+    /** Load a Google font (weights 400–600) once. */
+    const load = (option) => {
+      if (!option.google) return;
+      const id = `font-${option.name.replace(/\s+/g, '-')}`;
+      if (document.getElementById(id)) return;
+      const link = Object.assign(document.createElement('link'), {
+        id,
+        rel: 'stylesheet',
+        href: `https://fonts.googleapis.com/css2?family=${option.google}&display=swap`,
+      });
+      document.head.append(link);
+    };
+
+    /** role: 'heading' | 'body'. */
+    const apply = (role, name) => {
+      const option = fontOptions.find((o) => o.name === name);
+      if (!option || name === DEFAULT_FONT) {
+        root.style.removeProperty(`--font-${role}`);
+      } else {
+        load(option);
+        root.style.setProperty(`--font-${role}`, `"${option.name}", ${stacks[option.fallback]}`);
+      }
+    };
+
+    const current = () => ({
+      heading: saved.heading || DEFAULT_FONT,
+      body: saved.body || DEFAULT_FONT,
+    });
+
+    window.cozmFonts = {
+      options: fontOptions,
+      current,
+      set(role, name) {
+        saved = { ...current(), [role]: name };
+        store.set(KEY, JSON.stringify(saved));
+        apply(role, name);
+      },
+      reset() {
+        saved = {};
+        store.set(KEY, null);
+        apply('heading', DEFAULT_FONT);
+        apply('body', DEFAULT_FONT);
+      },
+    };
+
+    apply('heading', current().heading);
+    apply('body', current().body);
+  })();
+</script>
