@@ -1,13 +1,11 @@
 ---
 /**
  * Manifesto — why COZM exists (Figma 241:2765). The copy fills the first 7
- * grid columns; the illustration fills the last 5 and runs out to the right
- * edge of the screen, the full height of the section. On desktop the section
+ * grid columns; a white frame (ink rule on its left) fills the last 5 and runs
+ * out to the right edge of the screen, the full height of the section. On desktop the section
  * fills the visible area below the header, with the copy centred vertically.
  */
-import { Image } from 'astro:assets';
 import { manifesto } from '../../data/site';
-import illustration from '../../assets/about/manifesto.png';
 ---
 
 <section
@@ -17,14 +15,6 @@ import illustration from '../../assets/about/manifesto.png';
     {manifesto.body.map((paragraph) => <p class="text-lead">{paragraph}</p>)}
   </div>
 
-  <!-- -mr-gutter: bleeds into the right page margin. Crop as in Figma (lower part of the drawing). -->
-  <div class="relative -mx-gutter aspect-[4/5] overflow-hidden lg:mx-0 lg:-mr-gutter lg:aspect-auto">
-    <Image
-      src={illustration}
-      alt="An illustration of someone working at a desk late at night, under a lamp, in front of a window full of stars."
-      class="absolute inset-0 size-full object-cover object-[50%_94%]"
-      widths={[531]}
-      sizes="(min-width: 64rem) 42vw, 100vw"
-    />
-  </div>
+  <!-- White frame (placeholder for a visual). -mr-gutter: bleeds into the right page margin. -->
+  <div aria-hidden="true" class="-mx-gutter aspect-[4/5] border-ink bg-paper max-lg:border-y lg:mx-0 lg:-mr-gutter lg:aspect-auto lg:border-l"></div>
 </section>
