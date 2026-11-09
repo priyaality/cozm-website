@@ -8,7 +8,8 @@
  * current offering's card is in front and straight; the others fan out behind
  * it, tilted ±15° (Figma's layout).
  *
- * Hovering (with a mouse) or clicking an offering selects it; so do the arrow
+ * Clicking an offering selects it, as does resting the mouse on it for 200ms
+ * (just passing over doesn't, so moving away after a click can't undo it); so do the arrow
  * keys, Home and End once the list has focus (WAI-ARIA tabs pattern, automatic
  * activation, roving tabindex).
  *
@@ -147,6 +148,9 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
 </style>
 
 <script>
+  /** How long the mouse must rest on an offering before hovering selects it. */
+  const HOVER_INTENT_MS = 200;
+
   document.querySelectorAll<HTMLElement>('[data-offerings]').forEach((root) => {
     const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-offering-tab]')];
     const panels = [...root.querySelectorAll<HTMLElement>('[data-offering-panel]')];
@@ -169,12 +173,23 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
       if (focus) tabs[index].focus();
     };
 
+    // Hover intent: a mouse has to rest on an item briefly before it's selected,
+    // so moving across the list (e.g. away after a click) doesn't change it.
+    let hoverTimer: number | undefined;
+    const cancelHover = () => window.clearTimeout(hoverTimer);
+
     tabs.forEach((tab, i) => {
-      tab.addEventListener('click', () => select(i));
-      // Hover selects with a mouse (touch taps already fire click).
-      tab.addEventListener('pointerenter', (event) => {
-        if (event.pointerType === 'mouse') select(i);
+      tab.addEventListener('click', () => {
+        cancelHover();
+        select(i);
       });
+      // Touch taps already fire click, so hover is mouse-only.
+      tab.addEventListener('pointerenter', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        cancelHover();
+        hoverTimer = window.setTimeout(() => select(i), HOVER_INTENT_MS);
+      });
+      tab.addEventListener('pointerleave', cancelHover);
       tab.addEventListener('keydown', (event) => {
         const last = tabs.length - 1;
         const next = {
