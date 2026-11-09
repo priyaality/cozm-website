@@ -102,8 +102,6 @@ export interface WorkProject {
   credit?: string;
   /** Where to watch. */
   watch: string;
-  /** An extra link shown beside the watch button (e.g. the case study's approach page). */
-  related?: { label: string; href: string };
 }
 
 const work = (title: string) => featuredWork.find((w) => w.title === title)!;
@@ -161,7 +159,6 @@ export const workProjects: WorkProject[] = [
     ],
     credit: 'Built with COZM, run in-house since the handover',
     watch: 'https://www.youtube.com/@paisasmart',
-    related: { label: 'See our approach', href: '/approach' },
   },
 ];
 

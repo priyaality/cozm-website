@@ -86,7 +86,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
   <!-- Details of the selected project -->
   <div class="work-panels grid gap-y-16 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:self-end">
     {
-      projects.map(({ item, about, facts, credit = 'Produced by COZM', watch, related }, i) => (
+      projects.map(({ item, about, facts, credit = 'Produced by COZM', watch }, i) => (
         <div
           role="tabpanel"
           id={id(i, 'panel')}
@@ -110,12 +110,9 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
             </dl>
           )}
           <p class="text-label">{credit}</p>
-          <div class:list={['grid gap-4', related && 'sm:grid-cols-2']}>
-            <Button href={watch} target="_blank" rel="noopener">
-              Watch on Youtube
-            </Button>
-            {related && <Button href={related.href}>{related.label}</Button>}
-          </div>
+          <Button href={watch} target="_blank" rel="noopener">
+            Watch on Youtube
+          </Button>
         </div>
       ))
     }
