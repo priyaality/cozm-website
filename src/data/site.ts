@@ -223,6 +223,10 @@ export const originals: Original[] = [
 export const aboutIntro = {
   heading: 'India’s most ambitious people deserve media as ambitious as they are.',
   subheading: 'COZM exists to make it, and to enable India’s companies able to make it themselves.',
+};
+
+/** Why COZM exists — shown beside the illustration. */
+export const manifesto = {
   body: [
     'Indian media has long underestimated its audience. From films to podcasts, the instinct has been to serve the lowest common denominator.',
     'So the most curious and ambitious Indians, hungry to learn and to grow, spend their attention elsewhere. Their media diet is mostly Western, and mostly not about them.',
@@ -230,7 +234,6 @@ export const aboutIntro = {
     'It is also a sound business. India’s top 10% is about 140 million people, and they are its emerging consumer class. Get a piece of their mind and you get a piece of their wallet.',
     'We do it two ways: with companies, by building media capability inside them, and on our own, through COZM Originals.',
   ],
-  signature: 'Palash Kulkarni',
 };
 
 /** "Our philosophy" — four principles, shown 2 × 2. */
