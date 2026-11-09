@@ -86,7 +86,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
   <!-- Details of the selected project -->
   <div class="work-panels grid gap-y-16 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:self-end">
     {
-      projects.map(({ item, about, facts, watch }, i) => (
+      projects.map(({ item, about, facts, credit = 'Produced by COZM', watch, related }, i) => (
         <div
           role="tabpanel"
           id={id(i, 'panel')}
@@ -97,8 +97,8 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
         >
           <h2 class="text-lead leading-[1.2] font-semibold">{item.title}</h2>
           <p class="text-small">{item.description}</p>
-          {about && <p class="text-small">{about}</p>}
-          {facts && (
+          <p class="text-small">{about}</p>
+          {facts.length > 0 && (
             <dl class="grid grid-cols-2 gap-x-4 gap-y-4">
               {facts.map((fact, f) => (
                 // An odd last fact (e.g. notable guests) gets the full row.
@@ -109,8 +109,13 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
               ))}
             </dl>
           )}
-          <p class="text-label">Produced by COZM</p>
-          {watch && <Button href={watch.href}>{watch.label}</Button>}
+          <p class="text-label">{credit}</p>
+          <div class:list={['grid gap-4', related && 'sm:grid-cols-2']}>
+            <Button href={watch} target="_blank" rel="noopener">
+              Watch on Youtube
+            </Button>
+            {related && <Button href={related.href}>{related.label}</Button>}
+          </div>
         </div>
       ))
     }
