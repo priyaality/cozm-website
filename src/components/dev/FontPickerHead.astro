@@ -72,6 +72,13 @@ const isDev = import.meta.env.DEV;
         load(option);
         root.style.setProperty(`--font-${role}`, `"${option.name}", ${stacks[option.fallback]}`);
       }
+      // Some heading fonts set the big display styles at their own weight.
+      if (role === 'heading') {
+        for (const token of ['--text-display--font-weight', '--text-display-sm--font-weight']) {
+          if (option?.displayWeight) root.style.setProperty(token, String(option.displayWeight));
+          else root.style.removeProperty(token);
+        }
+      }
     };
 
     // A saved font that's no longer offered for its role falls back to the default.
