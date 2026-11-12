@@ -38,8 +38,9 @@ const { id } = Astro.props;
 
 <script>
   document.querySelectorAll<HTMLFormElement>('[data-notify]').forEach((form) => {
-    const input = form.querySelector<HTMLInputElement>('input[type=email]')!;
-    const status = form.querySelector<HTMLElement>('[data-notify-status]')!;
+    const input = form.querySelector<HTMLInputElement>('input[type=email]');
+    const status = form.querySelector<HTMLElement>('[data-notify-status]');
+    if (!input || !status) return;
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();

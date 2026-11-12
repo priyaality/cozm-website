@@ -4,11 +4,14 @@
  * paint (no flash of the default fonts) and exposes `window.cozmFonts` for the
  * picker (FontPicker.astro).
  *
- * The picker is shown to everyone, on every build (dev and the deployed site).
- * Choices are saved per browser.
+ * Rendered only when the picker is enabled (dev, or PUBLIC_FONT_PICKER=true;
+ * see ./enabled.ts). Choices are saved per browser.
  */
 import { DEFAULT_FONTS, fontsByRole } from '../../data/fonts';
+import { fontPickerEnabled } from './enabled';
 ---
+
+{fontPickerEnabled && (
 
 <script is:inline define:vars={{ fontsByRole, DEFAULT_FONTS }}>
   (() => {
@@ -102,3 +105,4 @@ import { DEFAULT_FONTS, fontsByRole } from '../../data/fonts';
     apply('body', current().body);
   })();
 </script>
+)}

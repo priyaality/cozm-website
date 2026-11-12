@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cozm-website",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // Serve dist/404.html with a 404 status for unmatched paths (the default is an empty 404).
+    "not_found_handling": "404-page",
+  },
+  "workers_dev": false,
+  "routes": [
+    { "pattern": "cozm.in", "custom_domain": true },
+    { "pattern": "www.cozm.in", "custom_domain": true },
+  ],
+}

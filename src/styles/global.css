@@ -31,14 +31,15 @@
   --color-rust: #af480e; /* inline links in large body copy (about page bio) */
 
   /* ---------- Font families ---------- */
-  --font-sans: "Arimo", ui-sans-serif, system-ui, sans-serif;
-  /* Heading and body faces: Plus Jakarta Sans and DM Sans (self-hosted). The
-     font picker can swap either at runtime by setting these on
-     <html>. Headings are the
-     display, headline and title styles (see the base layer);
-     everything else is body. */
-  --font-heading: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "DM Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  /* Faces are declared in src/components/head/Fonts.astro (self-hosted).
+     Heading and body: Plus Jakarta Sans and DM Sans, each followed by a
+     metric-matched local fallback (shown until the web font loads). The font
+     picker (dev and the review deploy; see src/components/dev/enabled.ts) can swap either at runtime by setting these on <html>.
+     Headings are the display, headline and title styles (see the base layer);
+     everything else is body. --font-sans is left at Tailwind's default:
+     nothing uses it, and <html> sets --font-body. */
+  --font-heading: "Plus Jakarta Sans Variable", "Plus Jakarta Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans Variable", "DM Sans Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   /* Figma uses "Figma Hand", which isn't on Google Fonts. Caveat is the stand-in. */
   --font-hand: "Caveat", "Figma Hand", cursive;

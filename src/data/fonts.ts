@@ -1,8 +1,10 @@
 /**
  * Fonts offered by the font picker (src/components/dev/FontPicker.astro).
  *
+ * The picker is off in production builds (see src/components/dev/enabled.ts).
+ *
  * The defaults — Plus Jakarta Sans for headings, DM Sans for body — are
- * self-hosted (fontsource, imported in BaseLayout) and set in global.css, so
+ * self-hosted (src/components/head/Fonts.astro) and set in global.css, so
  * every visitor gets them; "Reset to defaults" in the picker goes back to them.
  * The other options load only when picked, from Fontshare (`fontshare` is the
  * css API spec) or Google Fonts (`google`, the css2 family spec).
@@ -34,7 +36,11 @@ export type FontRole = 'heading' | 'body';
 export const DEFAULT_FONTS: Record<FontRole, string> = { heading: 'Plus Jakarta Sans', body: 'DM Sans' };
 
 /** Self-hosted (the defaults): already on every page, nothing to load. */
-const plusJakartaSans: FontOption = { name: 'Plus Jakarta Sans', family: 'Plus Jakarta Sans Variable', fallback: 'sans-serif' };
+const plusJakartaSans: FontOption = {
+  name: 'Plus Jakarta Sans',
+  family: 'Plus Jakarta Sans Variable',
+  fallback: 'sans-serif',
+};
 const dmSans: FontOption = { name: 'DM Sans', family: 'DM Sans Variable', fallback: 'sans-serif' };
 
 /** A Fontshare family, variable (`@1`). Its API slug is the name in kebab case unless given. */

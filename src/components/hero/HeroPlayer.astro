@@ -15,15 +15,21 @@
  * fails. The video is the same element throughout, so there's no jump when it
  * starts. With prefers-reduced-motion, or when the URL has a #hash (a deep
  * link), the intro is skipped. Without JS the card is shown unexpanded and the
- * page scrolls normally.
+ * page scrolls normally (the video only preloads metadata; the script asks for
+ * the rest).
  */
 import PlayerCard from './PlayerCard.astro';
 import NowPlaying from './NowPlaying.astro';
 import Button from '../ui/Button.astro';
 
+interface VideoSource {
+  src: string;
+  type: string;
+}
+
 interface Props {
-  src?: string;
-  type?: string;
+  /** Encodings of the same video, best first; the browser plays the first it supports. */
+  sources?: VideoSource[];
   poster?: string;
   /** Seconds into the video to show first and start playing from (media fragment #t=). */
   startAt?: number;
@@ -35,8 +41,8 @@ interface Props {
   next: string;
 }
 
-const { src, type = 'video/mp4', poster, startAt, title, subtitle, duration, next } = Astro.props;
-const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
+const { sources = [], poster, startAt, title, subtitle, duration, next } = Astro.props;
+const withStart = (src: string) => (startAt ? `${src}#t=${startAt}` : src);
 ---
 
 <!-- Sand while the player card loads; the video covers it once expanded. -->
@@ -44,19 +50,21 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
   <div class="absolute inset-0 grid place-items-center">
     <PlayerCard title={title} subtitle={subtitle} duration={duration}>
       {
-        src && (
+        sources.length > 0 && (
           <video
             data-hero-video
             class="absolute inset-0 size-full object-cover"
             muted
             loop
             playsinline
-            preload="auto"
+            preload="metadata"
             poster={poster}
             disablepictureinpicture
             aria-hidden="true"
           >
-            <source src={videoSrc} type={type} />
+            {sources.map((s) => (
+              <source src={withStart(s.src)} type={s.type} />
+            ))}
           </video>
         )
       }
@@ -114,24 +122,45 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
 </style>
 
 <script>
-  import { animate } from 'motion';
+  // Web Animations API, no library. The easings are the cubic-béziers the intro
+  // was designed with in Motion.
+  const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  const EASE_IN_OUT = 'cubic-bezier(0.76, 0, 0.24, 1)';
+  const EASE_OUT_PLAIN = 'cubic-bezier(0, 0, 0.58, 1)'; // Motion's 'easeOut'
+  const MIN_LOADING_MS = 1000; // from the card starting to appear (includes its 0.8s fade-in)
+  const MAX_LOADING_MS = 5000;
+  const FAILSAFE_MS = 10000;
 
   const hero = document.querySelector<HTMLElement>('[data-hero-player]');
+  if (hero) setUpHero(hero);
 
-  if (hero) {
-    const card = hero.querySelector<HTMLElement>('[data-player-card]')!;
-    const thumb = hero.querySelector<HTMLElement>('[data-player-thumb]')!;
-    const chrome = hero.querySelector<HTMLElement>('[data-player-chrome]')!;
-    const durationLabel = hero.querySelector<HTMLElement>('[data-player-duration]')!;
-    const video = hero.querySelector<HTMLVideoElement>('[data-hero-video]');
-    const nowPlaying = hero.querySelector<HTMLElement>('[data-now-playing]')!;
-    const toggle = hero.querySelector<HTMLButtonElement>('[data-now-playing-toggle]')!;
-    const cue = hero.querySelector<HTMLAnchorElement>('[data-scroll-cue]')!;
-    const nowPlayingWrap = nowPlaying.closest<HTMLElement>('.hero-reveal')!;
+  function setUpHero(hero: HTMLElement) {
     const root = document.documentElement;
+    const card = hero.querySelector<HTMLElement>('[data-player-card]');
+    const thumb = hero.querySelector<HTMLElement>('[data-player-thumb]');
+    const chrome = hero.querySelector<HTMLElement>('[data-player-chrome]');
+    const cue = hero.querySelector<HTMLAnchorElement>('[data-scroll-cue]');
+    const nowPlaying = hero.querySelector<HTMLElement>('[data-now-playing]');
+    const nowPlayingWrap = nowPlaying?.closest<HTMLElement>('.hero-reveal');
+    const video = hero.querySelector<HTMLVideoElement>('[data-hero-video]');
+    const durationLabel = hero.querySelector('[data-player-duration]');
+    const toggle = hero.querySelector<HTMLButtonElement>('[data-now-playing-toggle]');
+
+    // Markup out of sync with this script: never leave the page hidden or locked.
+    if (!card || !thumb || !chrome || !cue || !nowPlaying || !nowPlayingWrap) {
+      if (card) card.style.opacity = '1';
+      root.classList.add('hero-header-in', 'hero-intro-done');
+      return;
+    }
+
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // A deep link (e.g. /#main-content) should land on its section, not sit through the intro.
     const skipIntro = reducedMotion || location.hash.length > 1;
+    const isDone = () => root.classList.contains('hero-intro-done');
+
+    // The markup only preloads metadata so the video doesn't compete with the
+    // page's own CSS, fonts and JS; buffer it now that the intro needs it.
+    if (video) video.preload = 'auto';
 
     // Everything after the hero (main, footer…). Made inert during the intro so
     // Tab can't focus into it, because focusing an element would scroll the page
@@ -144,24 +173,33 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       root.classList.add('hero-intro-done');
     };
     if (!skipIntro) belowHero.forEach((el) => (el.inert = true));
-    const EASE_OUT = [0.22, 1, 0.36, 1] as const;
-    const EASE_IN_OUT = [0.76, 0, 0.24, 1] as const;
-    const MIN_LOADING_MS = 1000; // from the card starting to appear (includes its 0.8s fade-in)
-    const MAX_LOADING_MS = 5000;
+
     const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
 
     /** Resolves once the video has enough data to play (or fails to load, so we never hang). */
     const videoReady = () =>
       new Promise<void>((resolve) => {
-        if (!video || video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return resolve();
-        video.addEventListener('canplay', () => resolve(), { once: true });
-        video.addEventListener('error', () => resolve(), { once: true });
-        video.querySelector('source')?.addEventListener('error', () => resolve(), { once: true });
+        if (
+          !video ||
+          video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA ||
+          video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE
+        )
+          return resolve();
+        const listeners = new AbortController();
+        const ready = () => {
+          listeners.abort();
+          resolve();
+        };
+        const opts = { signal: listeners.signal };
+        video.addEventListener('canplay', ready, opts);
+        video.addEventListener('error', ready, opts);
+        // With <source> children, a failed load fires 'error' on the last <source>, not the video.
+        video.querySelector('source:last-of-type')?.addEventListener('error', ready, opts);
       });
 
     // Show the video's real length on the player card.
     const showDuration = () => {
-      if (!video || !Number.isFinite(video.duration)) return;
+      if (!video || !durationLabel || !Number.isFinite(video.duration)) return;
       const total = Math.round(video.duration);
       durationLabel.textContent = `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
     };
@@ -178,18 +216,15 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       const cy = card.clientTop + thumb.offsetTop + thumb.offsetHeight / 2;
       const scale =
         Math.max(hero.clientWidth / thumb.offsetWidth, hero.clientHeight / thumb.offsetHeight) * 1.002;
-      return {
-        origin: `${cx}px ${cy}px`,
-        x: hero.clientWidth / 2 - (card.offsetLeft + cx),
-        y: hero.clientHeight / 2 - (card.offsetTop + cy),
-        scale,
-      };
+      const x = hero.clientWidth / 2 - (card.offsetLeft + cx);
+      const y = hero.clientHeight / 2 - (card.offsetTop + cy);
+      return { origin: `${cx}px ${cy}px`, transform: `translateX(${x}px) translateY(${y}px) scale(${scale})` };
     };
 
     const applyCover = () => {
       const t = coverTransform();
       card.style.transformOrigin = t.origin;
-      card.style.transform = `translateX(${t.x}px) translateY(${t.y}px) scale(${t.scale})`;
+      card.style.transform = t.transform;
     };
 
     const play = () => {
@@ -198,21 +233,44 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       video.play().catch(() => {});
     };
 
+    const toggleLabel = toggle?.querySelector('[data-now-playing-label]');
+    const pauseIcon = toggle?.querySelector('[data-icon-pause]');
+    const playIcon = toggle?.querySelector('[data-icon-play]');
     const syncToggle = () => {
       const paused = !video || video.paused;
-      toggle.querySelector('[data-now-playing-label]')!.textContent = paused ? 'Play' : 'Pause';
-      toggle.querySelector('[data-icon-pause]')!.classList.toggle('hidden', paused);
-      toggle.querySelector('[data-icon-play]')!.classList.toggle('hidden', !paused);
+      if (toggleLabel) toggleLabel.textContent = paused ? 'Play' : 'Pause';
+      pauseIcon?.classList.toggle('hidden', paused);
+      playIcon?.classList.toggle('hidden', !paused);
       nowPlaying.toggleAttribute('data-paused', paused);
     };
 
-    const fadeUp = (el: HTMLElement, duration: number) => {
+    /** Intro animations still running, so the failsafe can stop them. */
+    const running = new Set<Animation>();
+
+    /**
+     * Animates el's inline style from `from` to `to`. `to` is set inline first, so it
+     * stays once the animation ends. Rejects if the animation is cancelled.
+     */
+    const tween = async (el: HTMLElement, from: Keyframe, to: Keyframe, ms: number, easing: string) => {
+      Object.assign(el.style, to);
+      const animation = el.animate([from, to], { duration: ms, easing });
+      running.add(animation);
+      try {
+        await animation.finished;
+      } finally {
+        running.delete(animation);
+      }
+    };
+
+    const fadeUp = (el: HTMLElement, ms: number) => {
       el.style.visibility = 'visible';
-      return animate(el, { opacity: [0, 1], y: [16, 0] }, { duration, ease: EASE_OUT });
+      const from = { opacity: '0', transform: 'translateY(16px)' };
+      return tween(el, from, { opacity: '1', transform: 'none' }, ms, EASE_OUT);
     };
 
     /** Jump to the end state: expanded, playing, everything visible, scrolling unlocked. */
     const showAll = () => {
+      running.forEach((animation) => animation.cancel());
       expanded = true;
       applyCover();
       card.style.opacity = '1';
@@ -240,32 +298,33 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
       // 1. Fade the player in. It sits in its loading state (spinner, 0:00) until
       //    the video can actually play: at least MIN_LOADING_MS, at most MAX_LOADING_MS.
       const shownAt = performance.now();
-      await animate(card, { opacity: [0, 1], y: [24, 0] }, { duration: 0.8, ease: EASE_OUT });
+      const hidden = { opacity: '0', transform: 'translateY(24px)' };
+      await tween(card, hidden, { opacity: '1', transform: 'none' }, 800, EASE_OUT);
       await Promise.race([videoReady(), wait(MAX_LOADING_MS)]);
       await wait(MIN_LOADING_MS - (performance.now() - shownAt));
+      if (isDone()) return; // the failsafe already showed everything
 
       // 2. Expand: scale the card about the thumbnail until it covers the viewport.
       const t = coverTransform();
       card.style.transformOrigin = t.origin;
-      animate(chrome, { opacity: 0 }, { duration: 0.4, ease: 'easeOut' });
-      await animate(card, { x: t.x, y: t.y, scale: t.scale }, { duration: 1.2, ease: EASE_IN_OUT });
-
+      void tween(chrome, { opacity: '1' }, { opacity: '0' }, 400, EASE_OUT_PLAIN).catch(() => {});
+      const rest = { transform: 'translateX(0px) translateY(0px) scale(1)' };
+      await tween(card, rest, { transform: t.transform }, 1200, EASE_IN_OUT);
       expanded = true;
-      chrome.style.opacity = '0';
 
       // 3. Play.
       play();
 
       // 4. "Now playing" card + header together (the header fades via CSS, 600ms).
       root.classList.add('hero-header-in');
-      await fadeUp(nowPlayingWrap, 0.6);
+      await fadeUp(nowPlayingWrap, 600);
 
       // 5. Scroll-down button, then unlock scrolling.
-      await fadeUp(cue, 0.5);
+      await fadeUp(cue, 500);
       unlock();
     };
 
-    toggle.addEventListener('click', () => {
+    toggle?.addEventListener('click', () => {
       if (!video) return;
       if (video.paused) video.play().catch(() => {});
       else video.pause();
@@ -287,11 +346,9 @@ const videoSrc = src && startAt ? `${src}#t=${startAt}` : src;
     });
 
     // Never leave the page locked: if the intro errors or stalls, jump to the end state.
-    const failsafe = window.setTimeout(showAll, 10000);
+    const failsafe = window.setTimeout(showAll, FAILSAFE_MS);
     intro()
       .catch(showAll)
-      .finally(() => {
-        if (root.classList.contains('hero-intro-done')) window.clearTimeout(failsafe);
-      });
+      .finally(() => window.clearTimeout(failsafe));
   }
 </script>

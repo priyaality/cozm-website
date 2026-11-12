@@ -1,0 +1,18 @@
+# Response headers for the Cloudflare Workers static-assets deploy (wrangler.jsonc).
+# GitHub Pages ignores this file.
+#
+# No script/style CSP: the pages rely on inline scripts (`is:inline`, `define:vars`) and
+# inline styles, so a useful policy needs hashes and its own pass. The CSP below only
+# covers framing, <base> and plugins, which nothing on the site uses.
+
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+
+# Content-hashed build output never changes under the same name.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

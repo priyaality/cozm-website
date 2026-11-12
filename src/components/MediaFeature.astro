@@ -17,7 +17,8 @@ interface Props {
 
 const { title, description, cta } = Astro.props;
 // Links off the site (e.g. YouTube) open in a new tab, like on /work.
-const external = /^https?:\/\//.test(cta.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+const isExternal = /^https?:\/\//.test(cta.href);
+const external = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 ---
 
 <article
@@ -33,7 +34,9 @@ const external = /^https?:\/\//.test(cta.href) ? { target: '_blank', rel: 'noope
     >
       <h3 class="text-title">{title}</h3>
       <p class="text-body text-ink-muted">{description}</p>
-      <Button href={cta.href} variant="secondary" {...external}>{cta.label}</Button>
+      <Button href={cta.href} variant="secondary" {...external}
+        >{cta.label}{isExternal && <span class="sr-only">: {title} (opens in a new tab)</span>}</Button
+      >
     </div>
   </div>
 </article>

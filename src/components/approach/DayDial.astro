@@ -50,6 +50,8 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
             width={dial.width}
             height={dial.height}
             alt=""
+            loading="lazy"
+            decoding="async"
             class="size-full max-w-none will-change-transform"
           />
         </div>
@@ -155,7 +157,7 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
 </style>
 
 <script>
-  import { scroll } from 'motion';
+  import { trackScrollProgress } from '../../scripts/scroll-progress';
 
   /** Rotation per phase. Negative = anticlockwise, so the visible right-hand edge moves up as you scroll down. */
   const TURN_DEG = -90;
@@ -163,10 +165,11 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
   const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)');
 
   document.querySelectorAll<HTMLElement>('[data-day-dial]').forEach((root) => {
-    const wheel = root.querySelector<HTMLElement>('[data-dial-wheel]')!;
-    const stage = root.querySelector<HTMLElement>('.day-dial__stage')!;
-    const counter = root.querySelector<HTMLElement>('[data-dial-day]')!;
+    const wheel = root.querySelector<HTMLElement>('[data-dial-wheel]');
+    const stage = root.querySelector<HTMLElement>('.day-dial__stage');
+    const counter = root.querySelector<HTMLElement>('[data-dial-day]');
     const phases = [...root.querySelectorAll<HTMLElement>('[data-dial-phase]')];
+    if (!wheel || !stage || !counter || phases.length < 2) return;
     /** The day each phase starts on (1, 30, 60, 90); the wheel is at that phase's 90° mark on that day. */
     const marks = phases.map((phase) => Number(phase.dataset.day));
     const turns = phases.length - 1;
@@ -212,10 +215,14 @@ const dayClass = 'flex flex-col justify-self-end pr-6 lg:col-span-5 lg:w-[calc(1
       // Turning starts when the section's top reaches the bottom of the fixed header
       // (where the stage pins: its sticky `top`) and ends when the section unpins.
       const header = parseFloat(getComputedStyle(stage).top) || 0;
-      cancel = scroll((progress: number) => render(progress * turns), {
-        target: root,
-        offset: [`start ${header / window.innerHeight}`, 'end end'],
-      });
+      cancel = trackScrollProgress(
+        root,
+        [
+          [0, header / window.innerHeight],
+          [1, 1],
+        ],
+        (progress) => render(progress * turns),
+      );
     };
 
     let resizeTimer: number | undefined;

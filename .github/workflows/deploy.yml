@@ -1,5 +1,6 @@
-# Builds the Astro site and publishes it to GitHub Pages
+# Builds the site and publishes it to GitHub Pages
 # (https://priyaality.github.io/cozm-website/) on every push to main.
+# Independent of ci.yml so a push to main deploys even if a check fails.
 # Repo setting needed once: Settings → Pages → Source: "GitHub Actions".
 name: Deploy to GitHub Pages
 
@@ -23,12 +24,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the code
-        uses: actions/checkout@v4
-      - name: Install, build and upload the site
-        uses: withastro/action@v3
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
+          bun-version-file: package.json
+      # Astro's CLI runs on Node (its shebang), and Astro 7 needs Node >= 22.23.4.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      - name: Build for the /cozm-website sub-path
+        run: bun run build
+        env:
+          SITE_URL: https://priyaality.github.io
+          BASE_PATH: /cozm-website
+          # Review deploy: keep the font picker for the client (off on cozm.in).
+          PUBLIC_FONT_PICKER: 'true'
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
 
   deploy:
     needs: build

@@ -1,8 +1,8 @@
 /**
- * The site is served from a sub-path on GitHub Pages
- * (https://priyaality.github.io/cozm-website/), set as `base` in
- * astro.config.mjs. Internal links and files in public/ are written root-relative
- * in the code ('/work', '/video/hero.mp4'); these helpers add or remove the base.
+ * `base` comes from BASE_PATH in astro.config.mjs: '/' in production (https://cozm.in) and
+ * '/cozm-website' on the GitHub Pages preview (https://priyaality.github.io/cozm-website/).
+ * Internal links and files in public/ are written root-relative in the code ('/work',
+ * '/video/hero.mp4'); these helpers add or remove the base, and are no-ops at the root.
  * Images imported through astro:assets get the base automatically.
  */
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
