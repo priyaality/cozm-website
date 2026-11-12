@@ -24,7 +24,7 @@
   --color-graphite: #6b6b6b; /* typewritten script text */
   --color-black: #000000; /* hero media placeholder */
   --color-ink-muted: rgb(28 28 28 / 0.7); /* secondary body copy */
-  --color-ink-faint: rgb(28 28 28 / 0.4); /* de-emphasised statement copy */
+  --color-ink-faint: rgb(28 28 28 / 0.4); /* de-emphasised copy (unselected "What we do" tabs) */
   --color-scrim: rgb(28 28 28 / 0.6); /* overlay on work imagery */
   --color-transparent: transparent;
   --color-current: currentColor;
@@ -36,8 +36,7 @@
      font picker can swap either at runtime by setting these on
      <html>. Headings are the
      display, headline and title styles (see the base layer);
-     everything else, including large standalone text like the home page's
-     statement, is body. */
+     everything else is body. */
   --font-heading: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
   --font-body: "DM Sans Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -48,7 +47,7 @@
      Sizes, spacing and line heights from Figma. Heading weights (display,
      headline, title) are 550; Arimo's in Figma were 600 / 500 / 600. */
   /* display — page headlines and the day dial's numerals. 96 / 100% / -6% / 550 */
-  --text-display: clamp(2.75rem, 1.4rem + 5vw, 6rem);
+  --text-display: clamp(2.75rem, 1rem + 6.5vw, 6.75rem);
   --text-display--line-height: 1;
   --text-display--letter-spacing: -0.06em;
   --text-display--font-weight: 550;
@@ -58,12 +57,6 @@
   --text-headline--line-height: 1;
   --text-headline--letter-spacing: -0.02em;
   --text-headline--font-weight: 550;
-
-  /* statement — large reading copy. 56 / 120% / -2% / regular */
-  --text-statement: clamp(1.75rem, 1.14rem + 2.5vw, 3.5rem);
-  --text-statement--line-height: 1.2;
-  --text-statement--letter-spacing: -0.02em;
-  --text-statement--font-weight: 400;
 
   /* title — card titles. 32 / 120% / -2% / 550 */
   --text-title: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
@@ -83,18 +76,7 @@
   --text-body--letter-spacing: -0.02em;
   --text-body--font-weight: 400;
 
-  /* label — button labels. 20 / 120% / -2% / semibold */
-  --text-label: clamp(1.125rem, 1.075rem + 0.2vw, 1.25rem);
-  --text-label--line-height: 1.2;
-  --text-label--letter-spacing: -0.02em;
-  --text-label--font-weight: 600;
-
-  /* eyebrow — ticker items, table headings (use with `uppercase`). 20 / 120% / -2% / medium.
-     16px on phones, scaling to 20px at 1512px wide (the Figma frame) and up. */
-  --text-eyebrow: clamp(1rem, 0.913rem + 0.357vw, 1.25rem);
-  --text-eyebrow--line-height: 1.2;
-  --text-eyebrow--letter-spacing: -0.02em;
-  --text-eyebrow--font-weight: 500;
+  /* button-text (large button labels, ticker items, table headings) is a utility below the theme. */
 
   /* nav — navigation links. 16 / 110% / -2% / medium */
   /* Small body copy (work details) — 16px */
@@ -102,12 +84,6 @@
   --text-small--line-height: 1.2;
   --text-small--letter-spacing: -0.02em;
   --text-small--font-weight: 400;
-
-  /* Large body copy (about page bio) — 24 / 136% / -2% / regular. Body face. */
-  --text-large: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
-  --text-large--line-height: 1.36;
-  --text-large--letter-spacing: -0.02em;
-  --text-large--font-weight: 400;
 
   --text-nav: 1rem;
   --text-nav--line-height: 1.1;
@@ -162,6 +138,19 @@
  * At 1512px each column is 98px, so 7 columns = 782px and 5 columns = 554px,
  * exactly the Figma layout. Column 8's left edge is the page's right-hand keyline.
  */
+/*
+ * button-text — large button labels, plus the ticker items and comparison
+ * table headings (with `uppercase`). 20 / 100% / -2% / semibold, 18px on
+ * phones. A utility rather than a theme token because Tailwind only makes
+ * text-size tokens named text-*.
+ */
+@utility button-text {
+  font-size: clamp(1.125rem, 1.075rem + 0.2vw, 1.25rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
 @utility grid-12 {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));

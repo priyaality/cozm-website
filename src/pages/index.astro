@@ -4,15 +4,13 @@ import Header from '../components/Header.astro';
 import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
 import HeroPlayer from '../components/hero/HeroPlayer.astro';
-import ServicesTicker from '../components/ServicesTicker.astro';
+import LogoTicker from '../components/LogoTicker.astro';
 import MediaFeature from '../components/MediaFeature.astro';
 import HorizontalScroll from '../components/HorizontalScroll.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
 import Footer from '../components/Footer.astro';
-import { contactHref, featuredWork, heroVideo, services, workProjects } from '../data/site';
+import { contactHref, featuredWork, heroVideo, workProjects } from '../data/site';
 
-// The services ticker is hidden for now; set to true to bring it back.
-const showTicker = false;
 
 // Work cards for the horizontal scroll: title and description from Featured work,
 // the CTA (label and link) from the matching /work project.
@@ -37,17 +35,27 @@ const workCards = featuredWork.map((item) => ({
         <HeroPlayer {...heroVideo} next="main-content" />
       </div>
 
-      <!-- Intro (+ services ticker, when shown) fills one viewport -->
+      <!-- Intro + client logos fill one viewport together -->
       <div id="main-content" class="relative z-10 flex min-h-svh flex-col">
         <Section rule class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">
-          <h1 class="text-display">
+          <!-- Desktop: the heading also shrinks on short screens, so the intro and the
+               logo ticker fit one screen. 342px = top padding (110) + bottom padding (80)
+               + ticker (151) + the 1px rule; the rest is shared by ~5 lines of heading. -->
+          <h1 class="text-display lg:text-[length:min(var(--text-display),calc((100svh-342px)/5))]">
             Cozm is a media studio that helps brands build original media for India’s top 10%.
           </h1>
-          <div class="flex flex-col gap-6 lg:pt-5">
-            <p class="text-body">
-              We spend 90 days building it with your team, from the format to the launch, and leave you
-              with everything you need to keep making it yourselves.
-            </p>
+          <!-- Desktop: copy at the top of the column, CTAs at the bottom -->
+          <div class="flex flex-col gap-6 lg:justify-between lg:self-stretch lg:pt-5">
+            <div class="flex flex-col gap-6">
+              <p class="text-body">
+                We spend 90 days building it with your team, from the format to the launch, and leave you
+                with everything you need to keep making it yourselves.
+              </p>
+              <p class="text-body">
+                We spend 90 days building it with your team, from the format to the launch, and leave you
+                with everything you need to keep making it yourselves.
+              </p>
+            </div>
             <div class="flex flex-col gap-4">
               <Button href={contactHref} variant="primary">Talk to us</Button>
               <Button href="/approach" variant="secondary">Learn our approach</Button>
@@ -55,7 +63,8 @@ const workCards = featuredWork.map((item) => ({
           </div>
         </Section>
 
-        {showTicker && <ServicesTicker items={services} />}
+        <!-- Client logos ("Built with") -->
+        <LogoTicker />
       </div>
     </div>
 

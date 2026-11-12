@@ -64,7 +64,7 @@ const hasSlot = Astro.slots.has('default');
     )
   }
   {note && <p class="text-small">{note}</p>}
-  {credit && <p class="text-label">{credit}</p>}
+  {credit && <p class="button-text">{credit}</p>}
   {
     links.length > 0 && (
       <div class:list={['grid gap-2', links.length > 1 && 'sm:grid-cols-2']}>

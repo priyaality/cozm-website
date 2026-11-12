@@ -1,0 +1,103 @@
+---
+/**
+ * LogoTicker — "Built with": an endlessly scrolling row of client logos
+ * (Figma: ticker-section, node 291:380). The row is rendered twice and the
+ * track slides by exactly one copy (-50%), so the loop is seamless. Stops for
+ * prefers-reduced-motion.
+ *
+ * Logos are 80% of their Figma sizes (56% on small screens).
+ */
+import luminary from '../assets/logos/luminary.svg';
+import myMuse from '../assets/logos/mymuse.png';
+import audible from '../assets/logos/audible.svg';
+import autoX from '../assets/logos/autox.svg';
+import cokeStudio from '../assets/logos/coke-studio.png';
+import capMint from '../assets/logos/capmint.png';
+import paisaSmart from '../assets/logos/paisasmart.svg';
+
+interface Props {
+  /** Seconds for one full pass of the row. Higher is slower. */
+  duration?: number;
+}
+
+const { duration = 40 } = Astro.props;
+
+const logos = [
+  { src: luminary, name: 'Luminary', width: 252.972, height: 56 },
+  { src: myMuse, name: 'MyMuse', width: 116.667, height: 56 },
+  { src: audible, name: 'Audible', width: 163.025, height: 64 },
+  { src: autoX, name: 'autoX', width: 151.5, height: 48 },
+  // The Coke Studio image has empty space above and below; it's cropped to this box, as in Figma.
+  { src: cokeStudio, name: 'Coke Studio', width: 269.647, height: 40 },
+  { src: capMint, name: 'CapMint', width: 188.235, height: 64 },
+  { src: paisaSmart, name: 'PaisaSmart', width: 287.102, height: 48 },
+];
+---
+
+<section class="logo-ticker flex flex-col gap-4 bg-sand pb-4" aria-labelledby="built-with">
+  <h2 id="built-with" class="button-text text-center uppercase">Built with</h2>
+  <div class="overflow-hidden py-6" style={`--ticker-duration: ${duration}s`}>
+    <div class="logo-ticker__track flex w-max">
+      {
+        [0, 1].map((copy) => (
+          <ul class="logo-ticker__row flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
+            {logos.map((logo) => (
+              <li class="shrink-0">
+                <img
+                  src={logo.src.src}
+                  width={logo.width}
+                  height={logo.height}
+                  alt={copy === 0 ? logo.name : ''}
+                  style={`--w: ${logo.width}px; --h: ${logo.height}px`}
+                  class="logo-ticker__logo block object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .logo-ticker {
+    --scale: 0.56;
+    --gap: 48px;
+  }
+
+  @media (min-width: 64rem) {
+    .logo-ticker {
+      --scale: 0.8;
+      --gap: 72px;
+    }
+  }
+
+  .logo-ticker__row {
+    gap: var(--gap);
+    padding-right: var(--gap);
+  }
+
+  .logo-ticker__logo {
+    width: calc(var(--w) * var(--scale));
+    height: calc(var(--h) * var(--scale));
+  }
+
+  .logo-ticker__track {
+    animation: logo-ticker var(--ticker-duration) linear infinite;
+  }
+
+  @keyframes logo-ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo-ticker__track {
+      animation: none;
+    }
+  }
+</style>
