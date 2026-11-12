@@ -84,13 +84,14 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
 </style>
 
 <script>
-  import { scroll } from 'motion';
+  import { trackScrollProgress } from '../scripts/scroll-progress';
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   document.querySelectorAll<HTMLElement>('[data-hscroll]').forEach((root) => {
-    const stage = root.querySelector<HTMLElement>('.hscroll__stage')!;
-    const track = root.querySelector<HTMLElement>('.hscroll__track')!;
+    const stage = root.querySelector<HTMLElement>('.hscroll__stage');
+    const track = root.querySelector<HTMLElement>('.hscroll__track');
+    if (!stage || !track) return;
     const items = () => [...track.children] as HTMLElement[];
     let cancel: VoidFunction | undefined;
     let distance = 0;
@@ -118,11 +119,15 @@ const { aspect = 1352 / 800, class: className } = Astro.props;
       // The stage pins when the section's top reaches the bottom of the fixed header,
       // and unpins when the section's bottom reaches the bottom of the viewport.
       const header = headerHeight();
-      cancel = scroll(
-        (progress: number) => {
+      cancel = trackScrollProgress(
+        root,
+        [
+          [0, header / window.innerHeight],
+          [1, 1],
+        ],
+        (progress) => {
           track.style.transform = `translate3d(${-progress * distance}px, 0, 0)`;
         },
-        { target: root, offset: [`start ${header / window.innerHeight}`, 'end end'] },
       );
     };
 

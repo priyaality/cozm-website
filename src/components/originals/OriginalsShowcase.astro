@@ -40,7 +40,7 @@ const first = items[0].video;
   <video
     data-originals-video
     class="absolute inset-0 -z-30 size-full object-cover"
-    src={withStart(first)}
+    src={first.sources ? undefined : withStart(first)}
     poster={first.poster}
     autoplay
     muted
@@ -48,7 +48,10 @@ const first = items[0].video;
     playsinline
     preload="auto"
     disablepictureinpicture
-    aria-hidden="true"></video>
+    aria-hidden="true"
+  >
+    {first.sources?.map((source) => <source src={withStart({ ...first, src: source.src })} type={source.type} />)}
+  </video>
   <!-- Fades in to black while the video changes. -->
   <div data-originals-fade aria-hidden="true" class="originals-fade absolute inset-0 -z-20 bg-black opacity-0"></div>
   <div aria-hidden="true" class="absolute inset-0 -z-10 bg-linear-to-b from-black/60 via-black/10 via-45% to-black/75"></div>
@@ -93,13 +96,14 @@ const first = items[0].video;
 <script>
   import { initProjectTabs } from '../../scripts/project-tabs';
 
-  type VideoInfo = { src: string; poster?: string; startAt?: number };
+  type VideoInfo = { src: string; sources?: { src: string; type: string }[]; poster?: string; startAt?: number };
   const FADE_MS = 450;
   const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   document.querySelectorAll<HTMLElement>('[data-originals]').forEach((root) => {
-    const video = root.querySelector<HTMLVideoElement>('[data-originals-video]')!;
-    const fade = root.querySelector<HTMLElement>('[data-originals-fade]')!;
+    const video = root.querySelector<HTMLVideoElement>('[data-originals-video]');
+    const fade = root.querySelector<HTMLElement>('[data-originals-fade]');
+    if (!video || !fade) return;
     const videos: VideoInfo[] = JSON.parse(root.dataset.videos ?? '[]');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let currentSrc = videos[0]?.src;
@@ -120,7 +124,9 @@ const first = items[0].video;
       if (next.src !== currentSrc) {
         currentSrc = next.src;
         video.poster = next.poster ?? '';
-        video.src = next.startAt ? `${next.src}#t=${next.startAt}` : next.src;
+        // The first encoding this browser can play (AV1 WebM where supported), else the fallback.
+        const file = next.sources?.find((source) => video.canPlayType(source.type) !== '')?.src ?? next.src;
+        video.src = next.startAt ? `${file}#t=${next.startAt}` : file;
         const playing = ready('playing');
         video.play().catch(() => {});
         await playing;

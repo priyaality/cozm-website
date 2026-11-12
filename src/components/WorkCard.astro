@@ -6,7 +6,7 @@
  * touches the viewport edge (16px on the inner side), as in Figma.
  *
  * Overlay: a flat 60% scrim by default. On hover (or when something inside has
- * keyboard focus) it crossfades to a bottom-up gradient that clears the top of
+ * keyboard focus, should the card ever hold a link) it crossfades to a bottom-up gradient that clears the top of
  * the image, highlighting the card while keeping the text legible.
  */
 import { Image } from 'astro:assets';
@@ -17,21 +17,10 @@ type Props = WorkItem & {
   class?: string;
 };
 
-const {
-  title,
-  description,
-  image,
-  position = '50% 50%',
-  href,
-  edge,
-  class: className,
-} = Astro.props;
-
-const Tag = href ? 'a' : 'article';
+const { title, description, image, position = '50% 50%', edge, class: className } = Astro.props;
 ---
 
-<Tag
-  href={href}
+<article
   class:list={[
     // Stacked (< lg): keep close to the desktop card proportion; several covers are
     // wide strips with baked-in text that a wider crop would reveal.
@@ -64,4 +53,4 @@ const Tag = href ? 'a' : 'article';
     <h3 class="text-title">{title}</h3>
     <p class="text-body">{description}</p>
   </div>
-</Tag>
+</article>

@@ -21,7 +21,13 @@ const workCards = featuredWork.map((item) => ({
 }));
 ---
 
-<BaseLayout>
+<BaseLayout
+  title="Cozm — Original media for India’s top 10%"
+  description="Cozm is a media studio that helps brands build original media for India’s top 10%: podcasts, documentaries and video essays, made with your team in 90 days."
+>
+  <!-- The hero poster is the first thing painted in the player card. -->
+  {heroVideo.poster && <link slot="head" rel="preload" as="image" href={heroVideo.poster} fetchpriority="high" />}
+
   <Header />
 
   <main>
@@ -112,7 +118,7 @@ const workCards = featuredWork.map((item) => ({
    * so it can't overshoot. When input goes quiet with the page stopped partway
    * (a short scroll up, keys, the scrollbar), the same rules finish the move.
    */
-  import { animate } from 'motion';
+  import { cubicBezier, glideScroll } from '../scripts/glide-scroll';
 
   const intro = document.getElementById('main-content');
   const root = document.documentElement;
@@ -125,6 +131,9 @@ const workCards = featuredWork.map((item) => ({
     const upThreshold = () => Math.min(200, window.innerHeight * 0.2);
     // The hero's loading intro locks scrolling; don't move the page during it.
     const unlocked = () => !root.querySelector('[data-hero-player]') || root.classList.contains('hero-intro-done');
+
+    // ease-out: picks up the visitor's motion, lands softly
+    const easeOut = cubicBezier(0.22, 1, 0.36, 1);
 
     let gliding = false;
     let quietTimer: number | undefined;
@@ -151,12 +160,7 @@ const workCards = featuredWork.map((item) => ({
         done();
         return;
       }
-      animate(window.scrollY, target, {
-        duration: 0.9,
-        ease: [0.22, 1, 0.36, 1], // ease-out: picks up the visitor's motion, lands softly
-        onUpdate: (v) => window.scrollTo({ top: v, behavior: 'instant' }),
-        onComplete: done,
-      });
+      glideScroll(target, 900, easeOut, done);
     };
 
     /** Should a scroll in this direction be turned into a glide? */

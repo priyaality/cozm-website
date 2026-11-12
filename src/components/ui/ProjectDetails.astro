@@ -7,8 +7,9 @@
  * are two), and/or whatever is passed in the default slot (e.g. a form).
  *
  * It's the panel for row `index` of a ProjectList with the same `idPrefix`
- * (labelled by that row's button); initProjectTabs shows the selected one. Text follows the current
- * colour, so it works in ink on sand and in sand over video.
+ * (labelled by that row's button); initProjectTabs shows the selected one.
+ * Text follows the current colour, so it works in ink on sand and in sand
+ * over video.
  */
 import Button from './Button.astro';
 
@@ -71,6 +72,7 @@ const hasSlot = Astro.slots.has('default');
         {links.map((link) => (
           <Button href={link.href} target="_blank" rel="noopener">
             {link.label}
+            <span class="sr-only"> (opens in a new tab)</span>
           </Button>
         ))}
       </div>

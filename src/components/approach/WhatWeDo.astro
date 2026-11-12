@@ -205,9 +205,9 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
 
     // A click pauses hover selection until the mouse leaves the list, so moving
     // away from the clicked item across the others doesn't change it.
-    const tablist = root.querySelector<HTMLElement>('[role=tablist]')!;
+    const tablist = root.querySelector<HTMLElement>('[role=tablist]');
     let clicked = false;
-    tablist.addEventListener('pointerleave', () => (clicked = false));
+    tablist?.addEventListener('pointerleave', () => (clicked = false));
 
     tabs.forEach((tab, i) => {
       tab.addEventListener('click', () => {

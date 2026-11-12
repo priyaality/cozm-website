@@ -11,7 +11,6 @@
  * Card text is inset 16px from the seam (WorkCard). Stacks vertically below lg.
  */
 import WorkCard from './WorkCard.astro';
-import divider from '../assets/icons/divider-vertical.svg';
 import type { WorkItem } from '../data/site';
 
 interface Props {
@@ -29,14 +28,7 @@ const [first, second] = items;
   <WorkCard {...first} edge="left" />
   <WorkCard {...second} edge="right" class="border-t border-ink lg:border-t-0" />
   <!-- 1px rule over the seam (absolutely positioned so it doesn't shift the columns) -->
-  <img
-    src={divider.src}
-    width="1"
-    height="520"
-    alt=""
-    aria-hidden="true"
-    class="work-row__divider pointer-events-none absolute inset-y-0 hidden h-full w-px lg:block"
-  />
+  <div aria-hidden="true" class="work-row__divider pointer-events-none absolute inset-y-0 hidden w-px bg-black lg:block"></div>
 </div>
 
 <style>

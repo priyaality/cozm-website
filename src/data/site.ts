@@ -20,14 +20,22 @@ export const navLinks = [
 ];
 
 /**
- * Hero video. Drop the file at public/video/hero.mp4 (optionally a poster image
- * too, e.g. public/video/hero.jpg — shown in the player card before playback
- * and as the "now playing" artwork).
+ * Hero video, also used by the Originals showcase. Always muted, so encoded without
+ * audio: hero.webm (AV1: SVT-AV1 preset 2, CRF 46) and hero.mp4 (H.264 High@4.0,
+ * two-pass 400 kb/s, +faststart), each with a keyframe at startAt so the #t= start
+ * decodes at once. hero.jpg is the frame at startAt, shown in the player card before
+ * playback and as the "now playing" artwork.
  * title / subtitle are the labels shown on the player and "now playing" cards.
  */
 export const heroVideo = {
+  /** H.264 MP4, plays everywhere. */
   src: withBase('/video/hero.mp4'),
   type: 'video/mp4',
+  /** Every encoding, best first (AV1 is about half the MP4's size). */
+  sources: [
+    { src: withBase('/video/hero.webm'), type: 'video/webm; codecs="av01.0.05M.08"' },
+    { src: withBase('/video/hero.mp4'), type: 'video/mp4; codecs="avc1.640028"' },
+  ],
   /** Frame of the video at `startAt` (the clip opens on black, so the first frame isn't usable). */
   poster: withBase('/video/hero.jpg') as string | undefined,
   /** Seconds into the video to show in the card and start playing from. */
@@ -59,7 +67,6 @@ export type WorkItem = {
   image: ImageMetadata;
   /** CSS object-position reproducing the Figma crop. */
   position?: string;
-  href?: string;
 };
 
 export const featuredWork: WorkItem[] = [
@@ -104,7 +111,11 @@ export interface WorkProject {
   watch: string;
 }
 
-const work = (title: string) => featuredWork.find((w) => w.title === title)!;
+const work = (title: string): WorkItem => {
+  const item = featuredWork.find((w) => w.title === title);
+  if (!item) throw new Error(`No featured work titled "${title}"`);
+  return item;
+};
 
 /** The /work page list, in Figma's order. Copy from the Notion "Work" page. */
 export const workProjects: WorkProject[] = [
@@ -180,7 +191,14 @@ export interface Original {
   /** Where to listen / watch. A coming-soon original shows the notify form instead. */
   links?: { label: string; href: string }[];
   /** Background video while this original is selected. */
-  video: { src: string; poster?: string; startAt?: number };
+  video: {
+    /** Fallback file; also identifies the video (same src = same video, just restarted). */
+    src: string;
+    /** Encodings, best first; the browser plays the first one it supports. */
+    sources?: { src: string; type: string }[];
+    poster?: string;
+    startAt?: number;
+  };
 }
 
 /** Cozm's own shows, in Figma's order. The first is selected by default. */
@@ -286,8 +304,7 @@ export const approachSteps: ApproachStep[] = [
   {
     day: '30',
     title: 'Train the team',
-    description:
-      'Your team starts leading production, and we coach them through each episode until they’re confident.',
+    description: 'Your team starts leading production, and we coach them through each episode until they’re confident.',
   },
   {
     day: '60',
@@ -298,8 +315,7 @@ export const approachSteps: ApproachStep[] = [
   {
     day: '90',
     title: 'Hand it over',
-    description:
-      'Your team runs it on its own, and each new episode costs less to make than the last.',
+    description: 'Your team runs it on its own, and each new episode costs less to make than the last.',
   },
 ];
 
@@ -340,8 +356,7 @@ export interface Offering {
 export const offerings: Offering[] = [
   {
     name: 'Audio',
-    description:
-      'Narrative and conversation podcasts. Format, research, recording, edit, mix and release.',
+    description: 'Narrative and conversation podcasts. Format, research, recording, edit, mix and release.',
   },
   {
     name: 'Video',
@@ -350,7 +365,6 @@ export const offerings: Offering[] = [
   },
   {
     name: 'Creative consulting',
-    description:
-      'Content strategy, format and IP development, editorial direction, and building your in-house team.',
+    description: 'Content strategy, format and IP development, editorial direction, and building your in-house team.',
   },
 ];

@@ -1,43 +1,40 @@
 ---
-import '@fontsource-variable/plus-jakarta-sans/index.css';
-import '@fontsource-variable/dm-sans/opsz.css';
-import '@fontsource/arimo/400.css';
-import '@fontsource/arimo/500.css';
-import '@fontsource/arimo/600.css';
-import '@fontsource/ibm-plex-mono/400.css';
-import '@fontsource/caveat/400.css';
+import Fonts from '../components/head/Fonts.astro';
+import Seo from '../components/head/Seo.astro';
 import '../styles/global.css';
-import FontPickerHead from '../components/dev/FontPickerHead.astro';
 import FontPicker from '../components/dev/FontPicker.astro';
 import CopyEmailOnClick from '../components/ui/CopyEmailOnClick.astro';
-import { withBase } from '../lib/paths';
+import { seo } from '../data/seo';
 
 interface Props {
   title?: string;
   description?: string;
+  /** Keep this page out of search results (e.g. the 404 page). */
+  noindex?: boolean;
 }
 
-const {
-  title = 'Cozm — Original media for India’s top 10%',
-  description = 'Cozm is a media studio that helps brands build original media for India’s top 10%.',
-} = Astro.props;
+const { title = seo.defaultTitle, description = seo.defaultDescription, noindex = false } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={seo.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
-    <link rel="icon" href={withBase('/favicon.ico')} />
-    <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
-    <title>{title}</title>
+    <Seo {title} {description} {noindex} />
     <!-- Lets CSS hide JS-animated elements before their intro, without hiding them when JS is off. -->
     <script is:inline>document.documentElement.classList.add('js');</script>
-    <FontPickerHead />
+    <Fonts />
+    <!-- Page-specific head tags, e.g. <link slot="head" rel="preload" …>. -->
+    <slot name="head" />
   </head>
   <body class="bg-sand text-ink">
+    <!-- Keyboard users: first Tab stop, shown only when focused. Every page has an element with id="main-content" (on home, the intro below the hero). -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-sand"
+      >Skip to content</a
+    >
     <slot />
     <CopyEmailOnClick />
     <FontPicker />

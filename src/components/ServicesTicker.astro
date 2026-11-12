@@ -2,7 +2,8 @@
 /**
  * ServicesTicker — endlessly scrolling band of services, separated by the
  * cross icon. The list is rendered twice and the track slides by exactly one
- * copy (-50%), so the loop is seamless. Stops for prefers-reduced-motion.
+ * copy (-50%), so the loop is seamless; the copy is aria-hidden. Stops for
+ * prefers-reduced-motion.
  */
 import tickerIcon from '../assets/icons/ticker-icon.svg';
 
@@ -26,12 +27,18 @@ const { items, duration = 60 } = Astro.props;
       [0, 1].map((copy) => (
         <ul class="flex shrink-0 items-center gap-6 pr-6" aria-hidden={copy === 1 ? 'true' : undefined}>
           {items.map((item) => (
-            <>
-              <li class="shrink-0 button-text whitespace-nowrap uppercase">{item}</li>
-              <li aria-hidden="true" class="shrink-0">
-                <img src={tickerIcon.src} width="24" height="24" alt="" class="block size-6" />
-              </li>
-            </>
+            <li class="flex shrink-0 items-center gap-6">
+              <span class="button-text whitespace-nowrap uppercase">{item}</span>
+              <img
+                src={tickerIcon.src}
+                width="24"
+                height="24"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                class="block size-6 shrink-0"
+              />
+            </li>
           ))}
         </ul>
       ))

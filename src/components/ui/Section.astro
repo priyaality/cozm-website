@@ -5,16 +5,18 @@
 import type { HTMLAttributes } from 'astro/types';
 
 type Props = HTMLAttributes<'section'> & {
+  /** Render a <div> when the band sits inside another section (avoids an unlabelled nested landmark). */
+  as?: 'section' | 'div';
   /** Draw the 1px ink rule along the top edge. */
   rule?: boolean;
   /** Apply the standard 80px vertical padding. */
   padded?: boolean;
 };
 
-const { rule = true, padded = true, class: className, ...rest } = Astro.props;
+const { as: Tag = 'section', rule = true, padded = true, class: className, ...rest } = Astro.props;
 ---
 
-<section
+<Tag
   class:list={[
     'bg-sand px-gutter',
     rule && 'border-t border-ink',
@@ -24,4 +26,4 @@ const { rule = true, padded = true, class: className, ...rest } = Astro.props;
   {...rest}
 >
   <slot />
-</section>
+</Tag>
