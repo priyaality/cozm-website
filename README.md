@@ -27,7 +27,7 @@ Internal links go through `withBase()` (`src/lib/paths.ts`) so they work under e
 ## Tokens
 
 All in `src/styles/global.css` (`@theme`), each a CSS variable and a Tailwind utility: colours (`ink`, `sand`,
-`paper`, …), fonts (`font-body` Instrument Sans, `font-heading` Literata, `font-mono` IBM Plex Mono, `font-hand`
+`paper`, …), fonts (`font-body` DM Sans, `font-heading` Plus Jakarta Sans, `font-mono` IBM Plex Mono, `font-hand`
 Caveat), the `text-*` type scale, spacing, and the 12-column grid (`grid-12`, `grid-split` for 7/5).
 
 ## Components (`src/components`)
