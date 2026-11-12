@@ -38,12 +38,6 @@ export const heroVideo = {
   duration: '0:47',
 };
 
-export const statement = [
-  'India’s most curious audience has plenty to watch, just very little about India.',
-  'India’s top 10% is about 140 million people, curious, ambitious and hungry for media that makes them think. But Indian media has mostly aimed for the widest audience, leaving them to fill the gap with shows from elsewhere.',
-  'We think they deserve better, so we started making it ourselves. Our originals are where we learn what this audience chooses, and everything we build with brands starts from there.',
-];
-
 export const services = [
   'Podcasts',
   'Documentaries',

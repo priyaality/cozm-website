@@ -65,7 +65,9 @@ import { withBase } from '../lib/paths';
 
 <script>
   const header = document.getElementById('site-header');
-  const hero = document.querySelector('[data-hero]');
+  // A page can mark the hero's scroll position separately ([data-hero-area]), e.g.
+  // when the hero itself is pinned and another section slides over it.
+  const hero = document.querySelector('[data-hero-area]') ?? document.querySelector('[data-hero]');
 
   if (header && hero) {
     const observer = new IntersectionObserver(

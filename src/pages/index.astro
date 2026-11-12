@@ -5,58 +5,72 @@ import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
 import HeroPlayer from '../components/hero/HeroPlayer.astro';
 import ServicesTicker from '../components/ServicesTicker.astro';
-import ScrollWordReveal from '../components/ScrollWordReveal.astro';
 import MediaFeature from '../components/MediaFeature.astro';
 import HorizontalScroll from '../components/HorizontalScroll.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
-import FeaturedWork from '../components/FeaturedWork.astro';
 import Footer from '../components/Footer.astro';
-import { contactHref, heroVideo, services, statement } from '../data/site';
+import { contactHref, featuredWork, heroVideo, services, workProjects } from '../data/site';
+
+// The services ticker is hidden for now; set to true to bring it back.
+const showTicker = false;
+
+// Work cards for the horizontal scroll: title and description from Featured work,
+// the CTA (label and link) from the matching /work project.
+const workCards = featuredWork.map((item) => ({
+  title: item.title,
+  description: item.description,
+  cta: { label: 'Watch on Youtube', href: workProjects.find((p) => p.item === item)!.watch },
+}));
 ---
 
 <BaseLayout>
   <Header />
 
-  <HeroPlayer {...heroVideo} next="main-content" />
+  <main>
+    <!-- Curtain: the hero stays pinned while the intro slides up over it. The
+         wrapper ends with the intro, so the hero unpins once it's fully covered. -->
+    <div data-curtain class="relative">
+      <!-- Where the hero would scroll in normal flow. The header watches this
+           (not the pinned hero) to know when the intro has reached the top. -->
+      <div data-hero-area aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 h-svh"></div>
+      <div class="sticky top-0">
+        <HeroPlayer {...heroVideo} next="main-content" />
+      </div>
 
-  <main id="main-content">
-    <!-- Intro + services ticker together fill one viewport -->
-    <div class="flex min-h-svh flex-col">
-      <Section rule class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">
-        <h1 class="text-display">
-          Cozm is a media studio that helps brands build original media for India’s top 10%.
-        </h1>
-        <div class="flex flex-col gap-6 lg:pt-5">
-          <p class="text-body">
-            We spend 90 days building it with your team, from the format to the launch, and leave you
-            with everything you need to keep making it yourselves.
-          </p>
-          <div class="flex flex-col gap-4">
-            <Button href={contactHref} variant="primary">Talk to us</Button>
-            <Button href="/approach" variant="secondary">Learn our approach</Button>
+      <!-- Intro (+ services ticker, when shown) fills one viewport -->
+      <div id="main-content" class="relative z-10 flex min-h-svh flex-col">
+        <Section rule class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">
+          <h1 class="text-display">
+            Cozm is a media studio that helps brands build original media for India’s top 10%.
+          </h1>
+          <div class="flex flex-col gap-6 lg:pt-5">
+            <p class="text-body">
+              We spend 90 days building it with your team, from the format to the launch, and leave you
+              with everything you need to keep making it yourselves.
+            </p>
+            <div class="flex flex-col gap-4">
+              <Button href={contactHref} variant="primary">Talk to us</Button>
+              <Button href="/approach" variant="secondary">Learn our approach</Button>
+            </div>
           </div>
-        </div>
-      </Section>
+        </Section>
 
-      <ServicesTicker items={services} />
+        {showTicker && <ServicesTicker items={services} />}
+      </div>
     </div>
 
-    <!-- Statement: words reveal on scroll -->
-    <ScrollWordReveal paragraphs={statement} />
-
-    <!-- Originals: scroll sideways through the cards -->
-    <HorizontalScroll>
-      <MediaFeature
-        title="All Risk is creative"
-        description="We spend 90 days building it with your team, from the format to the launch, and leave you with everything you need to keep making it yourselves."
-        cta={{ label: 'Listen on Spotify', href: '#' }}
-      />
-      <MediaFeature
-        title="The Craft"
-        description="We spend 90 days building it with your team, from the format to the launch, and leave you with everything you need to keep making it yourselves."
-        cta={{ label: 'Watch on YouTube', href: '#' }}
-      />
-    </HorizontalScroll>
+    <!-- Featured work: heading + "View all work", then scroll sideways through the cards -->
+    <section aria-labelledby="featured-work">
+      <Section padded={false} class="pt-16 pb-[23px]">
+        <div class="grid-split items-end gap-y-6">
+          <h2 id="featured-work" class="text-headline">Featured work</h2>
+          <Button href="/work" variant="secondary">View all work</Button>
+        </div>
+      </Section>
+      <HorizontalScroll>
+        {workCards.map((card) => <MediaFeature {...card} />)}
+      </HorizontalScroll>
+    </section>
 
     <!-- Approach -->
     <Section class="grid-split items-start gap-y-12">
@@ -70,13 +84,146 @@ import { contactHref, heroVideo, services, statement } from '../data/site';
             Here’s how the usual agency script goes, and how we’d rewrite it.
           </p>
         </div>
-        <Button href="/approach" variant="secondary">Read the full approach</Button>
+        <Button href="/approach" variant="secondary">Learn our approach</Button>
       </div>
     </Section>
-
-    <!-- Featured work -->
-    <FeaturedWork />
   </main>
 
   <Footer />
 </BaseLayout>
+
+<script>
+  /**
+   * Curtain snap: the intro never rests partway over the hero.
+   *
+   * Down (hero → intro): as soon as the visitor starts scrolling, we take over
+   * and glide the intro to the top, easing out so it lands softly.
+   * Up (intro → hero) has some resistance: the page scrolls normally for the
+   * first UP_THRESHOLD px, and only past that do we glide back to the hero.
+   * Stopping short of it settles the intro back at the top.
+   * Leftover trackpad momentum after a glide is swallowed until it dies down,
+   * so it can't overshoot. When input goes quiet with the page stopped partway
+   * (a short scroll up, keys, the scrollbar), the same rules finish the move.
+   */
+  import { animate } from 'motion';
+
+  const intro = document.getElementById('main-content');
+  const root = document.documentElement;
+
+  if (intro && document.querySelector('[data-curtain]')) {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /** Scroll position with the intro at the top (the hero's height), measured fresh. */
+    const end = () => intro.getBoundingClientRect().top + window.scrollY;
+    /** How far up (px) the visitor must scroll from the intro before it glides back to the hero. */
+    const upThreshold = () => Math.min(200, window.innerHeight * 0.2);
+    // The hero's loading intro locks scrolling; don't move the page during it.
+    const unlocked = () => !root.querySelector('[data-hero-player]') || root.classList.contains('hero-intro-done');
+
+    let gliding = false;
+    let quietTimer: number | undefined;
+    /** True from the start of a glide until input has been quiet for a moment after it. */
+    let swallowing = false;
+
+    const keepSwallowing = () => {
+      clearTimeout(quietTimer);
+      quietTimer = window.setTimeout(() => {
+        if (!gliding) swallowing = false;
+      }, 200);
+    };
+
+    const glide = (direction: number) => {
+      const target = direction > 0 ? end() : 0;
+      if (Math.abs(window.scrollY - target) < 1) return;
+      gliding = swallowing = true;
+      const done = () => {
+        gliding = false;
+        keepSwallowing();
+      };
+      if (reducedMotion) {
+        window.scrollTo({ top: target, behavior: 'instant' });
+        done();
+        return;
+      }
+      animate(window.scrollY, target, {
+        duration: 0.9,
+        ease: [0.22, 1, 0.36, 1], // ease-out: picks up the visitor's motion, lands softly
+        onUpdate: (v) => window.scrollTo({ top: v, behavior: 'instant' }),
+        onComplete: done,
+      });
+    };
+
+    /** Should a scroll in this direction be turned into a glide? */
+    const inCurtain = (direction: number) => {
+      const y = window.scrollY;
+      const e = end();
+      // Up: only once the visitor has scrolled past the threshold; before that, scroll normally.
+      return direction > 0 ? y < e - 1 : y > 0 && y <= e - upThreshold();
+    };
+
+    const intent = (event: Event, direction: number) => {
+      if (!unlocked() || direction === 0) return;
+      if (swallowing) {
+        event.preventDefault();
+        keepSwallowing();
+        return;
+      }
+      if (inCurtain(direction)) {
+        event.preventDefault();
+        glide(direction);
+      }
+    };
+
+    window.addEventListener('wheel', (e) => intent(e, Math.sign(e.deltaY)), { passive: false });
+
+    let touchY = 0;
+    window.addEventListener('touchstart', (e) => (touchY = e.touches[0].clientY), { passive: true });
+    window.addEventListener(
+      'touchmove',
+      (e) => {
+        const dy = touchY - e.touches[0].clientY;
+        if (Math.abs(dy) > 8 || swallowing) intent(e, Math.sign(dy));
+      },
+      { passive: false },
+    );
+
+    // When all input has been quiet for a moment (no wheel, scroll or finger on
+    // the screen), finish a move that stopped partway. Not `scrollend`: Chrome
+    // fires it after every wheel tick, mid-gesture.
+    let lastY = window.scrollY;
+    let direction = 0;
+    let touching = false;
+    let idleTimer: number | undefined;
+    const settle = () => {
+      if (gliding || touching || !unlocked()) return;
+      const y = window.scrollY;
+      const e = end();
+      if (y <= 0 || y >= e - 1) return;
+      // A short scroll up from the intro (not past the threshold) settles back on the intro.
+      glide(direction < 0 && y <= e - upThreshold() ? -1 : 1);
+    };
+    const settleWhenQuiet = () => {
+      clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(settle, 180);
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        const y = window.scrollY;
+        if (y !== lastY) direction = Math.sign(y - lastY);
+        lastY = y;
+        settleWhenQuiet();
+      },
+      { passive: true },
+    );
+    window.addEventListener('wheel', settleWhenQuiet, { passive: true });
+    window.addEventListener('touchstart', () => (touching = true), { passive: true });
+    window.addEventListener(
+      'touchend',
+      () => {
+        touching = false;
+        settleWhenQuiet();
+      },
+      { passive: true },
+    );
+  }
+</script>
