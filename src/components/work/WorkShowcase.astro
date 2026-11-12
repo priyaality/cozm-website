@@ -51,6 +51,11 @@ const { heading, projects } = Astro.props;
           </div>
         ))
       }
+      <!-- Desktop: darkens the bottom of the image so the sand project list over it stays readable. -->
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 hidden bg-linear-to-t from-black/75 via-black/30 via-25% to-transparent to-55% lg:block"
+      ></div>
     </div>
 
     <ProjectList
@@ -61,7 +66,7 @@ const { heading, projects } = Astro.props;
       }))}
       idPrefix="work"
       label="Projects"
-      class="lg:absolute lg:bottom-2 lg:left-2 lg:w-max lg:min-w-[326px] lg:bg-sand lg:p-2"
+      class="lg:absolute lg:bottom-2 lg:left-2 lg:w-max lg:min-w-[326px] lg:text-sand"
     />
   </div>
 
