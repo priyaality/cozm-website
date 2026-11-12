@@ -5,14 +5,19 @@ import paisasmart from '../assets/images/work-paisasmart.png';
 import masaba from '../assets/images/work-masaba.png';
 import { withBase } from '../lib/paths';
 
+/**
+ * Where every "Talk to us" / "Start a conversation" button goes (header,
+ * home intro, approach intro, footer). Set to undefined to make them dummy
+ * buttons that do nothing.
+ */
+export const contactHref: string | undefined = 'mailto:palash@cozm.in';
+
 export const navLinks = [
   { label: 'Approach', href: '/approach' },
   { label: 'Work', href: '/work' },
   { label: 'Originals', href: '/originals' },
   { label: 'About', href: '/about' },
 ];
-
-export const contactHref = '/contact';
 
 /**
  * Hero video. Drop the file at public/video/hero.mp4 (optionally a poster image

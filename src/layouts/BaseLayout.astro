@@ -9,6 +9,7 @@ import '@fontsource/caveat/400.css';
 import '../styles/global.css';
 import FontPickerHead from '../components/dev/FontPickerHead.astro';
 import FontPicker from '../components/dev/FontPicker.astro';
+import CopyEmailOnClick from '../components/ui/CopyEmailOnClick.astro';
 import { withBase } from '../lib/paths';
 
 interface Props {
@@ -38,6 +39,7 @@ const {
   </head>
   <body class="bg-sand text-ink">
     <slot />
+    <CopyEmailOnClick />
     <FontPicker />
   </body>
 </html>

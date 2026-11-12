@@ -1,0 +1,44 @@
+---
+/**
+ * CopyEmailOnClick — clicking any mailto: link on the site (the "Talk to us" /
+ * "Start a conversation" buttons) also copies the address to the clipboard,
+ * and a short toast confirms it. The link still opens the visitor's email app
+ * as usual, so whichever they prefer, they have the address.
+ *
+ * Mounted once in BaseLayout. If the clipboard isn't available (e.g. a
+ * non-https page), the link just works as a normal mailto: link.
+ */
+---
+
+<div
+  data-copy-toast
+  role="status"
+  aria-live="polite"
+  class="pointer-events-none fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 translate-y-2 border border-ink bg-sand px-5 py-3 text-small whitespace-nowrap text-ink opacity-0 transition duration-300 data-shown:translate-y-0 data-shown:opacity-100"
+>
+</div>
+
+<script>
+  const toast = document.querySelector<HTMLElement>('[data-copy-toast]');
+  let hideTimer: number | undefined;
+
+  const show = (message: string) => {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.setAttribute('data-shown', '');
+    clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(() => toast.removeAttribute('data-shown'), 2500);
+  };
+
+  document.addEventListener('click', (event) => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="mailto:"]');
+    if (!link || !navigator.clipboard) return;
+    // The address, without the "mailto:" prefix or any ?subject=… part.
+    const email = decodeURIComponent(link.getAttribute('href')!.slice('mailto:'.length).split('?')[0]);
+    // No preventDefault: the mailto: link still opens the email app.
+    navigator.clipboard.writeText(email).then(
+      () => show(`Email copied: ${email}`),
+      () => {}, // Copy refused (rare); the mailto: link still did its job.
+    );
+  });
+</script>
