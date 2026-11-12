@@ -40,17 +40,17 @@ import { DEFAULT_FONTS, fontsByRole } from '../../data/fonts';
       serif: 'ui-serif, Georgia, serif',
     };
 
-    /** Load a Google font (weights 400–600) once. */
+    /** Load a picked font's stylesheet (Fontshare or Google Fonts) once. */
     const load = (option) => {
-      if (!option.google) return;
+      const href = option.fontshare
+        ? `https://api.fontshare.com/v2/css?f[]=${option.fontshare}&display=swap`
+        : option.google
+          ? `https://fonts.googleapis.com/css2?family=${option.google}&display=swap`
+          : null;
+      if (!href) return;
       const id = `font-${option.name.replace(/\s+/g, '-')}`;
       if (document.getElementById(id)) return;
-      const link = Object.assign(document.createElement('link'), {
-        id,
-        rel: 'stylesheet',
-        href: `https://fonts.googleapis.com/css2?family=${option.google}&display=swap`,
-      });
-      document.head.append(link);
+      document.head.append(Object.assign(document.createElement('link'), { id, rel: 'stylesheet', href }));
     };
 
     const HEADING_STYLES = ['display', 'headline', 'title'];
@@ -66,7 +66,7 @@ import { DEFAULT_FONTS, fontsByRole } from '../../data/fonts';
         root.style.setProperty(`--font-${role}`, `"${option.family || option.name}", ${stacks[option.fallback]}`);
       }
       if (role !== 'heading') return;
-      // Heading weights and optical size: the font's own, or the defaults (Literata's).
+      // Heading weights and optical size: the font's own, or the site defaults (global.css).
       const weights = !isDefault && option.headingWeights;
       for (const style of HEADING_STYLES) {
         const token = `--text-${style}--font-weight`;

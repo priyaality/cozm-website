@@ -6,8 +6,9 @@
  * FontPickerHead. Shown on every page, in dev and on the deployed site.
  *
  * The panel is a native popover: it closes on Escape or a click outside.
- * Each option is shown in its own face (only the letters of the font names are
- * fetched for the previews, when the panel first opens).
+ * Each option is shown in its own face. The preview fonts are fetched when the
+ * panel first opens: Fontshare's variable files, Google just the letters of
+ * the names.
  */
 import { fontsByRole, type FontOption } from '../../data/fonts';
 
@@ -83,7 +84,7 @@ const stack = (o: FontOption) =>
 <script>
   type Role = 'heading' | 'body';
   interface CozmFonts {
-    fontsByRole: Record<Role, { name: string; google?: string }[]>;
+    fontsByRole: Record<Role, { name: string; google?: string; fontshare?: string }[]>;
     current: () => Record<Role, string>;
     set: (role: Role, name: string) => void;
     reset: () => void;
@@ -112,14 +113,23 @@ const stack = (o: FontOption) =>
     panel.addEventListener('toggle', (event) => {
       if ((event as ToggleEvent).newState !== 'open' || previewsLoaded) return;
       previewsLoaded = true;
-      const google = [...fonts.fontsByRole.heading, ...fonts.fontsByRole.body].filter((o) => o.google);
-      const letters = [...new Set(google.map((o) => o.name).join(''))].join('');
-      const families = google.map((o) => `family=${o.google!.split(':')[0]}`).join('&');
-      const link = Object.assign(document.createElement('link'), {
-        rel: 'stylesheet',
-        href: `https://fonts.googleapis.com/css2?${families}&text=${encodeURIComponent(letters)}&display=swap`,
-      });
-      document.head.append(link);
+      const all = [...fonts.fontsByRole.heading, ...fonts.fontsByRole.body];
+      const stylesheet = (href: string) =>
+        document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href }));
+
+      // Fontshare: one request for every family, the same variable files a pick
+      // uses (fonts download only as the previews render).
+      const fontshare = [...new Set(all.filter((o) => o.fontshare).map((o) => o.fontshare!))];
+      if (fontshare.length)
+        stylesheet(`https://api.fontshare.com/v2/css?${fontshare.map((s) => `f[]=${s}`).join('&')}&display=swap`);
+
+      // Google: only the letters of the names.
+      const google = all.filter((o) => o.google);
+      if (google.length) {
+        const letters = [...new Set(google.map((o) => o.name).join(''))].join('');
+        const families = google.map((o) => `family=${o.google!.split(':')[0]}`).join('&');
+        stylesheet(`https://fonts.googleapis.com/css2?${families}&text=${encodeURIComponent(letters)}&display=swap`);
+      }
     });
   }
 </script>

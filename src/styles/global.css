@@ -32,32 +32,32 @@
 
   /* ---------- Font families ---------- */
   --font-sans: "Arimo", ui-sans-serif, system-ui, sans-serif;
-  /* Heading and body faces: Literata and Instrument Sans (self-hosted). The
+  /* Heading and body faces: Plus Jakarta Sans and DM Sans (self-hosted). The
      font picker can swap either at runtime by setting these on
      <html>. Headings are the
      display, headline and title styles (see the base layer);
      everything else, including large standalone text like the home page's
      statement, is body. */
-  --font-heading: "Literata Variable", ui-serif, Georgia, serif;
-  --font-body: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   /* Figma uses "Figma Hand", which isn't on Google Fonts. Caveat is the stand-in. */
   --font-hand: "Caveat", "Figma Hand", cursive;
 
   /* ---------- Type scale ----------
      Sizes, spacing and line heights from Figma. Heading weights (display,
-     headline, title) are Literata Regular; Arimo's were 600 / 500 / 600. */
-  /* display — page headlines and the day dial's numerals. 96 / 100% / -6% / semibold */
+     headline, title) are 550; Arimo's in Figma were 600 / 500 / 600. */
+  /* display — page headlines and the day dial's numerals. 96 / 100% / -6% / 550 */
   --text-display: clamp(2.75rem, 1.4rem + 5vw, 6rem);
   --text-display--line-height: 1;
   --text-display--letter-spacing: -0.06em;
-  --text-display--font-weight: 400;
+  --text-display--font-weight: 550;
 
-  /* headline — section headings. 56 / 100% / -2% / medium */
+  /* headline — section headings. 56 / 100% / -2% / 550 */
   --text-headline: clamp(2.25rem, 1.65rem + 2.4vw, 3.5rem);
   --text-headline--line-height: 1;
   --text-headline--letter-spacing: -0.02em;
-  --text-headline--font-weight: 400;
+  --text-headline--font-weight: 550;
 
   /* statement — large reading copy. 56 / 120% / -2% / regular */
   --text-statement: clamp(1.75rem, 1.14rem + 2.5vw, 3.5rem);
@@ -65,11 +65,11 @@
   --text-statement--letter-spacing: -0.02em;
   --text-statement--font-weight: 400;
 
-  /* title — card titles. 32 / 120% / -2% / semibold */
+  /* title — card titles. 32 / 120% / -2% / 550 */
   --text-title: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
   --text-title--line-height: 1.2;
   --text-title--letter-spacing: -0.02em;
-  --text-title--font-weight: 400;
+  --text-title--font-weight: 550;
 
   /* lead — larger reading copy (comparison table rows). 24 / 130% / -2% / regular */
   --text-lead: clamp(1.125rem, 0.975rem + 0.6vw, 1.5rem);
@@ -145,9 +145,10 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Heading styles use the heading face (a font-* utility still overrides),
-     pinned to its display optical size so small headings match large ones
-     (Literata's opsz runs 7–72; fonts without the axis ignore it). */
+  /* Heading styles use the heading face (a font-* utility still overrides).
+     For a heading font with an optical-size axis, it's pinned to a display
+     size so small headings match large ones; fonts without the axis (like
+     the default, Plus Jakarta Sans) ignore it. */
   .text-display,
   .text-headline,
   .text-title {
