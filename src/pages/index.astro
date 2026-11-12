@@ -9,7 +9,7 @@ import MediaFeature from '../components/MediaFeature.astro';
 import HorizontalScroll from '../components/HorizontalScroll.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
 import Footer from '../components/Footer.astro';
-import { contactHref, featuredWork, heroVideo, workProjects } from '../data/site';
+import { featuredWork, heroVideo, workProjects } from '../data/site';
 
 
 // Work cards for the horizontal scroll: title and description from Featured work,
@@ -44,8 +44,7 @@ const workCards = featuredWork.map((item) => ({
           <h1 class="text-display lg:text-[length:min(var(--text-display),calc((100svh-342px)/5))]">
             Cozm is a media studio that helps brands build original media for India’s top 10%.
           </h1>
-          <!-- Desktop: copy at the top of the column, CTAs at the bottom -->
-          <div class="flex flex-col gap-6 lg:justify-between lg:self-stretch lg:pt-5">
+          <div class="flex flex-col gap-6 lg:pt-5">
             <div class="flex flex-col gap-6">
               <p class="text-body">
                 We spend 90 days building it with your team, from the format to the launch, and leave you
@@ -57,7 +56,6 @@ const workCards = featuredWork.map((item) => ({
               </p>
             </div>
             <div class="flex flex-col gap-4">
-              <Button href={contactHref} variant="primary">Talk to us</Button>
               <Button href="/approach" variant="secondary">Learn our approach</Button>
             </div>
           </div>
