@@ -13,8 +13,10 @@
  * State lives on <html>: `.hero-header-in` shows the header, `.hero-intro-done`
  * unlocks scrolling. A failsafe unlocks everything after 10s if the sequence
  * fails. The video is the same element throughout, so there's no jump when it
- * starts. With prefers-reduced-motion, or when the URL has a #hash (a deep
- * link), the intro is skipped. Without JS the card is shown unexpanded and the
+ * starts. The intro plays once per visit: after it has run, coming back to the
+ * home page in the same tab (sessionStorage) goes straight to the playing video.
+ * It's also skipped with prefers-reduced-motion, or when the URL has a #hash (a
+ * deep link). Without JS the card is shown unexpanded and the
  * page scrolls normally (the video only preloads metadata; the script asks for
  * the rest).
  */
@@ -154,8 +156,22 @@ const withStart = (src: string) => (startAt ? `${src}#t=${startAt}` : src);
     }
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // The intro plays once per visit (per tab); storage can be blocked, so it's guarded.
+    const SEEN_KEY = 'cozm-intro-seen';
+    const introSeen = () => {
+      try {
+        return sessionStorage.getItem(SEEN_KEY) === '1';
+      } catch {
+        return false;
+      }
+    };
+    const markIntroSeen = () => {
+      try {
+        sessionStorage.setItem(SEEN_KEY, '1');
+      } catch {}
+    };
     // A deep link (e.g. /#main-content) should land on its section, not sit through the intro.
-    const skipIntro = reducedMotion || location.hash.length > 1;
+    const skipIntro = reducedMotion || location.hash.length > 1 || introSeen();
     const isDone = () => root.classList.contains('hero-intro-done');
 
     // The markup only preloads metadata so the video doesn't compete with the
@@ -171,6 +187,7 @@ const withStart = (src: string) => (startAt ? `${src}#t=${startAt}` : src);
     const unlock = () => {
       belowHero.forEach((el) => (el.inert = false));
       root.classList.add('hero-intro-done');
+      markIntroSeen();
     };
     if (!skipIntro) belowHero.forEach((el) => (el.inert = true));
 
