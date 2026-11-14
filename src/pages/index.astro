@@ -96,10 +96,13 @@ import { heroVideo } from '../data/site';
    * Up (intro → hero) has some resistance: the page scrolls normally for the
    * first UP_THRESHOLD px, and only past that do we glide back to the hero.
    * Stopping short of it settles the intro back at the top.
-   * Leftover trackpad momentum after a glide is swallowed until it dies down,
-   * so it can't overshoot. Only input in the glide's direction is swallowed:
-   * scrolling the other way (during the glide or just after) is a new intent,
-   * so it stops the glide and is handled like any other scroll.
+   * Leftover trackpad momentum after a glide is swallowed, so it can't
+   * overshoot. Momentum is a fast stream of shrinking wheel deltas, so after
+   * the glide only that is swallowed: a delta that doesn't shrink (a mouse
+   * wheel's steady ticks, a new swipe) or comes after a pause is a new scroll
+   * and goes through, e.g. to carry on down past the intro. During the glide,
+   * input in its direction is swallowed. Scrolling the other way (during the
+   * glide or just after) stops it and is handled like any other scroll.
    * When input goes quiet with the page stopped partway
    * (a short scroll up, keys, the scrollbar), the same rules finish the move.
    */
@@ -126,6 +129,11 @@ import { heroVideo } from '../data/site';
     let swallowing = false;
     /** Direction of the current / last glide (1 down, -1 up); only this direction is swallowed. */
     let glideDirection = 0;
+    /** The previous wheel event's size and time, to tell momentum from a new scroll. */
+    let lastSize = 0;
+    let lastAt = 0;
+    /** Momentum: within 80ms of the last event and smaller than it (or a tiny tail value). */
+    const isMomentum = (size: number, at: number) => at - lastAt < 80 && (size < lastSize || size <= 2);
     let stopGlide: (() => void) | undefined;
 
     /** Drop the current glide (if any) and stop swallowing, e.g. when the visitor reverses. */
@@ -170,16 +178,21 @@ import { heroVideo } from '../data/site';
       return direction > 0 ? y < e - 1 : y > 0 && y <= e - upThreshold();
     };
 
-    const intent = (event: Event, direction: number) => {
+    /** size: the wheel delta's magnitude (Infinity for touch, which has no momentum events). */
+    const intent = (event: Event, direction: number, size = Infinity) => {
       if (!unlocked() || direction === 0) return;
+      const at = performance.now();
+      const momentum = isMomentum(size, at);
+      lastSize = size;
+      lastAt = at;
       if (swallowing) {
-        if (direction === glideDirection) {
-          // Momentum from the gesture that started the glide.
+        if (direction === glideDirection && (gliding || momentum)) {
+          // Already moving that way, or momentum from the gesture that started the glide.
           event.preventDefault();
           keepSwallowing();
           return;
         }
-        // Scrolling the other way: a new intent, not momentum.
+        // Scrolling the other way, or a new scroll after the glide: not momentum.
         release();
       }
       if (inCurtain(direction)) {
@@ -188,7 +201,7 @@ import { heroVideo } from '../data/site';
       }
     };
 
-    window.addEventListener('wheel', (e) => intent(e, Math.sign(e.deltaY)), { passive: false });
+    window.addEventListener('wheel', (e) => intent(e, Math.sign(e.deltaY), Math.abs(e.deltaY)), { passive: false });
 
     let touchY = 0;
     window.addEventListener('touchstart', (e) => (touchY = e.touches[0].clientY), { passive: true });
