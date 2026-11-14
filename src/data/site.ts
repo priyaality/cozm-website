@@ -292,6 +292,8 @@ export interface ApproachStep {
   day: string;
   title: string;
   description: string;
+  /** How the same step goes with an agency, shown below the description. */
+  agency: string;
 }
 
 /** The four phases shown on the dial, one per 90° turn. */
@@ -300,22 +302,26 @@ export const approachSteps: ApproachStep[] = [
     day: '01',
     title: 'Create the format',
     description: 'We work out the idea, format, and voice with you and your team.',
+    agency: 'With an agency, you only get what they make.',
   },
   {
     day: '30',
     title: 'Train the team',
     description: 'Your team starts leading production, and we coach them through each episode until they’re confident.',
+    agency: 'With an agency, your team never learns how.',
   },
   {
     day: '60',
     title: 'Set up workflows',
     description:
       'We put the templates, quality checks and publishing schedule in place, and write them down so nothing depends on us.',
+    agency: 'With an agency, your team watches from the sidelines.',
   },
   {
     day: '90',
     title: 'Hand it over',
     description: 'Your team runs it on its own, and each new episode costs less to make than the last.',
+    agency: 'With an agency, your team only signs off on their work.',
   },
 ];
 

@@ -5,20 +5,10 @@ import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
 import HeroPlayer from '../components/hero/HeroPlayer.astro';
 import LogoTicker from '../components/LogoTicker.astro';
-import MediaFeature from '../components/MediaFeature.astro';
-import HorizontalScroll from '../components/HorizontalScroll.astro';
+import FeaturedWork from '../components/FeaturedWork.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
 import Footer from '../components/Footer.astro';
-import { featuredWork, heroVideo, workProjects } from '../data/site';
-
-
-// Work cards for the horizontal scroll: title and description from Featured work,
-// the CTA (label and link) from the matching /work project.
-const workCards = featuredWork.map((item) => ({
-  title: item.title,
-  description: item.description,
-  cta: { label: 'Watch on Youtube', href: workProjects.find((p) => p.item === item)!.watch },
-}));
+import { heroVideo } from '../data/site';
 ---
 
 <BaseLayout
@@ -43,12 +33,14 @@ const workCards = featuredWork.map((item) => ({
 
       <!-- Intro + client logos fill one viewport together -->
       <div id="main-content" class="relative z-10 flex min-h-svh flex-col">
-        <Section rule class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">
+        <Section tone="red" class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">
           <!-- Desktop: the heading also shrinks on short screens, so the intro and the
-               logo ticker fit one screen. 342px = top padding (110) + bottom padding (80)
-               + ticker (151) + the 1px rule; the rest is shared by ~5 lines of heading. -->
-          <h1 class="text-display lg:text-[length:min(var(--text-display),calc((100svh-342px)/5))]">
-            Cozm is a media studio that helps brands build original media for India’s top 10%.
+               logo ticker fit one screen. Taken off the screen height: the header, 276px
+               (40 above the heading + 80 bottom padding + ticker 155 + the 1px rule); the
+               rest is shared by ~5 lines of heading. -->
+          <h1 class="text-display lg:text-[length:min(var(--text-display),calc((100svh-var(--spacing-nav)-276px)/5))]">
+            Cozm is a media studio that helps brands build{' '}
+            <span class="text-black">original media for India’s top 10%.</span>
           </h1>
           <div class="flex flex-col gap-6 lg:pt-5">
             <div class="flex flex-col gap-6">
@@ -73,31 +65,21 @@ const workCards = featuredWork.map((item) => ({
     </div>
 
     <!-- Featured work: heading + "View all work", then scroll sideways through the cards -->
-    <section aria-labelledby="featured-work">
-      <Section padded={false} class="pt-16 pb-[23px]">
-        <div class="grid-split items-end gap-y-6">
-          <h2 id="featured-work" class="text-headline">Featured work</h2>
-          <Button href="/work" variant="secondary">View all work</Button>
-        </div>
-      </Section>
-      <HorizontalScroll>
-        {workCards.map((card) => <MediaFeature {...card} />)}
-      </HorizontalScroll>
-    </section>
+    <FeaturedWork />
 
     <!-- Approach -->
-    <Section class="grid-split items-start gap-y-12">
+    <Section tone="red" class="grid-split items-start gap-y-12">
       <div>
         <ScriptPage />
       </div>
       <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
           <h2 class="text-headline">Our job is to get your team to a point where they don’t need us.</h2>
-          <p class="text-body text-ink-muted">
+          <p class="text-body">
             Here’s how the usual agency script goes, and how we’d rewrite it.
           </p>
         </div>
-        <Button href="/approach" variant="secondary">Learn our approach</Button>
+        <Button href="/approach" variant="outline">Learn our approach</Button>
       </div>
     </Section>
   </main>

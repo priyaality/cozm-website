@@ -1,23 +1,33 @@
 ---
 /**
- * FeaturedWork — "Featured work" heading + "View all work", then two WorkRows
- * (7:5, then 5:7). Shared by the home and approach pages.
+ * FeaturedWork — "Featured work" heading + "View all work" on brick red, then
+ * the featured projects as large cards that scroll sideways (HorizontalScroll
+ * + MediaFeature). Shared by the home and approach pages.
+ *
+ * Each card takes its title and description from Featured work, and its CTA
+ * from the matching /work project's watch link.
  */
 import Section from './ui/Section.astro';
 import Button from './ui/Button.astro';
-import WorkRow from './WorkRow.astro';
-import { featuredWork } from '../data/site';
+import HorizontalScroll from './HorizontalScroll.astro';
+import MediaFeature from './MediaFeature.astro';
+import { featuredWork, workProjects } from '../data/site';
 
-const [uncovered, capmint, paisasmart, masaba] = featuredWork;
+const cards = featuredWork.map((item) => ({
+  title: item.title,
+  description: item.description,
+  cta: { label: 'Watch on Youtube', href: workProjects.find((p) => p.item === item)!.watch },
+}));
 ---
 
 <section aria-labelledby="featured-work">
-  <Section as="div" padded={false} class="pt-16 pb-[23px]">
+  <Section as="div" tone="red" padded={false} class="pt-16 pb-[23px]">
     <div class="grid-split items-end gap-y-6">
       <h2 id="featured-work" class="text-headline">Featured work</h2>
-      <Button href="/work" variant="secondary">View all work</Button>
+      <Button href="/work" variant="outline">View all work</Button>
     </div>
   </Section>
-  <WorkRow items={[uncovered, capmint]} />
-  <WorkRow items={[paisasmart, masaba]} reverse />
+  <HorizontalScroll tone="red">
+    {cards.map((card) => <MediaFeature {...card} />)}
+  </HorizontalScroll>
 </section>

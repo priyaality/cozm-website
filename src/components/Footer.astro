@@ -1,8 +1,9 @@
 ---
 /**
- * Footer — closing CTA (right) with logo, nav and legal (left), over a faded
- * film-strip graphic in the top-left corner. The graphic is a pre-treated
- * export (grain, tone and transparency baked in) at 2× its 552×545 size.
+ * Footer — black band (Figma: homepage, node 313:2797): closing CTA (right)
+ * with logo, nav and legal (left), over a film-strip graphic in the
+ * bottom-left corner. As in Figma, the graphic is flipped vertically, shown at
+ * 60% opacity in a 540×897 box, and runs off the bottom of the footer.
  */
 import { Image } from 'astro:assets';
 import Logo from './ui/Logo.astro';
@@ -14,21 +15,40 @@ import { contactHref } from '../data/site';
 interface Props {
   /** The closing call to action; each page can tailor it. */
   heading?: string;
+  /** Optional lead-in before `heading`, shown in brick red. */
+  lead?: string;
+  /** Optional ending after `heading`, shown in brick red. */
+  accent?: string;
+  /** Colour of the top rule: black (default) or brick red (/originals, below the dark video). */
+  rule?: 'black' | 'red';
 }
 
+const defaults = {
+  lead: 'If India’s top 10% is who you want to reach,',
+  heading: 'let’s talk about what your first 90 days could look like.',
+};
 const {
-  heading = 'If India’s top 10% is who you want to reach, let’s talk about what your first 90 days could look like.',
+  heading = defaults.heading,
+  lead = Astro.props.heading ? undefined : defaults.lead,
+  accent,
+  rule = 'black',
 } = Astro.props;
 ---
 
-<footer class="relative overflow-hidden border-t border-ink bg-sand px-gutter py-section">
+<footer
+  data-tone="black"
+  class:list={[
+    'relative overflow-hidden border-t bg-black px-gutter py-section text-butter',
+    rule === 'red' ? 'border-brick-red' : 'border-black',
+  ]}
+>
   <Image
     src={filmStrip}
     alt=""
     aria-hidden="true"
-    class="pointer-events-none absolute top-0 left-0 w-[552px] max-w-none max-lg:hidden"
-    widths={[552, 1104]}
-    sizes="552px"
+    class="pointer-events-none absolute -bottom-[266px] left-0 h-[897px] w-[540px] max-w-none -scale-y-100 object-bottom opacity-60 max-lg:hidden"
+    widths={[540]}
+    sizes="540px"
   />
 
   <!-- Desktop: 7/5 page grid. Mobile: stacked with the CTA first. -->
@@ -47,7 +67,11 @@ const {
     </div>
 
     <div class="flex flex-col gap-[22px]">
-      <h2 class="text-headline lg:text-right">{heading}</h2>
+      <h2 class="text-headline lg:text-right">
+        {lead && <span class="text-brick-red">{lead} </span>}
+        {heading}
+        {accent && <span class="text-brick-red"> {accent}</span>}
+      </h2>
       <Button href={contactHref} variant="primary">Start a conversation</Button>
     </div>
   </div>

@@ -1,12 +1,15 @@
 ---
 /**
- * NowPlaying — "now playing" card shown once the hero video is playing.
- * Square sand card with a 1px ink rule. The Pause / Play button controls the
- * hero video (wired up in HeroPlayer), which also gives visitors a way to stop
- * the autoplaying video.
+ * NowPlaying — "now playing" card shown once the hero video is playing
+ * (Figma: hero-sec › now-playing, node 312:2717). Butter card with a 1px ink
+ * rule. The Play / Pause button controls the hero video (wired up in
+ * HeroPlayer), which also gives visitors a way to stop the autoplaying video;
+ * "View full catalog" opens /work.
  */
 import Logo from '../ui/Logo.astro';
 import Button from '../ui/Button.astro';
+import playIcon from '../../assets/icons/play.svg';
+import queueIcon from '../../assets/icons/queue.svg';
 
 interface Props {
   title: string;
@@ -17,33 +20,44 @@ interface Props {
 const { title, subtitle, poster } = Astro.props;
 ---
 
-<div data-now-playing class="relative flex items-center gap-4 border border-ink bg-sand p-3 pr-12 text-ink">
-  <div class="grid size-20 shrink-0 place-items-center overflow-hidden bg-ink sm:size-24">
+<div data-now-playing class="relative flex items-start gap-4 border border-black bg-butter p-4 text-black">
+  <div class="grid size-20 shrink-0 place-items-center overflow-hidden bg-black sm:size-[93px]">
     {poster ? <img src={poster} alt="" class="size-full object-cover" /> : <Logo class="w-14" />}
   </div>
 
-  <div class="flex min-w-0 flex-col gap-1">
-    <p class="text-caption text-ink-muted uppercase">Now playing</p>
-    <p class="line-clamp-2 text-body font-semibold">{title}</p>
-    <p class="truncate text-caption text-ink-muted">{subtitle}</p>
-    <Button variant="secondary" size="xs" class="mt-1 w-fit" data-now-playing-toggle>
-      <svg data-icon-pause viewBox="0 0 24 24" class="size-3" fill="currentColor" aria-hidden="true"
-        ><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg
-      >
-      <svg data-icon-play viewBox="0 0 24 24" class="hidden size-3" fill="currentColor" aria-hidden="true"
-        ><path d="M7 4v16l13-8z"></path></svg
-      >
-      <span data-now-playing-label>Pause</span>
-    </Button>
-  </div>
+  <div class="flex min-w-0 flex-col gap-4">
+    <div class="flex items-start gap-4">
+      <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+        <p class="text-caption leading-none uppercase">Now playing</p>
+        <p class="line-clamp-2 text-small font-medium">{title}</p>
+        <p class="truncate text-caption leading-none">{subtitle}</p>
+      </div>
 
-  <!-- Equalizer: animates while the video plays -->
-  <div class="equalizer absolute top-3 right-3 flex h-4 items-end gap-[3px]" aria-hidden="true">
-    <span></span><span></span><span></span>
+      <!-- Equalizer: animates while the video plays -->
+      <div class="equalizer flex h-4 shrink-0 items-end gap-[3px]" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- Wraps on narrow phones, where the card makes room for the scroll button -->
+    <div class="flex flex-wrap gap-1.5">
+      <Button variant="red" size="xs" data-now-playing-toggle>
+        <svg data-icon-pause viewBox="0 0 24 24" class="size-3" fill="currentColor" aria-hidden="true"
+          ><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg
+        >
+        <img data-icon-play src={playIcon.src} width="12" height="12" alt="" class="hidden size-3" />
+        <span data-now-playing-label>Pause</span>
+      </Button>
+      <Button href="/work" variant="ghost" size="xs">
+        <img src={queueIcon.src} width="12" height="12" alt="" class="size-3" />
+        View full catalog
+      </Button>
+    </div>
   </div>
 </div>
 
 <style>
+  /* Bar heights at rest, from Figma: 16, 13 and 7px. */
   .equalizer span {
     width: 3px;
     height: 100%;
@@ -73,7 +87,12 @@ const { title, subtitle, poster } = Astro.props;
   @media (prefers-reduced-motion: reduce) {
     .equalizer span {
       animation: none;
-      transform: scaleY(0.6);
+    }
+    .equalizer span:nth-child(2) {
+      transform: scaleY(0.8125);
+    }
+    .equalizer span:nth-child(3) {
+      transform: scaleY(0.4375);
     }
   }
 </style>

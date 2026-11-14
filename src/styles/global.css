@@ -3,11 +3,10 @@
 /*
  * Cozm design tokens
  * ------------------------------------------------------------------
- * Extracted from the Figma file "Cozm Website Redesign" (homepage, node 105:2326).
- * The file has no Figma variables, so these tokens are derived from every
- * raw colour / text style used on the page. Each token below becomes both a
- * CSS custom property (e.g. var(--color-ink)) and a Tailwind utility
- * (e.g. text-ink, bg-sand, text-display).
+ * From the Figma file "Cozm Website Redesign" (homepage, node 304:2345):
+ * colours are its variables; text styles are taken from the page. Each token below becomes both a
+ * CSS custom property (e.g. var(--color-black)) and a Tailwind utility
+ * (e.g. text-black, bg-butter, text-display).
  *
  * Large type sizes are fluid: they hit the exact Figma value at the 1512px
  * design width and scale down on smaller screens.
@@ -18,17 +17,17 @@
 @theme static {
   /* ---------- Colour ---------- */
   --color-*: initial;
-  --color-ink: #1c1c1c; /* primary text, borders, primary button */
-  --color-sand: #e7dbc9; /* page background, inverse text */
+  /* Figma variables: butter, black, brick-red. */
+  --color-butter: #fefdde; /* page background, text and rules on brick red, secondary buttons */
+  --color-black: #0a0501; /* primary text, borders, primary button, footer background */
+  --color-brick-red: #a53333; /* homepage background, Play button, agency lines on /approach */
+  --color-black-muted: rgb(10 5 1 / 0.7); /* secondary body copy */
+  --color-black-faint: rgb(10 5 1 / 0.4); /* de-emphasised copy (unselected "What we do" tabs) */
+  --color-scrim: rgb(10 5 1 / 0.6); /* overlay on work imagery */
   --color-paper: #ffffff; /* media placeholder cards */
   --color-graphite: #6b6b6b; /* typewritten script text */
-  --color-black: #000000; /* hero media placeholder */
-  --color-ink-muted: rgb(28 28 28 / 0.7); /* secondary body copy */
-  --color-ink-faint: rgb(28 28 28 / 0.4); /* de-emphasised copy (unselected "What we do" tabs) */
-  --color-scrim: rgb(28 28 28 / 0.6); /* overlay on work imagery */
   --color-transparent: transparent;
   --color-current: currentColor;
-  --color-rust: #af480e; /* inline links in large body copy (about page bio) */
 
   /* ---------- Font families ---------- */
   /* Faces are declared in src/components/head/Fonts.astro (self-hosted).
@@ -45,31 +44,31 @@
   --font-hand: "Caveat", "Figma Hand", cursive;
 
   /* ---------- Type scale ----------
-     Sizes, spacing and line heights from Figma. Heading weights (display,
-     headline, title) are 550; Arimo's in Figma were 600 / 500 / 600. */
-  /* display — page headlines and the day dial's numerals. 96 / 100% / -6% / 550 */
-  --text-display: clamp(2.75rem, 1rem + 6.5vw, 6.75rem);
+     Sizes, spacing, line heights and weights from Figma (headings are
+     Plus Jakarta Sans SemiBold). */
+  /* display — page headlines and the day dial's numerals. 104 / 100% / -6% / 600 */
+  --text-display: clamp(2.75rem, 1rem + 6.5vw, 6.5rem);
   --text-display--line-height: 1;
   --text-display--letter-spacing: -0.06em;
-  --text-display--font-weight: 550;
+  --text-display--font-weight: 600;
 
-  /* headline — section headings. 56 / 100% / -2% / 550 */
+  /* headline — section headings. 56 / 100% / -3% / 600 */
   --text-headline: clamp(2.25rem, 1.65rem + 2.4vw, 3.5rem);
   --text-headline--line-height: 1;
-  --text-headline--letter-spacing: -0.02em;
-  --text-headline--font-weight: 550;
+  --text-headline--letter-spacing: -0.03em;
+  --text-headline--font-weight: 600;
 
-  /* title — card titles. 32 / 120% / -2% / 550 */
+  /* title — card titles. 32 / 120% / -2% / 600 */
   --text-title: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
   --text-title--line-height: 1.2;
   --text-title--letter-spacing: -0.02em;
-  --text-title--font-weight: 550;
+  --text-title--font-weight: 600;
 
-  /* lead — larger reading copy (comparison table rows). 24 / 130% / -2% / regular */
+  /* lead — larger reading copy (about page, comparison table rows). 24 / 136% / -2% / medium */
   --text-lead: clamp(1.125rem, 0.975rem + 0.6vw, 1.5rem);
-  --text-lead--line-height: 1.3;
+  --text-lead--line-height: 1.36;
   --text-lead--letter-spacing: -0.02em;
-  --text-lead--font-weight: 400;
+  --text-lead--font-weight: 500;
 
   /* body — paragraph copy. 20 / 120% / -2% / regular */
   --text-body: clamp(1.125rem, 1.075rem + 0.2vw, 1.25rem);
@@ -101,7 +100,7 @@
   --spacing-gutter: clamp(1.25rem, -0.25rem + 6vw, 5rem); /* page side padding: 80px at desktop */
   --spacing-section: clamp(3rem, 1.75rem + 5vw, 5rem); /* section vertical padding: 80px */
   --spacing-column-gap: 1rem; /* 16px gap between the 12 grid columns */
-  --spacing-nav: 4.375rem; /* 70px fixed header height: 16px above and below the 38px CTA */
+  --spacing-nav: 3.875rem; /* 62px fixed header height: 12px above the 38px CTA, 11px + the 1px rule below */
 
   /* ---------- Effects ---------- */
   --drop-shadow-paper: 0 6px 10px rgb(0 0 0 / 0.12);
@@ -110,13 +109,29 @@
   --breakpoint-lg: 64rem;
 }
 
+/* Primary CTA colours follow the section behind them (sections mark their
+   background with data-tone; unmarked areas count as butter). No border. */
+:root,
+[data-tone="butter"] {
+  --cta-bg: var(--color-brick-red);
+  --cta-fg: var(--color-butter);
+}
+[data-tone="red"] {
+  --cta-bg: var(--color-black);
+  --cta-fg: var(--color-butter);
+}
+[data-tone="black"] {
+  --cta-bg: var(--color-butter);
+  --cta-fg: var(--color-black);
+}
+
 @layer base {
   html {
     /* Keep the scrollbar's space reserved, so unlocking scroll after the hero
        intro doesn't shift the layout on systems with classic scrollbars. */
     scrollbar-gutter: stable;
-    background-color: var(--color-sand);
-    color: var(--color-ink);
+    background-color: var(--color-butter);
+    color: var(--color-black);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;

@@ -5,7 +5,6 @@ import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
 import DayDial from '../components/approach/DayDial.astro';
 import DayNinetyOne from '../components/approach/DayNinetyOne.astro';
-import AgencyComparison from '../components/approach/AgencyComparison.astro';
 import WhatWeDo from '../components/approach/WhatWeDo.astro';
 import FeaturedWork from '../components/FeaturedWork.astro';
 import Footer from '../components/Footer.astro';
@@ -22,6 +21,7 @@ import { approachSteps, contactHref, dayNinetyOne, offerings } from '../data/sit
   <main id="main-content" class="overflow-x-clip">
     <!-- Intro: full-width headline, then a 7/5 split of copy and CTA -->
     <Section
+      tone="red"
       rule={false}
       padded={false}
       class="flex flex-col gap-8 pt-[calc(var(--spacing-nav)+var(--spacing-section))] pb-[clamp(4rem,2.5rem+6vw,7.5rem)]"
@@ -44,14 +44,11 @@ import { approachSteps, contactHref, dayNinetyOne, offerings } from '../data/sit
     <!-- Day 91: what the team is left with -->
     <DayNinetyOne items={dayNinetyOne} />
 
-    <!-- Typical agency vs Cozm -->
-    <AgencyComparison />
-
     <!-- What we do: offerings as tabs with an image stack -->
     <WhatWeDo items={offerings} />
 
     <FeaturedWork />
   </main>
 
-  <Footer heading="Let’s talk about what your team could be making 90 days from now." />
+  <Footer heading="Let’s talk about what your team could be making" accent="90 days from now." />
 </BaseLayout>

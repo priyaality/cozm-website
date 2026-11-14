@@ -29,13 +29,14 @@ const { heading, projects } = Astro.props;
 
 <section
   data-work-showcase
-  class="grid gap-y-8 bg-sand px-gutter pt-[calc(var(--spacing-nav)+2rem)] pb-8 lg:h-svh lg:min-h-[44rem] lg:grid-12 lg:grid-rows-[auto_1fr]"
+  data-tone="red"
+  class="grid gap-y-8 bg-brick-red px-gutter text-butter pt-[calc(var(--spacing-nav)+2rem)] pb-8 lg:h-svh lg:min-h-[44rem] lg:grid-12 lg:grid-rows-[auto_1fr]"
 >
   <h1 class="text-headline lg:col-span-5 lg:col-start-8 lg:row-start-1">{heading}</h1>
 
   <!-- Media frame with the project list in its bottom-left corner -->
   <div class="flex flex-col gap-4 lg:relative lg:col-span-7 lg:col-start-1 lg:row-span-2 lg:row-start-1">
-    <div class="work-covers relative grid aspect-[4/3] overflow-hidden border border-ink bg-ink lg:aspect-auto lg:h-full">
+    <div class="work-covers relative grid aspect-[4/3] overflow-hidden border border-black bg-black lg:aspect-auto lg:h-full">
       {
         projects.map(({ item }, i) => (
           <div data-project-media data-active={i === 0 ? '' : undefined} class="relative aspect-[4/3] lg:aspect-auto">
@@ -65,7 +66,8 @@ const { heading, projects } = Astro.props;
       }))}
       idPrefix="work"
       label="Projects"
-      class="lg:absolute lg:bottom-2 lg:left-2 lg:w-max lg:min-w-[326px] lg:text-sand"
+      compact
+      class="lg:absolute lg:bottom-2 lg:left-2 lg:w-max lg:min-w-[326px] lg:text-butter"
     />
   </div>
 
@@ -76,6 +78,7 @@ const { heading, projects } = Astro.props;
         <ProjectDetails
           idPrefix="work"
           index={i}
+          tone="red"
           title={item.title}
           description={item.description}
           about={about}

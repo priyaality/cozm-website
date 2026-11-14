@@ -3,15 +3,19 @@
  * Button — the rectangular CTA used throughout the design. Renders a link when
  * given an `href`, otherwise a <button type="button">.
  *
- * variant
- *   primary   ink fill, sand label            ("Talk to us", "Start a conversation")
- *   secondary sand fill, ink border + label    ("Learn our approach", "View all work"…)
- *   ghost     transparent, border + label in the current text colour
- *             (header "Talk to us": sand over the hero, ink once scrolled)
+ * variant (Figma: homepage, node 304:2345)
+ *   primary   filled, no border; colours follow the section behind it (global.css):
+ *             butter → brick red, brick red → black, black → butter
+ *             ("Talk to us", "Start a conversation", "Notify me", "Back to home")
+ *   secondary butter fill, black border + label        ("Learn our approach", "Talk to us"…)
+ *   outline   brick-red fill, butter border + label    (on brick-red sections: "View all work"…)
+ *   dark      black fill, butter border + label        (over video on /originals: "Listen on Spotify"…)
+ *   ghost     transparent, border + label in the current text colour (mobile menu, "View full catalog")
+ *   red       brick-red fill, butter label             (the hero card's Play / Pause)
  * size
- *   lg    full-width block CTA, 28/40 padding, button-text type
- *   sm    compact button, 9/24 padding, nav type
- *   xs    small inline control (e.g. the hero's Pause), caption type
+ *   lg    full-width block CTA, 28/40 padding, button-text type (20 / semibold)
+ *   sm    compact button, 10/24 padding, 16 / semibold (header "Talk to us")
+ *   xs    small inline control (the hero card's Play / Pause, View full catalog), caption type
  *   icon  56px square for a single icon (e.g. the hero's scroll-down button)
  */
 import type { HTMLAttributes } from 'astro/types';
@@ -21,22 +25,25 @@ type Props = Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> & {
   href?: string;
   /** For the <button> form (no href): 'submit' inside a form. */
   type?: 'button' | 'submit';
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'dark' | 'ghost' | 'red';
   size?: 'lg' | 'sm' | 'xs' | 'icon';
 };
 
 const { href, type = 'button', variant = 'secondary', size = 'lg', class: className, ...rest } = Astro.props;
 
 const variants = {
-  primary: 'bg-ink text-sand border-ink',
-  secondary: 'bg-sand text-ink border-ink',
+  primary: 'bg-(--cta-bg) text-(--cta-fg) border-transparent',
+  secondary: 'bg-butter text-black border-black',
+  outline: 'bg-brick-red text-butter border-butter',
+  dark: 'bg-black text-butter border-butter',
   ghost: 'bg-transparent text-current border-current',
+  red: 'bg-brick-red text-butter border-brick-red',
 };
 
 const sizes = {
   lg: 'w-full px-10 py-7 button-text',
-  sm: 'px-6 py-[9px] text-nav',
-  xs: 'gap-1.5 px-3 py-1.5 text-caption font-semibold',
+  sm: 'px-6 py-2.5 text-nav font-semibold leading-none',
+  xs: 'gap-2 px-3 py-1.5 text-caption leading-none',
   icon: 'size-14',
 };
 

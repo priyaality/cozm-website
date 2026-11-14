@@ -21,10 +21,11 @@ const social = [
 ---
 
 <section
-  class="grid-split gap-y-10 border-t border-ink bg-sand px-gutter py-8 lg:min-h-[calc(100svh-var(--spacing-nav))]"
+  data-tone="red"
+  class="grid-split gap-y-10 border-t border-black bg-brick-red px-gutter text-butter py-8 lg:min-h-[calc(100svh-var(--spacing-nav))]"
 >
   <div class="flex flex-col justify-center gap-4">
-    <h2 class="text-caption leading-[1.2] font-semibold uppercase opacity-60">Team</h2>
+    <h2 class="text-caption leading-[1.2] font-semibold text-black uppercase">Team</h2>
     <div class="flex flex-col gap-6 text-lead">
       {
         team.bio.map((paragraph) => (
@@ -35,7 +36,7 @@ const social = [
                   typeof part === 'string' ? (
                     part
                   ) : (
-                    <a href={withBase(part.href)} class="text-rust underline-offset-4 hover:underline focus-visible:underline">
+                    <a href={withBase(part.href)} class="text-black underline-offset-4 hover:underline focus-visible:underline">
                       {part.label}
                     </a>
                   ),
@@ -63,7 +64,7 @@ const social = [
     </ul>
   </div>
 
-  <div class="relative aspect-[554/613] overflow-hidden border border-ink lg:aspect-auto">
+  <div class="relative aspect-[554/613] overflow-hidden border border-black lg:aspect-auto">
     <Image
       src={photo}
       alt={team.name}

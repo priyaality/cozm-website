@@ -31,9 +31,15 @@ export interface ProjectDetailsContent {
 interface Props extends ProjectDetailsContent {
   idPrefix: string;
   index: number;
+  /**
+   * red   on brick red (/work): 20px copy, black credit line, outline buttons
+   * dark  over video (/originals): 16px copy, black buttons with butter borders
+   */
+  tone?: 'red' | 'dark';
 }
 
-const { idPrefix, index, title, tag, description, about, facts, note, credit, links = [] } = Astro.props;
+const { idPrefix, index, title, tag, description, about, facts, note, credit, links = [], tone = 'dark' } = Astro.props;
+const copy = tone === 'red' ? 'text-body' : 'text-small';
 const hasSlot = Astro.slots.has('default');
 ---
 
@@ -47,30 +53,30 @@ const hasSlot = Astro.slots.has('default');
 >
   <div class="flex items-start gap-3">
     <h2 class="min-w-0 flex-1 text-title">{title}</h2>
-    {tag && <span class="mt-1 bg-ink px-1 text-caption leading-[1.3] whitespace-nowrap text-sand">{tag}</span>}
+    {tag && <span class="mt-1 bg-black px-1 text-caption leading-[1.3] whitespace-nowrap text-butter">{tag}</span>}
   </div>
-  <p class="text-small">{description}</p>
-  {about && <p class="text-small">{about}</p>}
+  <p class={copy}>{description}</p>
+  {about && <p class={copy}>{about}</p>}
   {
     facts.length > 0 && (
       <dl class="grid grid-cols-2 gap-4">
         {facts.map((fact, f) => (
           // An odd last fact (e.g. notable guests) gets the full row.
           <div class:list={['flex flex-col gap-0.5', f === facts.length - 1 && f % 2 === 0 && 'col-span-2']}>
-            <dt class="text-caption leading-[1.2] font-semibold uppercase opacity-60">{fact.label}</dt>
-            <dd class="text-small">{fact.value}</dd>
+            <dt class="text-caption leading-[1.2] font-medium uppercase opacity-60">{fact.label}</dt>
+            <dd class={copy}>{fact.value}</dd>
           </div>
         ))}
       </dl>
     )
   }
   {note && <p class="text-small">{note}</p>}
-  {credit && <p class="button-text">{credit}</p>}
+  {credit && <p class:list={['button-text', tone === 'red' && 'text-black']}>{credit}</p>}
   {
     links.length > 0 && (
       <div class:list={['grid gap-2', links.length > 1 && 'sm:grid-cols-2']}>
         {links.map((link) => (
-          <Button href={link.href} target="_blank" rel="noopener">
+          <Button href={link.href} variant={tone === 'red' ? 'outline' : 'dark'} target="_blank" rel="noopener">
             {link.label}
             <span class="sr-only"> (opens in a new tab)</span>
           </Button>

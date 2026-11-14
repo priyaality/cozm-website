@@ -22,7 +22,7 @@ const external = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } :
 ---
 
 <article
-  class="relative flex flex-col overflow-hidden border border-ink bg-paper lg:block lg:aspect-[1352/800]"
+  class="relative flex flex-col overflow-hidden border border-black bg-paper text-black lg:block lg:aspect-[1352/800]"
 >
   <div class="aspect-video w-full lg:absolute lg:inset-0 lg:aspect-auto">
     <slot name="media" />
@@ -33,7 +33,7 @@ const external = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } :
       class="flex flex-col gap-4 p-4 lg:pointer-events-auto lg:col-span-5 lg:col-start-8 lg:p-0 lg:pr-4 lg:pb-4"
     >
       <h3 class="text-title">{title}</h3>
-      <p class="text-body text-ink-muted">{description}</p>
+      <p class="text-body text-black-muted">{description}</p>
       <Button href={cta.href} variant="secondary" {...external}
         >{cta.label}{isExternal && <span class="sr-only">: {title} (opens in a new tab)</span>}</Button
       >

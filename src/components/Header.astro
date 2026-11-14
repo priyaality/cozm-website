@@ -2,9 +2,20 @@
 /**
  * Header — fixed to the top of the viewport.
  *
- * Over the hero it's transparent with sand text (as designed). Once the hero
- * has scrolled out from under it, `data-scrolled` is set and it becomes a sand
- * bar with ink text so it stays legible over the sand sections.
+ * Over the hero it's transparent with butter text (as designed). Once the hero
+ * has scrolled out from under it, `data-scrolled` is set and the header takes
+ * the colours of the section beneath it: sections mark their background with
+ * data-tone="butter" | "red" | "black" (Section, HorizontalScroll, LogoTicker,
+ * Footer; anything unmarked counts as butter), and the script below copies the
+ * tone of whichever one is under the header's bottom edge to `data-tone`.
+ *
+ *   butter  butter bar, black text and rule
+ *   red     brick-red bar, butter text, black rule
+ *   black   black bar, butter text, black rule
+ *
+ * "Talk to us" is a primary CTA, so it follows the same tone (brick red on
+ * butter, black on brick red, butter on black); over the hero it's butter.
+ *
  * Pages without a [data-hero] element get the scrolled style immediately.
  */
 import Logo from './ui/Logo.astro';
@@ -16,7 +27,8 @@ import { withBase } from '../lib/paths';
 
 <header
   id="site-header"
-  class="group/header fixed inset-x-0 top-0 z-50 h-nav border-b border-transparent px-gutter pt-4 text-sand transition-colors duration-300 data-scrolled:border-ink data-scrolled:bg-sand data-scrolled:text-ink"
+  data-tone="butter"
+  class="site-header fixed inset-x-0 top-0 z-50 h-nav border-b px-gutter pt-3 transition-colors duration-300"
 >
   <div class="grid-split items-start">
     <!-- -mx-3 cancels the padding so the wordmark sits on the page gutter; the padding just enlarges the click target. -->
@@ -27,19 +39,13 @@ import { withBase } from '../lib/paths';
     <!-- Desktop -->
     <nav class="hidden items-start justify-between lg:flex" aria-label="Primary">
       <NavLinks />
-      <!-- Sand over the hero; switches to primary (ink) once the header turns sand. -->
-      <Button
-        href={contactHref}
-        variant="secondary"
-        size="sm"
-        class="transition-colors duration-300 group-data-scrolled/header:border-ink group-data-scrolled/header:bg-ink group-data-scrolled/header:text-sand"
-      >
+      <Button href={contactHref} variant="primary" size="sm" class="transition-colors duration-300">
         Talk to us
       </Button>
     </nav>
 
     <!-- Mobile -->
-    <details class="group absolute top-4 right-gutter lg:hidden">
+    <details class="group absolute top-3 right-gutter lg:hidden">
       <summary
         class="cursor-pointer list-none border border-current px-6 py-[9px] text-nav [&::-webkit-details-marker]:hidden"
       >
@@ -47,21 +53,72 @@ import { withBase } from '../lib/paths';
         <span class="hidden group-open:inline">Close</span>
       </summary>
       <nav
-        class="absolute right-0 mt-2 flex w-56 flex-col border border-current bg-ink p-4 text-sand group-data-scrolled/header:bg-sand group-data-scrolled/header:text-ink"
+        class="site-header__menu absolute right-0 mt-2 flex w-56 flex-col border border-current p-4"
         aria-label="Primary"
       >
         {
           navLinks.map((link) => (
-            <a href={withBase(link.href)} class="py-3 text-nav">
+            <a href={withBase(link.href)} class="py-3 text-nav text-(--nav-link)">
               {link.label}
             </a>
           ))
         }
-        <Button href={contactHref} variant="ghost" size="sm" class="mt-2">Talk to us</Button>
+        <Button href={contactHref} variant="primary" size="sm" class="mt-2">Talk to us</Button>
       </nav>
     </details>
   </div>
 </header>
+
+<style>
+  /* Header colours: over the hero, then per tone of the section beneath it. */
+  /* --nav-link: nav item text; --nav-active: the current page's text and 2px rules
+     (also the hover / focus rules). The logo uses --header-fg. */
+  .site-header {
+    --header-bg: transparent;
+    --header-fg: var(--color-butter);
+    --header-rule: transparent;
+    --nav-link: var(--color-butter);
+    --nav-active: var(--color-butter);
+    background-color: var(--header-bg);
+    color: var(--header-fg);
+    border-color: var(--header-rule);
+  }
+  .site-header[data-scrolled] {
+    --header-bg: var(--color-butter);
+    --header-fg: var(--color-black);
+    --header-rule: var(--color-black);
+    --nav-link: var(--color-black);
+    --nav-active: var(--color-brick-red);
+  }
+  .site-header[data-scrolled][data-tone='red'] {
+    --header-bg: var(--color-brick-red);
+    --header-fg: var(--color-butter);
+    --header-rule: var(--color-black);
+    --nav-link: var(--color-black);
+    --nav-active: var(--color-butter);
+  }
+  .site-header[data-scrolled][data-tone='black'] {
+    --header-bg: var(--color-black);
+    --header-fg: var(--color-butter);
+    --header-rule: var(--color-black);
+    --nav-link: var(--color-butter);
+    --nav-active: var(--color-brick-red);
+  }
+  /* Over the hero video the primary CTA is butter (as on black). */
+  .site-header:not([data-scrolled]) {
+    --cta-bg: var(--color-butter);
+    --cta-fg: var(--color-black);
+  }
+  /* Mobile menu: black over the hero, the header's own colours after that. */
+  .site-header__menu {
+    background-color: var(--color-black);
+    color: var(--color-butter);
+  }
+  .site-header[data-scrolled] .site-header__menu {
+    background-color: var(--header-bg);
+    color: var(--header-fg);
+  }
+</style>
 
 <script>
   const header = document.getElementById('site-header');
@@ -78,5 +135,30 @@ import { withBase } from '../lib/paths';
     observer.observe(hero);
   } else {
     header?.setAttribute('data-scrolled', '');
+  }
+
+  // Match the header to the section beneath it. Elements come in document order,
+  // so the last match is the innermost one (e.g. a band inside a section).
+  if (header) {
+    const toned = [...document.querySelectorAll<HTMLElement>('[data-tone]')].filter((el) => el !== header);
+    let queued = false;
+    const syncTone = () => {
+      queued = false;
+      const y = header.offsetHeight;
+      let tone = 'butter';
+      for (const el of toned) {
+        const { top, bottom } = el.getBoundingClientRect();
+        if (top <= y && bottom > y) tone = el.dataset.tone ?? tone;
+      }
+      if (header.dataset.tone !== tone) header.dataset.tone = tone;
+    };
+    const queue = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(syncTone);
+    };
+    addEventListener('scroll', queue, { passive: true });
+    addEventListener('resize', queue);
+    syncTone();
   }
 </script>

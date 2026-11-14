@@ -40,7 +40,7 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
 <!-- Desktop: fills the visible area below the fixed header (100svh − nav). -->
 <section
   data-offerings
-  class="border-t border-ink bg-sand px-gutter py-section lg:h-[calc(100svh-var(--spacing-nav))] lg:min-h-[36rem]"
+  class="border-t border-black bg-butter px-gutter py-section lg:h-[calc(100svh-var(--spacing-nav))] lg:min-h-[36rem]"
 >
   <div class="grid gap-y-10 lg:h-full lg:grid-12">
     <!-- Heading + list at the top, description at the bottom (columns 1–4) -->
@@ -58,9 +58,9 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
                 aria-selected={i === 0 ? 'true' : 'false'}
                 tabindex={i === 0 ? 0 : -1}
                 data-offering-tab
-                class="offering-tab flex cursor-pointer items-center text-left text-title text-ink-faint transition-colors duration-300 aria-selected:text-ink"
+                class="offering-tab flex cursor-pointer items-center text-left text-title text-black-faint transition-colors duration-300 aria-selected:text-black"
               >
-                <span aria-hidden="true" class="offering-tab__dot block size-3 shrink-0 rounded-full bg-ink" />
+                <span aria-hidden="true" class="offering-tab__dot block size-3 shrink-0 rounded-full bg-black" />
                 {item.name}
               </button>
             ))
@@ -84,7 +84,7 @@ const slotFor = (i: number) => (i === 0 ? 'front' : i === 1 ? 'left' : i === 2 ?
       <div class="offering-stack grid w-full place-items-center" aria-hidden="true">
         {
           items.map((item, i) => (
-            <div data-offering-card data-slot={slotFor(i)} class="offering-card relative overflow-hidden border border-ink bg-paper">
+            <div data-offering-card data-slot={slotFor(i)} class="offering-card relative overflow-hidden border border-black bg-paper">
               {item.image ? (
                 <Image src={item.image} alt="" class="size-full object-cover grayscale" widths={[480, 960]} sizes="(min-width: 64rem) 40vw, 70vw" />
               ) : (

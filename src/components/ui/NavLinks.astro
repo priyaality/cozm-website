@@ -1,9 +1,10 @@
 ---
 /**
- * NavLinks — the Approach / Work / Originals / About list. Links inherit the
- * surrounding text colour (sand/ink in the header, ink in the footer).
- * In the header row, the hovered, focused and current-page links are marked
- * with a 2px rule above and below (Figma node 111:2503).
+ * NavLinks — the Approach / Work / Originals / About list.
+ * In the header row, colours come from the header (--nav-link, --nav-active;
+ * see Header.astro): the current page is in the active colour with a 2px rule
+ * above and below, and hovered / focused links get the rules. In the footer
+ * column, links inherit the surrounding text colour.
  */
 import { navLinks } from '../../data/site';
 import { withBase, withoutBase } from '../../lib/paths';
@@ -33,10 +34,9 @@ const here = withoutBase(Astro.url.pathname);
           class:list={[
             'block text-nav whitespace-nowrap',
             direction === 'row'
-              ? // Header: hover / focus / current page get a 2px rule above and below, in the
-                // text colour (sand over the hero, ink on the bar). The borders are always there,
-                // transparent, with 7px padding (9px in Figma minus the 2px rule) so nothing shifts.
-                'border-y-2 border-transparent py-[7px] transition-colors duration-200 hover:border-current focus-visible:border-current focus-visible:outline-none aria-[current=page]:border-current'
+              ? // Header: the borders are always there, transparent, with 7px padding (9px in
+                // Figma minus the 2px rule) so nothing shifts when they appear.
+                'border-y-2 border-transparent py-[7px] text-(--nav-link) transition-colors duration-200 hover:border-(--nav-active) focus-visible:border-(--nav-active) focus-visible:outline-none aria-[current=page]:border-(--nav-active) aria-[current=page]:text-(--nav-active)'
               : 'py-3',
           ]}
         >

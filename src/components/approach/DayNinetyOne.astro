@@ -1,6 +1,8 @@
 ---
 /**
- * DayNinetyOne — "On day 91, you'll have:" with the four outcomes.
+ * DayNinetyOne — "On day 91, you'll have:" with the four outcomes (Figma
+ * 313:3826). The heading is two lines in brick red: the agency version, struck
+ * through at 60%, then ours.
  *
  * Desktop: a 4-column, 2-row zigzag (01 and 03 on the top row, 02 and 04 on
  * the bottom row, each one column across), as in Figma. The list stays in
@@ -14,13 +16,16 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<section class="bg-sand px-gutter py-section">
-  <h2 class="text-headline">On day 91, you’ll have:</h2>
+<section class="bg-butter px-gutter py-section">
+  <h2 class="text-headline text-brick-red">
+    <s class="block text-brick-red/60">On day 91, you’ll get another invoice</s>
+    <span class="block">On day 91, you’ll have:</span>
+  </h2>
   <ol class="day-91 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
     {
       items.map((item, i) => (
         <li class="flex flex-col gap-1 p-4 lg:pb-6">
-          <span class="text-nav leading-[1.2] font-bold">{String(i + 1).padStart(2, '0')} //</span>
+          <span class="text-nav leading-[1.2] font-semibold text-brick-red">{String(i + 1).padStart(2, '0')} //</span>
           <span class="text-body">{item}</span>
         </li>
       ))

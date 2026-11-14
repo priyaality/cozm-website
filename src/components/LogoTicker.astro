@@ -1,11 +1,13 @@
 ---
 /**
- * LogoTicker — "Built with": an endlessly scrolling row of client logos
- * (Figma: ticker-section, node 291:380). The row is rendered twice and the
- * track slides by exactly one copy (-50%), so the loop is seamless. Stops for
- * prefers-reduced-motion.
+ * LogoTicker — "Built with": an endlessly scrolling row of client logos on
+ * brick red (Figma: homepage › ticker-section, node 304:2374). The row is
+ * rendered twice and the track slides by exactly one copy (-50%), so the loop
+ * is seamless. Stops for prefers-reduced-motion.
  *
- * Logos are 80% of their Figma sizes (56% on small screens).
+ * Logo boxes are the Figma sizes (70% on small screens). Some images have
+ * empty space around the logo; `crop` places the image in its box as Figma
+ * does (percentages of the box: image width/height, left/top offset).
  */
 import luminary from '../assets/logos/luminary.svg';
 import myMuse from '../assets/logos/mymuse.png';
@@ -22,19 +24,26 @@ interface Props {
 
 const { duration = 40 } = Astro.props;
 
-const logos = [
-  { src: luminary, name: 'Luminary', width: 252.972, height: 56 },
-  { src: myMuse, name: 'MyMuse', width: 116.667, height: 56 },
-  { src: audible, name: 'Audible', width: 163.025, height: 64 },
-  { src: autoX, name: 'autoX', width: 151.5, height: 48 },
-  // The Coke Studio image has empty space above and below; it's cropped to this box, as in Figma.
-  { src: cokeStudio, name: 'Coke Studio', width: 269.647, height: 40 },
-  { src: capMint, name: 'CapMint', width: 188.235, height: 64 },
-  { src: paisaSmart, name: 'PaisaSmart', width: 287.102, height: 48 },
+interface Logo {
+  src: ImageMetadata;
+  name: string;
+  width: number;
+  height: number;
+  crop?: { w: number; h: number; left: number; top: number };
+}
+
+const logos: Logo[] = [
+  { src: luminary, name: 'Luminary', width: 202.377, height: 44.8 },
+  { src: myMuse, name: 'MyMuse', width: 104, height: 45, crop: { w: 101.54, h: 99.56, left: -1.09, top: 0 } },
+  { src: audible, name: 'Audible', width: 131, height: 55 },
+  { src: autoX, name: 'autoX', width: 121.2, height: 38.4 },
+  { src: cokeStudio, name: 'Coke Studio', width: 196, height: 31, crop: { w: 110.06, h: 295.21, left: -6.01, top: -91.16 } },
+  { src: capMint, name: 'CapMint', width: 152, height: 44, crop: { w: 99.07, h: 145.2, left: 0.66, top: -16.69 } },
+  { src: paisaSmart, name: 'PaisaSmart', width: 229.682, height: 38.4 },
 ];
 ---
 
-<section class="logo-ticker flex flex-col gap-4 bg-sand pb-4" aria-labelledby="built-with">
+<section data-tone="red" class="logo-ticker flex flex-col gap-4 bg-brick-red pb-4 text-butter" aria-labelledby="built-with">
   <h2 id="built-with" class="button-text text-center uppercase">Built with</h2>
   <div class="overflow-hidden py-6" style={`--ticker-duration: ${duration}s`}>
     <div class="logo-ticker__track flex w-max">
@@ -42,14 +51,17 @@ const logos = [
         [0, 1].map((copy) => (
           <ul class="logo-ticker__row flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
             {logos.map((logo) => (
-              <li class="shrink-0">
+              <li class="logo-ticker__logo relative shrink-0 overflow-hidden" style={`--w: ${logo.width}px; --h: ${logo.height}px`}>
                 <img
                   src={logo.src.src}
-                  width={logo.width}
-                  height={logo.height}
+                  width={logo.src.width}
+                  height={logo.src.height}
                   alt={copy === 0 ? logo.name : ''}
-                  style={`--w: ${logo.width}px; --h: ${logo.height}px`}
-                  class="logo-ticker__logo block object-cover"
+                  style={
+                    logo.crop &&
+                    `width: ${logo.crop.w}%; height: ${logo.crop.h}%; left: ${logo.crop.left}%; top: ${logo.crop.top}%`
+                  }
+                  class:list={['block max-w-none', logo.crop ? 'absolute' : 'size-full']}
                   loading="lazy"
                   decoding="async"
                 />
@@ -64,13 +76,13 @@ const logos = [
 
 <style>
   .logo-ticker {
-    --scale: 0.56;
+    --scale: 0.7;
     --gap: 48px;
   }
 
   @media (min-width: 64rem) {
     .logo-ticker {
-      --scale: 0.8;
+      --scale: 1;
       --gap: 72px;
     }
   }

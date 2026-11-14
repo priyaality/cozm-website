@@ -20,32 +20,32 @@ const icon = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejo
 
 <div
   data-player-card
-  class="relative flex w-[min(26rem,calc(100vw-2*var(--spacing-gutter)))] flex-col gap-6 border border-ink bg-sand p-5 text-ink"
+  class="relative flex w-[min(26rem,calc(100vw-2*var(--spacing-gutter)))] flex-col gap-6 border border-black bg-butter p-5 text-black"
 >
-  <div data-player-thumb class="relative aspect-video overflow-hidden bg-ink">
+  <div data-player-thumb class="relative aspect-video overflow-hidden bg-black">
     <slot />
   </div>
 
   <div data-player-chrome class="flex flex-col gap-6" aria-hidden="true">
     <div class="flex flex-col gap-1">
       <p class="text-title">{title}</p>
-      <p class="text-body text-ink-muted">{subtitle}</p>
+      <p class="text-body text-black-muted">{subtitle}</p>
     </div>
 
     <!-- Seek bar: parked at 0:00 while the video loads -->
     <div class="flex flex-col gap-2">
-      <div class="relative h-0.5 bg-ink/15">
+      <div class="relative h-0.5 bg-black/15">
         <!-- playhead, parked at 0:00 -->
-        <span class="absolute top-1/2 left-0 size-2.5 -translate-y-1/2 bg-ink"></span>
+        <span class="absolute top-1/2 left-0 size-2.5 -translate-y-1/2 bg-black"></span>
       </div>
-      <div class="flex justify-between text-caption text-ink-muted tabular-nums">
+      <div class="flex justify-between text-caption text-black-muted tabular-nums">
         <span>0:00</span><span data-player-duration>{duration}</span>
       </div>
     </div>
 
     <!-- Transport: loading spinner in place of play -->
     <div class="flex items-center justify-center gap-12">
-      <svg viewBox="0 0 24 24" class="size-6 text-ink-muted" set:html={`<path ${icon} d="M6 5v14M19 5v14l-10-7z"/>`} />
+      <svg viewBox="0 0 24 24" class="size-6 text-black-muted" set:html={`<path ${icon} d="M6 5v14M19 5v14l-10-7z"/>`} />
       <svg viewBox="0 0 36 36" class="player-spinner size-9" role="presentation">
         <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1.5"></circle>
         <circle
@@ -58,15 +58,15 @@ const icon = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejo
           stroke-dasharray="24 100"
           stroke-linecap="square"></circle>
       </svg>
-      <svg viewBox="0 0 24 24" class="size-6 text-ink-muted" set:html={`<path ${icon} d="M18 5v14M5 5v14l10-7z"/>`} />
+      <svg viewBox="0 0 24 24" class="size-6 text-black-muted" set:html={`<path ${icon} d="M18 5v14M5 5v14l10-7z"/>`} />
     </div>
 
     <!-- Volume -->
     <div class="flex items-center gap-4">
       <svg viewBox="0 0 24 24" class="size-5 shrink-0" set:html={`<path ${icon} d="M4 9h4l5-4v14l-5-4H4z"/>`} />
-      <div class="relative h-0.5 flex-1 bg-ink/15">
-        <div class="absolute inset-y-0 left-0 w-[70%] bg-ink">
-          <span class="absolute top-1/2 right-0 size-2.5 translate-x-1/2 -translate-y-1/2 bg-ink"></span>
+      <div class="relative h-0.5 flex-1 bg-black/15">
+        <div class="absolute inset-y-0 left-0 w-[70%] bg-black">
+          <span class="absolute top-1/2 right-0 size-2.5 translate-x-1/2 -translate-y-1/2 bg-black"></span>
         </div>
       </div>
       <svg

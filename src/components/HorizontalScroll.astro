@@ -17,13 +17,15 @@
 interface Props {
   /** Width ÷ height of each item at desktop (the height is trimmed on short viewports). */
   aspect?: number;
+  /** Background: butter (default) or brick red (the homepage). */
+  tone?: 'butter' | 'red';
   class?: string;
 }
 
-const { aspect = 1352 / 800, class: className } = Astro.props;
+const { aspect = 1352 / 800, tone = 'butter', class: className } = Astro.props;
 ---
 
-<section data-hscroll class:list={['hscroll relative bg-sand', className]} style={`--hs-aspect: ${aspect}`}>
+<section data-hscroll class:list={['hscroll relative', tone === 'red' ? 'bg-brick-red' : 'bg-butter', className]} data-tone={tone} style={`--hs-aspect: ${aspect}`}>
   <div class="hscroll__stage">
     <div class="hscroll__track">
       <slot />

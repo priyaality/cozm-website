@@ -19,7 +19,7 @@ export const seo = {
   locale: 'en_IN',
   lang: 'en-IN',
   /** Sand, the page background. */
-  themeColor: '#e7dbc9',
+  themeColor: '#fefdde',
   ogImage: '/og.jpg',
   ogImageAlt: 'COZM — Original media for India’s top 10%',
   /** Square logo for JSON-LD (Google wants ≥112×112). */
