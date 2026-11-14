@@ -97,7 +97,10 @@ import { heroVideo } from '../data/site';
    * first UP_THRESHOLD px, and only past that do we glide back to the hero.
    * Stopping short of it settles the intro back at the top.
    * Leftover trackpad momentum after a glide is swallowed until it dies down,
-   * so it can't overshoot. When input goes quiet with the page stopped partway
+   * so it can't overshoot. Only input in the glide's direction is swallowed:
+   * scrolling the other way (during the glide or just after) is a new intent,
+   * so it stops the glide and is handled like any other scroll.
+   * When input goes quiet with the page stopped partway
    * (a short scroll up, keys, the scrollbar), the same rules finish the move.
    */
   import { cubicBezier, glideScroll } from '../scripts/glide-scroll';
@@ -121,6 +124,17 @@ import { heroVideo } from '../data/site';
     let quietTimer: number | undefined;
     /** True from the start of a glide until input has been quiet for a moment after it. */
     let swallowing = false;
+    /** Direction of the current / last glide (1 down, -1 up); only this direction is swallowed. */
+    let glideDirection = 0;
+    let stopGlide: (() => void) | undefined;
+
+    /** Drop the current glide (if any) and stop swallowing, e.g. when the visitor reverses. */
+    const release = () => {
+      stopGlide?.();
+      stopGlide = undefined;
+      clearTimeout(quietTimer);
+      gliding = swallowing = false;
+    };
 
     const keepSwallowing = () => {
       clearTimeout(quietTimer);
@@ -132,9 +146,12 @@ import { heroVideo } from '../data/site';
     const glide = (direction: number) => {
       const target = direction > 0 ? end() : 0;
       if (Math.abs(window.scrollY - target) < 1) return;
+      stopGlide?.();
       gliding = swallowing = true;
+      glideDirection = direction;
       const done = () => {
         gliding = false;
+        stopGlide = undefined;
         keepSwallowing();
       };
       if (reducedMotion) {
@@ -142,7 +159,7 @@ import { heroVideo } from '../data/site';
         done();
         return;
       }
-      glideScroll(target, 900, easeOut, done);
+      stopGlide = glideScroll(target, 900, easeOut, done);
     };
 
     /** Should a scroll in this direction be turned into a glide? */
@@ -156,9 +173,14 @@ import { heroVideo } from '../data/site';
     const intent = (event: Event, direction: number) => {
       if (!unlocked() || direction === 0) return;
       if (swallowing) {
-        event.preventDefault();
-        keepSwallowing();
-        return;
+        if (direction === glideDirection) {
+          // Momentum from the gesture that started the glide.
+          event.preventDefault();
+          keepSwallowing();
+          return;
+        }
+        // Scrolling the other way: a new intent, not momentum.
+        release();
       }
       if (inCurtain(direction)) {
         event.preventDefault();
