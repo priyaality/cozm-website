@@ -36,7 +36,7 @@ const { items } = Astro.props;
 >
   <div class="grid-split items-start py-4">
     <!-- Card (columns 1–7; on top on small screens): stays put while the list scrolls -->
-    <div data-wwd-card class="wwd-cards__card sticky z-10 grid overflow-clip rounded-[24px] p-4" aria-hidden="true">
+    <div data-wwd-card class="wwd-cards__card sticky z-10 grid overflow-clip p-4" aria-hidden="true">
       {
         items.map((item, i) => (
           <OfferingCard

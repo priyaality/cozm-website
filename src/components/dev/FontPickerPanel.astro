@@ -6,12 +6,16 @@
  * FontPickerHead. Rendered only through FontPicker.astro, when the picker is
  * enabled (see ./enabled.ts).
  *
+ * On /approach the panel also has a "What we do" group, to switch between the
+ * section's versions (hidden elsewhere; WhatWeDo.astro shows and wires it up).
+ *
  * The panel is a native popover: it closes on Escape or a click outside.
  * Each option is shown in its own face. The preview fonts are fetched when the
  * panel first opens: Fontshare's variable files, Google just the letters of
  * the names.
  */
 import { fontsByRole, type FontOption } from '../../data/fonts';
+import { wwdVersions } from '../approach/wwd-versions';
 
 const roles = [
   { role: 'heading', label: 'Heading' },
@@ -36,6 +40,20 @@ const stack = (o: FontOption) =>
     popover
     class="font-picker-panel m-0 w-[min(26rem,calc(100vw-2rem))] border border-black bg-butter p-5 text-black shadow-[0_8px_24px_rgb(0_0_0/0.25)]"
   >
+    <fieldset data-wwd-picker hidden class="mb-5 border-b border-black/20 pb-5">
+      <legend class="mb-2 button-text">What we do</legend>
+      <div class="flex flex-wrap gap-x-5 gap-y-1">
+        {
+          wwdVersions.map((v) => (
+            <label class="flex cursor-pointer items-center gap-2 py-0.5 text-small has-checked:font-semibold">
+              <input type="radio" name="wwd-version" value={v.id} data-wwd-switch class="accent-black" />
+              {v.label}
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
     <div class="flex items-baseline justify-between gap-4">
       <p class="button-text">Fonts</p>
       <button type="button" data-font-reset class="cursor-pointer text-caption underline underline-offset-2">
@@ -95,7 +113,7 @@ const stack = (o: FontOption) =>
   const panel = document.getElementById('font-picker-panel');
 
   if (fonts && panel) {
-    const radios = [...panel.querySelectorAll<HTMLInputElement>('input[type=radio]')];
+    const radios = [...panel.querySelectorAll<HTMLInputElement>('input[type=radio][name^="font-"]')];
     const sync = () => {
       const current = fonts.current();
       radios.forEach((r) => (r.checked = current[r.name.replace('font-', '') as Role] === r.value));

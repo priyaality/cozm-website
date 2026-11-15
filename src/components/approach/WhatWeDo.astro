@@ -8,16 +8,17 @@
  *   accordion  WhatWeDoAccordion: side-by-side strips, click one to open its card
  *
  * In dev and on the review deploy (the same switch as the font picker; see
- * ../dev/enabled.ts) all are rendered and a floating "What we do" switcher
- * (bottom left) swaps between them. The choice is remembered in this browser
+ * ../dev/enabled.ts) all are rendered, and a "What we do" group in the font
+ * picker's panel (the Aa button) swaps between them. The choice is remembered in this browser
  * and can be linked to with ?wwd=cards, ?wwd=lines or ?wwd=accordion. Production builds render
- * only `defaultVersion`.
+ * only the default (see ./wwd-versions.ts).
  */
 import WhatWeDoCards from './WhatWeDoCards.astro';
 import WhatWeDoLines from './WhatWeDoLines.astro';
 import WhatWeDoAccordion from './WhatWeDoAccordion.astro';
 import { fontPickerEnabled as review } from '../dev/enabled';
 import type { Offering } from '../../data/site';
+import { defaultWwdVersion, wwdVersions } from './wwd-versions';
 
 interface Props {
   items: Offering[];
@@ -25,13 +26,8 @@ interface Props {
 
 const { items } = Astro.props;
 
-const versions = [
-  { id: 'cards', label: 'Cards' },
-  { id: 'lines', label: 'Lines' },
-  { id: 'accordion', label: 'Accordion' },
-] as const;
-type Version = (typeof versions)[number]['id'];
-const defaultVersion: Version = 'cards';
+const versions = wwdVersions;
+const defaultVersion = defaultWwdVersion;
 ---
 
 {
@@ -54,23 +50,6 @@ const defaultVersion: Version = 'cards';
       <div data-wwd-version="accordion">
         <WhatWeDoAccordion items={items} />
       </div>
-
-      <div
-        role="group"
-        aria-label="What we do version"
-        class="fixed bottom-4 left-4 z-[60] flex items-center gap-1 border border-black bg-butter p-1 text-black shadow-[0_4px_12px_rgb(0_0_0/0.2)]"
-      >
-        <span class="px-2 text-caption font-semibold uppercase">What we do</span>
-        {versions.map((v) => (
-          <button
-            type="button"
-            data-wwd-switch={v.id}
-            class="cursor-pointer border border-black px-3 py-1.5 text-caption leading-none font-semibold aria-pressed:bg-black aria-pressed:text-butter"
-          >
-            {v.label}
-          </button>
-        ))}
-      </div>
     </>
   ) : defaultVersion === 'cards' ? (
     <WhatWeDoCards items={items} />
@@ -91,20 +70,19 @@ const defaultVersion: Version = 'cards';
 </style>
 
 <script>
-  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-wwd-switch]')];
+  // The switcher's radios are in the font picker's panel (FontPickerPanel),
+  // hidden on pages without this section.
+  const picker = document.querySelector<HTMLElement>('[data-wwd-picker]');
+  const radios = [...document.querySelectorAll<HTMLInputElement>('[data-wwd-switch]')];
   const root = document.documentElement;
 
-  const show = (version: string) => {
-    root.dataset.wwd = version;
-    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.wwdSwitch === version)));
-  };
-
-  if (buttons.length) {
-    show(root.dataset.wwd ?? 'cards');
-    buttons.forEach((button) =>
-      button.addEventListener('click', () => {
-        const version = button.dataset.wwdSwitch!;
-        show(version);
+  if (picker && radios.length) {
+    picker.hidden = false;
+    radios.forEach((radio) => (radio.checked = radio.value === root.dataset.wwd));
+    radios.forEach((radio) =>
+      radio.addEventListener('change', () => {
+        const version = radio.value;
+        root.dataset.wwd = version;
         try {
           localStorage.setItem('cozm-wwd', version);
         } catch {
@@ -113,7 +91,7 @@ const defaultVersion: Version = 'cards';
         const url = new URL(location.href);
         url.searchParams.set('wwd', version);
         history.replaceState(history.state, '', url);
-        // The page height changed: re-measure the pinned sections and the header tone.
+        // The page height changed: re-measure the scroll effects and the header tone.
         window.dispatchEvent(new Event('resize'));
       }),
     );
