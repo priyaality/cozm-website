@@ -1,0 +1,88 @@
+---
+/**
+ * OfferingCard — what's shown for one "What we do" offering: its image (a
+ * blank white card until there are images), its one-line description and the
+ * clients we did it for. Shared by the cards and accordion versions of the
+ * section; it fills its container's height, with the image taking the space
+ * left over (give it a height, or `imageClass` with an aspect ratio).
+ *
+ * Two looks (Figma):
+ *   cards      the cards version's card: 24px description, black-ruled image, logos at 80%
+ *   accordion  the accordion's open panel (362:7390): 20px description, 32px apart,
+ *              borderless image, logos at 60%
+ *
+ * Extra attributes (data-*, etc.) go on the root element.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import { Image } from 'astro:assets';
+import ClientLogo from '../ui/ClientLogo.astro';
+import type { Offering } from '../../data/site';
+import { clientLogos } from '../../data/logos';
+
+interface Props extends HTMLAttributes<'div'> {
+  item: Offering;
+  variant?: 'cards' | 'accordion';
+  /** Extra classes for the image box (e.g. an aspect ratio on small screens). */
+  imageClass?: string;
+}
+
+const { item, variant = 'cards', imageClass, class: className, ...attrs } = Astro.props;
+const accordion = variant === 'accordion';
+---
+
+<div
+  class:list={['offering-card flex min-h-0 flex-col', accordion ? 'gap-8' : 'gap-2', className]}
+  data-variant={variant}
+  {...attrs}
+>
+  <div
+    class:list={[
+      'relative min-h-0 flex-1 overflow-hidden rounded-[12px] bg-paper',
+      !accordion && 'border border-black',
+      imageClass,
+    ]}
+  >
+    {
+      item.image && (
+        <Image
+          src={item.image}
+          alt=""
+          class="absolute inset-0 size-full object-cover"
+          widths={[640, 1280]}
+          sizes="(min-width: 64rem) 55vw, 90vw"
+        />
+      )
+    }
+  </div>
+  <div class:list={['flex flex-col', accordion ? 'gap-8' : 'gap-4']}>
+    <p class:list={[accordion ? 'text-body' : 'text-lead', 'text-butter']}>{item.description}</p>
+    {
+      item.clients.length > 0 && (
+        <div class:list={['flex flex-col', accordion ? 'gap-2' : 'gap-4']}>
+          <p class="text-label text-butter/60 uppercase">Clients include:</p>
+          <div class="offering-card__logos flex flex-wrap items-center gap-x-[26px] gap-y-3">
+            {item.clients.map((key) => (
+              <ClientLogo logo={clientLogos[key]} alt="" />
+            ))}
+          </div>
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  /* Logos: 80% of their ticker size in the cards version, 60% in the accordion
+     (Figma); smaller on phones. */
+  .offering-card__logos {
+    --logo-scale: 0.6;
+  }
+  @media (min-width: 64rem) {
+    .offering-card__logos {
+      --logo-scale: 0.8;
+    }
+    [data-variant='accordion'] .offering-card__logos {
+      --logo-scale: 0.6;
+    }
+  }
+</style>

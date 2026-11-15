@@ -1,0 +1,152 @@
+---
+/**
+ * WhatWeDoCards — "What we do", card version (Figma: work, node 328:4782).
+ *
+ * Black section. Left (7 columns): a brick-red card with the current
+ * offering's image, its one-line description and the clients we did it for.
+ * Right (5 columns): "What we do" and the list of offerings; the current one is
+ * butter, the rest faded brick red.
+ *
+ * Scroll (motion.dev's "Scroll highlight"): the list scrolls normally while
+ * the card stays put beside it (sticky), and the offering passing through the
+ * middle of the screen is highlighted (a quick colour fade); the card switches to match, instantly. The list
+ * has half a screen of space above and below, so the first and last offerings
+ * can reach the middle.
+ *
+ * Below lg the card sticks under the header and the list scrolls up beneath
+ * it; the middle is then the middle of the space below the card.
+ *
+ * Without JS the first offering is highlighted.
+ */
+import OfferingCard from './OfferingCard.astro';
+import type { Offering } from '../../data/site';
+
+interface Props {
+  items: Offering[];
+}
+
+const { items } = Astro.props;
+---
+
+<section
+  data-wwd-cards
+  data-tone="black"
+  aria-labelledby="what-we-do-cards"
+  class="wwd-cards relative border-t border-black bg-black px-gutter text-butter"
+>
+  <div class="grid-split items-start py-4">
+    <!-- Card (columns 1–7; on top on small screens): stays put while the list scrolls -->
+    <div data-wwd-card class="wwd-cards__card sticky z-10 grid overflow-clip rounded-[24px] p-4" aria-hidden="true">
+      {
+        items.map((item, i) => (
+          <OfferingCard
+            item={item}
+            data-wwd-panel
+            data-active={i === 0 ? '' : undefined}
+            class="wwd-cards__panel"
+          />
+        ))
+      }
+    </div>
+
+    <!-- List (columns 8–12), with room above and below to reach the middle of the screen -->
+    <div class="wwd-cards__list flex flex-col gap-1">
+      <h2 id="what-we-do-cards" class="text-body leading-[1.2] font-semibold text-butter/60 uppercase">What we do</h2>
+      <ul class="flex flex-col gap-1">
+        {
+          items.map((item, i) => (
+            <li
+              data-wwd-item
+              data-active={i === 0 ? '' : undefined}
+              class="wwd-cards__item text-title text-brick-red/60 lg:text-headline lg:whitespace-nowrap"
+            >
+              {item.name}
+              <span class="sr-only">: {item.description}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Text colour: a quick fade (the card switches instantly). */
+  .wwd-cards__item {
+    transition: color 0.15s ease-out;
+  }
+  .wwd-cards__item[data-active] {
+    color: var(--color-butter);
+  }
+  /* Desktop: 56px, or less so the longest name ("YouTube & short-form",
+     ~10.1em) fits the five-column list on one line. */
+  @media (min-width: 64rem) {
+    .wwd-cards__item {
+      font-size: min(
+        var(--text-headline),
+        ((100vw - 2 * var(--spacing-gutter) - 11 * var(--spacing-column-gap)) / 12 * 5 + 4 * var(--spacing-column-gap)) / 10.3
+      );
+    }
+  }
+
+  /* Panels share one cell; only the current one shows (no transition). */
+  .wwd-cards__panel {
+    grid-area: 1 / 1;
+  }
+  .wwd-cards__panel:not([data-active]) {
+    visibility: hidden;
+  }
+
+
+  /* Card: sticks 16px below the header (Figma's padding). Opaque (brick red at
+     60% over black, as in Figma), since the list scrolls under it on phones.
+     Phones: --wwd-card-h tall on top, the list's middle is the middle of the
+     space below it. Desktop: fills the screen below the header. */
+  .wwd-cards {
+    --wwd-card-h: min(55svh, 30rem);
+    /* Height of the visible area the list scrolls through, below the header (and the card on phones). */
+    --wwd-view: calc(100svh - var(--spacing-nav) - var(--wwd-card-h) - 2rem);
+  }
+  .wwd-cards__card {
+    top: calc(var(--spacing-nav) + 1rem);
+    height: var(--wwd-card-h);
+    background-color: color-mix(in srgb, var(--color-brick-red) 60%, var(--color-black));
+  }
+  .wwd-cards__list {
+    padding-top: 1.5rem;
+    padding-bottom: calc(var(--wwd-view) / 2);
+  }
+  @media (min-width: 64rem) {
+    .wwd-cards {
+      --wwd-card-h: calc(100svh - var(--spacing-nav) - 2rem);
+      --wwd-view: calc(100svh - var(--spacing-nav));
+    }
+    /* Half a screen above, so the list starts in the middle of the screen beside the card. */
+    .wwd-cards__list {
+      padding-top: calc(var(--wwd-view) / 2 - 3rem);
+    }
+  }
+</style>
+
+<script>
+  import { middleBelow, trackScrollHighlight } from '../../scripts/scroll-highlight';
+
+  const header = document.getElementById('site-header');
+  const desktop = window.matchMedia('(min-width: 64rem)');
+
+  document.querySelectorAll<HTMLElement>('[data-wwd-cards]').forEach((root) => {
+    const card = root.querySelector<HTMLElement>('[data-wwd-card]');
+    const items = [...root.querySelectorAll<HTMLElement>('[data-wwd-item]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-wwd-panel]')];
+    if (!card || items.length === 0) return;
+
+    // The middle of the screen below the header; on phones, below the card.
+    const focus = () =>
+      middleBelow(desktop.matches ? (header?.offsetHeight ?? 0) : card.getBoundingClientRect().bottom);
+
+    trackScrollHighlight(items, focus, (index) => {
+      items.forEach((item, i) => item.toggleAttribute('data-active', i === index));
+      panels.forEach((panel, i) => panel.toggleAttribute('data-active', i === index));
+    });
+  });
+</script>

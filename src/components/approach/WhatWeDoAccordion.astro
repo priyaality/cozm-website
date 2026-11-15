@@ -1,0 +1,265 @@
+---
+/**
+ * WhatWeDoAccordion — "What we do" as an accordion, after niccolomiranda.com/work
+ * (Figma: Frame 27, node 362:7377).
+ *
+ * Desktop: "What we do" in a column on the left, then the seven offerings as
+ * vertical strips side by side, divided by brick-red rules. A strip shows its
+ * name on its side (reading upwards, at the foot of the strip) in faded brick
+ * red; the open one's name is butter, and the open strip widens to show its
+ * OfferingCard (accordion look). Clicking a strip opens it (the widths animate)
+ * and closes the one that was open.
+ *
+ * Size: the section fills the screen below the header. The names are 72px at
+ * 1512 wide and scale with the viewport width (text-strip), so everything fits
+ * across without sideways scrolling; on short screens they also shrink so the
+ * longest ("YouTube & short-form", ~9.93× the name size) fits the height.
+ *
+ * Below lg seven strips don't fit side by side, so it's a stacked accordion:
+ * a row per offering, the open one's card underneath.
+ *
+ * Each strip's header is a button (aria-expanded, aria-controls) and its card a
+ * region; closed cards are inert. Without JS the first offering is open.
+ */
+import OfferingCard from './OfferingCard.astro';
+import type { Offering } from '../../data/site';
+
+interface Props {
+  items: Offering[];
+}
+
+const { items } = Astro.props;
+const id = (i: number, part: string) => `wwd-accordion-${i}-${part}`;
+---
+
+<section
+  data-wwd-accordion
+  data-tone="black"
+  aria-labelledby="what-we-do-accordion"
+  class="wwd-acc relative border-t border-black bg-black px-gutter text-butter"
+>
+  <div class="wwd-acc__body flex flex-col max-lg:gap-6 max-lg:py-section lg:flex-row">
+    <!-- Heading column (desktop: 220px at 1512, ruled on the right) -->
+    <div class="wwd-acc__heading lg:py-4 lg:pr-4">
+      <h2 id="what-we-do-accordion" class="text-title text-butter uppercase">What we do</h2>
+    </div>
+
+    <ul class="wwd-acc__list flex min-w-0 flex-1 flex-col lg:flex-row">
+      {
+        items.map((item, i) => (
+          <li data-wwd-acc-item data-open={i === 0 ? '' : undefined} class="wwd-acc__item flex min-w-0 flex-col lg:flex-row">
+            <h3 class="contents">
+              <button
+                type="button"
+                id={id(i, 'header')}
+                aria-controls={id(i, 'panel')}
+                aria-expanded={i === 0 ? 'true' : 'false'}
+                data-wwd-acc-header
+                class="wwd-acc__header flex cursor-pointer py-4 text-left lg:flex-col lg:items-center lg:justify-end lg:px-2"
+              >
+                <span class="wwd-acc__name text-title lg:text-strip">{item.name}</span>
+              </button>
+            </h3>
+            <div
+              id={id(i, 'panel')}
+              role="region"
+              aria-labelledby={id(i, 'header')}
+              data-wwd-acc-panel
+              inert={i !== 0}
+              class="wwd-acc__panel grid min-w-0 overflow-hidden"
+            >
+              <div class="min-h-0 overflow-hidden">
+                <div class="wwd-acc__card max-lg:pb-6 lg:p-4">
+                  <OfferingCard
+                    item={item}
+                    variant="accordion"
+                    imageClass="max-lg:aspect-[3/2] max-lg:flex-none"
+                    class="h-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wwd-acc {
+    --rule: 1px solid var(--color-brick-red);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Small screens: rows divided by rules. */
+  .wwd-acc__item {
+    border-top: var(--rule);
+  }
+  .wwd-acc__item:last-child {
+    border-bottom: var(--rule);
+  }
+  /* The script keeps the tapped row in place itself; stop the browser's own
+     scroll anchoring from adjusting too. */
+  .wwd-acc__list {
+    overflow-anchor: none;
+  }
+
+  .wwd-acc__name {
+    color: rgb(165 51 51 / 0.6);
+    transition: color 0.15s ease-out;
+  }
+  /* No browser focus ring (it boxes the whole row on tap); keyboard focus
+     brightens the name instead, as hover does. */
+  .wwd-acc__header {
+    outline: none;
+  }
+  .wwd-acc__header:hover .wwd-acc__name,
+  .wwd-acc__header:focus-visible .wwd-acc__name {
+    color: rgb(254 253 222 / 0.8);
+  }
+  .wwd-acc__item[data-open] .wwd-acc__name {
+    color: var(--color-butter);
+  }
+
+  /* Small screens: the open card unfolds under its row (0fr → 1fr). */
+  .wwd-acc__panel {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.5s var(--ease);
+  }
+  .wwd-acc__item[data-open] .wwd-acc__panel {
+    grid-template-rows: 1fr;
+  }
+
+  @media (min-width: 64rem) {
+    .wwd-acc {
+      /* A closed strip: the name's line height plus 8px each side. */
+      /* Name size: text-strip, or smaller so the longest name (+ 16px above and
+         below) fits the section's height. */
+      --height: calc(100svh - var(--spacing-nav));
+      --name: min(var(--text-strip), (var(--height) - 2rem) / 9.93);
+      --strip: calc(var(--name) + 1rem);
+    }
+    /* Fills the screen below the fixed header. */
+    .wwd-acc__body {
+      height: var(--height);
+    }
+    .wwd-acc__name {
+      font-size: var(--name);
+    }
+    .wwd-acc__heading {
+      flex: none;
+      width: calc(var(--text-strip) * 220 / 72);
+      border-right: var(--rule);
+    }
+    .wwd-acc__list {
+      container-type: inline-size;
+    }
+    /* Strips: closed ones are just the header (+ the rule on their right; the
+       last has none); the open one grows to fill the rest (flex-grow animates). */
+    .wwd-acc__item {
+      flex: 0 0 calc(var(--strip) + 1px);
+      overflow: hidden;
+      border-top: 0;
+      border-right: var(--rule);
+      transition: flex-grow 0.6s var(--ease);
+    }
+    .wwd-acc__item:last-child {
+      flex-basis: var(--strip);
+      border-bottom: 0;
+      border-right: 0;
+    }
+    .wwd-acc__item[data-open] {
+      flex-grow: 1;
+    }
+    .wwd-acc__header {
+      flex: none;
+      width: var(--strip);
+    }
+    /* Name reads bottom to top, at the foot of the strip. Its length sets the
+       section's height. */
+    .wwd-acc__name {
+      writing-mode: vertical-rl;
+      rotate: 180deg;
+      white-space: nowrap;
+    }
+    /* The panel's width follows the strip; the card inside is always full size
+       (the list less the seven strips and six rules), so it's revealed rather
+       than squashed as the strip opens. */
+    .wwd-acc__panel {
+      display: block;
+      flex: 1 1 0;
+      transition: none;
+    }
+    .wwd-acc__panel > div,
+    .wwd-acc__card {
+      height: 100%;
+    }
+    .wwd-acc__card {
+      width: calc(100cqw - 7 * var(--strip) - 6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wwd-acc__item,
+    .wwd-acc__panel,
+    .wwd-acc__name {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const stacked = window.matchMedia('(max-width: 63.999rem)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const panelOf = (item: HTMLElement) => item.querySelector<HTMLElement>('[data-wwd-acc-panel]');
+
+  document.querySelectorAll<HTMLElement>('[data-wwd-accordion]').forEach((root) => {
+    const items = [...root.querySelectorAll<HTMLElement>('[data-wwd-acc-item]')];
+
+    /** Open item `index` and close the rest (-1 closes all). */
+    const open = (index: number) => {
+      items.forEach((item, i) => {
+        const isOpen = i === index;
+        item.toggleAttribute('data-open', isOpen);
+        item.querySelector('[data-wwd-acc-header]')?.setAttribute('aria-expanded', String(isOpen));
+        const panel = panelOf(item);
+        if (panel) panel.inert = !isOpen;
+      });
+    };
+
+    items.forEach((item, i) => {
+      const header = item.querySelector<HTMLElement>('[data-wwd-acc-header]');
+      header?.addEventListener('click', () => {
+        // Desktop: one strip is always open.
+        if (!stacked.matches) return open(i);
+
+        // Small screens: tapping the open row closes it.
+        const current = items.findIndex((it) => it.hasAttribute('data-open'));
+        if (current === i) return open(-1);
+
+        // If the open row is above this one, close it instantly and scroll by
+        // the height it loses, in one go before the next paint, so nothing
+        // jumps; only the new row animates open. (Correcting the scroll every
+        // frame of an animation instead is jerky on phones.)
+        const above = current !== -1 && current < i ? panelOf(items[current]) : null;
+        const top = header.getBoundingClientRect().top;
+        if (above) above.style.transition = 'none';
+        open(i);
+        if (above) {
+          window.scrollBy(0, header.getBoundingClientRect().top - top);
+          // Restore the transition once the instant close has been applied.
+          requestAnimationFrame(() => requestAnimationFrame(() => (above.style.transition = '')));
+        }
+
+        // Then glide the tapped row up to just below the header, so its card
+        // opens in view.
+        const nav = document.getElementById('site-header')?.offsetHeight ?? 0;
+        window.scrollTo({
+          top: window.scrollY + header.getBoundingClientRect().top - nav,
+          behavior: reducedMotion.matches ? 'instant' : 'smooth',
+        });
+      });
+    });
+  });
+</script>

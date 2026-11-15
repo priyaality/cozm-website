@@ -4,6 +4,7 @@ import capmint from '../assets/images/work-capmint.png';
 import paisasmart from '../assets/images/work-paisasmart.png';
 import masaba from '../assets/images/work-masaba.png';
 import { withBase } from '../lib/paths';
+import type { ClientLogoKey } from './logos';
 
 /**
  * Where every "Talk to us" / "Start a conversation" button goes (header,
@@ -353,24 +354,54 @@ export const agencyComparison = {
 
 export interface Offering {
   name: string;
+  /** One line, shown when this offering is highlighted. */
   description: string;
-  /** Image for the stack. Until real images exist, a labelled placeholder card is shown. */
+  /** Clients for this offering ("Clients include:" logos under the description). Empty hides the row. */
+  clients: ClientLogoKey[];
+  /** Image for the card version. Until real images exist, a blank white card is shown. */
   image?: ImageMetadata;
 }
 
-/** "What we do" — the studio's offerings. */
+/**
+ * "What we do" — the studio's offerings, highlighted one by one as the visitor
+ * scrolls (/approach). The first description and its clients are from Figma; the
+ * rest are drafts to review.
+ */
 export const offerings: Offering[] = [
   {
-    name: 'Audio',
+    name: 'Podcasts',
     description: 'Narrative and conversation podcasts. Format, research, recording, edit, mix and release.',
+    clients: ['audible', 'autoX', 'cokeStudio'],
   },
   {
-    name: 'Video',
+    name: 'Documentaries',
+    description: 'Long-form and short documentaries, from research and script through shoot, edit and finishing.',
+    clients: ['capMint'],
+  },
+  {
+    name: 'YouTube & short-form',
     description:
-      'Long-form interviews, documentaries and short-form. Research and script through shoot, edit, finishing and Shorts.',
+      'Channels, explainers and Shorts, with the packaging, cadence and production setup to keep them going.',
+    clients: ['paisaSmart'],
   },
   {
-    name: 'Creative consulting',
-    description: 'Content strategy, format and IP development, editorial direction, and building your in-house team.',
+    name: 'Format & IP',
+    description: 'Original formats your brand owns: the idea, structure and voice, built to run for years.',
+    clients: [],
+  },
+  {
+    name: 'Content strategy',
+    description: 'What to make, for whom and why, and how it ties back to the business.',
+    clients: [],
+  },
+  {
+    name: 'Launch & publishing',
+    description: 'Release plans, platforms, thumbnails, titles and distribution, so the work finds its audience.',
+    clients: [],
+  },
+  {
+    name: 'In-house teams',
+    description: 'Hiring, training and workflows, so your own team can keep making it after we leave.',
+    clients: ['paisaSmart'],
   },
 ];

@@ -1,0 +1,175 @@
+---
+/**
+ * WhatWeDoLines — "What we do", full-width lines version (Figma: work, node 337:5092).
+ *
+ * Black section: "What we do", then the offerings as large lines in faded
+ * brick red. The current one is butter and grows (80 → 104px in Figma), and
+ * its one-line description fades in on the right, with the clients named
+ * under it in 16px ("Clients include: …"; no room for logos here). Descriptions all start at
+ * the same place: just past the longest name at its highlighted size. Below lg the description opens under the line.
+ *
+ * Scroll (motion.dev's "Scroll highlight"): the lines scroll normally, and
+ * the one passing through the middle of the screen (below the header) is
+ * highlighted, the same point for every line. The section has normal padding:
+ * the sections above and below scroll on with it, so every line passes the
+ * middle.
+ *
+ * Sizes: lines are 80px, shrinking on narrow screens so the longest, grown,
+ * fits on one line.
+ *
+ * Without JS the first line is highlighted.
+ */
+import type { Offering } from '../../data/site';
+import { clientLogos } from '../../data/logos';
+
+interface Props {
+  items: Offering[];
+}
+
+const { items } = Astro.props;
+/** Client names (no room for logos here), e.g. "PaisaSmart, MyMuse". */
+const clientNames = (item: Offering) => item.clients.map((key) => clientLogos[key].name).join(', ');
+---
+
+<section
+  data-wwd-lines
+  data-tone="black"
+  aria-labelledby="what-we-do-lines"
+  class="wwd-lines relative border-t border-black bg-black px-gutter text-butter"
+>
+  <div class="flex flex-col gap-6 py-section">
+    <h2 id="what-we-do-lines" class="text-title text-butter uppercase">What we do</h2>
+    <!-- Desktop: names and descriptions in two shared columns (subgrid), so every
+         description starts at the same place -->
+    <ul class="wwd-lines__list flex flex-col gap-10 lg:gap-6">
+      {
+        items.map((item, i) => (
+          <li
+            data-wwd-item
+            data-active={i === 0 ? '' : undefined}
+            class="wwd-lines__item flex flex-col"
+          >
+            <span class="wwd-lines__name">{item.name}</span>
+            <span class="wwd-lines__desc grid">
+              <span class="min-h-0 overflow-hidden">
+                <span class="block text-body text-butter max-lg:pt-2">{item.description}</span>
+                {item.clients.length > 0 && (
+                  <span class="block pt-2 text-small text-butter/60">Clients include: {clientNames(item)}</span>
+                )}
+              </span>
+            </span>
+          </li>
+        ))
+      }
+      <!-- Sizer: every name at its highlighted size, invisible and zero-height, so
+           the name column is as wide as the longest highlighted name -->
+      <li role="presentation" aria-hidden="true" class="wwd-lines__sizer hidden">
+        {items.map((item) => <span class="wwd-lines__name">{item.name}</span>)}
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wwd-lines {
+    /* Line size: 80px, or less so the longest name, grown, fits the width
+       (~12.5 line-heights wide). */
+    --wwd-line: min(5rem, (100vw - 2 * var(--spacing-gutter)) / 13);
+    --wwd-line-active: calc(var(--wwd-line) * 1.3);
+  }
+  @media (min-width: 64rem) {
+    /* Desktop: also leave at least 20rem beside the longest name for the descriptions. */
+    .wwd-lines {
+      --wwd-line: min(5rem, (100vw - 2 * var(--spacing-gutter) - 21.5rem) / 12.6);
+    }
+  }
+
+  .wwd-lines__name {
+    font-family: var(--font-heading);
+    font-variation-settings: 'opsz' var(--heading-opsz, 72);
+    font-weight: 600;
+    line-height: 1;
+    font-size: var(--wwd-line);
+    letter-spacing: -0.04em;
+    color: rgb(165 51 51 / 0.6);
+    white-space: nowrap;
+    transition:
+      font-size 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      letter-spacing 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      color 0.3s ease;
+  }
+  .wwd-lines__item[data-active] .wwd-lines__name {
+    font-size: var(--wwd-line-active);
+    letter-spacing: -0.06em;
+    color: var(--color-butter);
+  }
+
+  /* Description: closed (0fr, so it takes no height) except on the current
+     line, where it opens and fades in: under the line on small screens,
+     beside it on desktop. */
+  .wwd-lines__desc {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.3s ease;
+  }
+  .wwd-lines__item[data-active] .wwd-lines__desc {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  @media (min-width: 64rem) {
+    .wwd-lines__list {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      column-gap: 1.5rem;
+    }
+    .wwd-lines__item {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: subgrid;
+      align-items: center;
+    }
+    .wwd-lines__sizer {
+      display: flex;
+      flex-direction: column;
+      grid-column: 1;
+      height: 0;
+      margin-top: -1.5rem; /* cancel the list's row gap above it */
+      overflow: hidden;
+      visibility: hidden;
+    }
+    .wwd-lines__sizer .wwd-lines__name {
+      font-size: var(--wwd-line-active);
+      letter-spacing: -0.06em;
+      transition: none;
+    }
+  }
+  }
+
+
+  @media (prefers-reduced-motion: reduce) {
+    .wwd-lines__name,
+    .wwd-lines__desc {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { middleBelow, trackScrollHighlight } from '../../scripts/scroll-highlight';
+
+  const header = document.getElementById('site-header');
+
+  document.querySelectorAll<HTMLElement>('[data-wwd-lines]').forEach((root) => {
+    const items = [...root.querySelectorAll<HTMLElement>('[data-wwd-item]')];
+    if (items.length === 0) return;
+
+    // The middle of the screen below the header.
+    trackScrollHighlight(
+      items,
+      () => middleBelow(header?.offsetHeight ?? 0),
+      (index) => items.forEach((item, i) => item.toggleAttribute('data-active', i === index)),
+    );
+  });
+</script>

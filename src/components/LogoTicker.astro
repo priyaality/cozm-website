@@ -5,17 +5,10 @@
  * rendered twice and the track slides by exactly one copy (-50%), so the loop
  * is seamless. Stops for prefers-reduced-motion.
  *
- * Logo boxes are the Figma sizes (70% on small screens). Some images have
- * empty space around the logo; `crop` places the image in its box as Figma
- * does (percentages of the box: image width/height, left/top offset).
+ * Logo boxes are the Figma sizes (70% on small screens); see src/data/logos.ts.
  */
-import luminary from '../assets/logos/luminary.svg';
-import myMuse from '../assets/logos/mymuse.png';
-import audible from '../assets/logos/audible.svg';
-import autoX from '../assets/logos/autox.svg';
-import cokeStudio from '../assets/logos/coke-studio.png';
-import capMint from '../assets/logos/capmint.png';
-import paisaSmart from '../assets/logos/paisasmart.svg';
+import ClientLogo from './ui/ClientLogo.astro';
+import { clientLogos } from '../data/logos';
 
 interface Props {
   /** Seconds for one full pass of the row. Higher is slower. */
@@ -24,23 +17,7 @@ interface Props {
 
 const { duration = 40 } = Astro.props;
 
-interface Logo {
-  src: ImageMetadata;
-  name: string;
-  width: number;
-  height: number;
-  crop?: { w: number; h: number; left: number; top: number };
-}
-
-const logos: Logo[] = [
-  { src: luminary, name: 'Luminary', width: 202.377, height: 44.8 },
-  { src: myMuse, name: 'MyMuse', width: 104, height: 45, crop: { w: 101.54, h: 99.56, left: -1.09, top: 0 } },
-  { src: audible, name: 'Audible', width: 131, height: 55 },
-  { src: autoX, name: 'autoX', width: 121.2, height: 38.4 },
-  { src: cokeStudio, name: 'Coke Studio', width: 196, height: 31, crop: { w: 110.06, h: 295.21, left: -6.01, top: -91.16 } },
-  { src: capMint, name: 'CapMint', width: 152, height: 44, crop: { w: 99.07, h: 145.2, left: 0.66, top: -16.69 } },
-  { src: paisaSmart, name: 'PaisaSmart', width: 229.682, height: 38.4 },
-];
+const logos = Object.values(clientLogos);
 ---
 
 <section data-tone="red" class="logo-ticker flex flex-col gap-4 bg-brick-red pb-4 text-butter" aria-labelledby="built-with">
@@ -51,20 +28,8 @@ const logos: Logo[] = [
         [0, 1].map((copy) => (
           <ul class="logo-ticker__row flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
             {logos.map((logo) => (
-              <li class="logo-ticker__logo relative shrink-0 overflow-hidden" style={`--w: ${logo.width}px; --h: ${logo.height}px`}>
-                <img
-                  src={logo.src.src}
-                  width={logo.src.width}
-                  height={logo.src.height}
-                  alt={copy === 0 ? logo.name : ''}
-                  style={
-                    logo.crop &&
-                    `width: ${logo.crop.w}%; height: ${logo.crop.h}%; left: ${logo.crop.left}%; top: ${logo.crop.top}%`
-                  }
-                  class:list={['block max-w-none', logo.crop ? 'absolute' : 'size-full']}
-                  loading="lazy"
-                  decoding="async"
-                />
+              <li class="shrink-0">
+                <ClientLogo logo={logo} alt={copy === 0 ? logo.name : ''} />
               </li>
             ))}
           </ul>
@@ -76,13 +41,13 @@ const logos: Logo[] = [
 
 <style>
   .logo-ticker {
-    --scale: 0.7;
+    --logo-scale: 0.7;
     --gap: 48px;
   }
 
   @media (min-width: 64rem) {
     .logo-ticker {
-      --scale: 1;
+      --logo-scale: 1;
       --gap: 72px;
     }
   }
@@ -90,11 +55,6 @@ const logos: Logo[] = [
   .logo-ticker__row {
     gap: var(--gap);
     padding-right: var(--gap);
-  }
-
-  .logo-ticker__logo {
-    width: calc(var(--w) * var(--scale));
-    height: calc(var(--h) * var(--scale));
   }
 
   .logo-ticker__track {

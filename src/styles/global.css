@@ -34,7 +34,7 @@
      Heading and body: Plus Jakarta Sans and DM Sans, each followed by a
      metric-matched local fallback (shown until the web font loads). The font
      picker (dev and the review deploy; see src/components/dev/enabled.ts) can swap either at runtime by setting these on <html>.
-     Headings are the display, headline and title styles (see the base layer);
+     Headings are the display, headline, strip and title styles (see the base layer);
      everything else is body. --font-sans is left at Tailwind's default:
      nothing uses it, and <html> sets --font-body. */
   --font-heading: "Plus Jakarta Sans Variable", "Plus Jakarta Sans Fallback", ui-sans-serif, system-ui, sans-serif;
@@ -57,6 +57,14 @@
   --text-headline--line-height: 1;
   --text-headline--letter-spacing: -0.03em;
   --text-headline--font-weight: 600;
+
+  /* strip — the names on the "What we do" accordion's strips (/approach), set
+     on their side. 72 / 100% / -4% / 600; scales with the viewport width
+     (72px at 1512) so the seven strips fit side by side. */
+  --text-strip: min(4.5rem, 4.762vw);
+  --text-strip--line-height: 1;
+  --text-strip--letter-spacing: -0.04em;
+  --text-strip--font-weight: 600;
 
   /* title — card titles. 32 / 120% / -2% / 600 */
   --text-title: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
@@ -89,6 +97,12 @@
   --text-nav--line-height: 1.1;
   --text-nav--letter-spacing: -0.02em;
   --text-nav--font-weight: 500;
+
+  /* label — small uppercase labels ("Clients include:"). 14 / 120% / -2% / 600 */
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: -0.02em;
+  --text-label--font-weight: 600;
 
   /* caption — legal / small print. 14 / 110% / -2% / regular */
   --text-caption: 0.875rem;
@@ -143,6 +157,7 @@
      the default, Plus Jakarta Sans) ignore it. */
   .text-display,
   .text-headline,
+  .text-strip,
   .text-title {
     font-family: var(--font-heading);
     font-variation-settings: "opsz" var(--heading-opsz, 72);

@@ -1,0 +1,40 @@
+---
+/**
+ * ClientLogo — one client logo in its Figma-sized box (see src/data/logos.ts),
+ * scaled by the `--logo-scale` CSS variable (default 1).
+ */
+import type { ClientLogo } from '../../data/logos';
+
+interface Props {
+  logo: ClientLogo;
+  /** Empty for a decorative copy (e.g. the ticker's second row). */
+  alt?: string;
+  class?: string;
+}
+
+const { logo, alt = logo.name, class: className } = Astro.props;
+---
+
+<span
+  class:list={['client-logo relative block shrink-0 overflow-hidden', className]}
+  style={`--w: ${logo.width}px; --h: ${logo.height}px`}
+>
+  <img
+    src={logo.src.src}
+    width={logo.src.width}
+    height={logo.src.height}
+    alt={alt}
+    style={logo.crop &&
+      `width: ${logo.crop.w}%; height: ${logo.crop.h}%; left: ${logo.crop.left}%; top: ${logo.crop.top}%`}
+    class:list={['block max-w-none', logo.crop ? 'absolute' : 'size-full']}
+    loading="lazy"
+    decoding="async"
+  />
+</span>
+
+<style>
+  .client-logo {
+    width: calc(var(--w) * var(--logo-scale, 1));
+    height: calc(var(--h) * var(--logo-scale, 1));
+  }
+</style>
