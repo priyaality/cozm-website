@@ -98,8 +98,8 @@ const { items } = Astro.props;
   }
 
 
-  /* Card: sticks 16px below the header (Figma's padding). Opaque (brick red at
-     60% over black, as in Figma), since the list scrolls under it on phones.
+  /* Card: sticks 16px below the header (Figma's padding). Solid brick red
+     (opaque, since the list scrolls under it on phones).
      Phones: --wwd-card-h tall on top, the list's middle is the middle of the
      space below it. Desktop: fills the screen below the header. */
   .wwd-cards {
@@ -110,7 +110,7 @@ const { items } = Astro.props;
   .wwd-cards__card {
     top: calc(var(--spacing-nav) + 1rem);
     height: var(--wwd-card-h);
-    background-color: color-mix(in srgb, var(--color-brick-red) 60%, var(--color-black));
+    background-color: var(--color-brick-red);
   }
   .wwd-cards__list {
     padding-top: 1.5rem;

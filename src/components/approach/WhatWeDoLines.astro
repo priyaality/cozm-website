@@ -14,6 +14,11 @@
  * the sections above and below scroll on with it, so every line passes the
  * middle.
  *
+ * Brake: from when the first line reaches the middle until the last one does,
+ * the list moves at `pace` × the page's speed (it's shifted down inside the
+ * section, which is that much taller), so each line gets more scroll before
+ * the next takes over. Before and after, it scrolls normally.
+ *
  * Sizes: lines are 80px, shrinking on narrow screens so the longest, grown,
  * fits on one line.
  *
@@ -24,9 +29,11 @@ import { clientLogos } from '../../data/logos';
 
 interface Props {
   items: Offering[];
+  /** How fast the list moves while the lines are being highlighted, relative to the page (0.5 = half speed). */
+  pace?: number;
 }
 
-const { items } = Astro.props;
+const { items, pace = 0.5 } = Astro.props;
 /** Client names (no room for logos here), e.g. "PaisaSmart, MyMuse". */
 const clientNames = (item: Offering) => item.clients.map((key) => clientLogos[key].name).join(', ');
 ---
@@ -36,8 +43,9 @@ const clientNames = (item: Offering) => item.clients.map((key) => clientLogos[ke
   data-tone="black"
   aria-labelledby="what-we-do-lines"
   class="wwd-lines relative border-t border-black bg-black px-gutter text-butter"
+  data-pace={pace}
 >
-  <div class="flex flex-col gap-6 py-section">
+  <div data-wwd-body class="flex flex-col gap-6 py-section">
     <h2 id="what-we-do-lines" class="text-title text-butter uppercase">What we do</h2>
     <!-- Desktop: names and descriptions in two shared columns (subgrid), so every
          description starts at the same place -->
@@ -52,10 +60,14 @@ const clientNames = (item: Offering) => item.clients.map((key) => clientLogos[ke
             <span class="wwd-lines__name">{item.name}</span>
             <span class="wwd-lines__desc grid">
               <span class="min-h-0 overflow-hidden">
-                <span class="block text-body text-butter max-lg:pt-2">{item.description}</span>
-                {item.clients.length > 0 && (
-                  <span class="block pt-2 text-small text-butter/60">Clients include: {clientNames(item)}</span>
-                )}
+                {/* Small screens: every open description is the same height, so the
+                    lines below move by the same amount whichever one is open */}
+                <span class="block max-lg:min-h-[7.5rem] max-lg:pt-2">
+                  <span class="block text-body text-butter">{item.description}</span>
+                  {item.clients.length > 0 && (
+                    <span class="block pt-2 text-small text-butter/60">Clients include: {clientNames(item)}</span>
+                  )}
+                </span>
               </span>
             </span>
           </li>
@@ -160,15 +172,50 @@ const clientNames = (item: Offering) => item.clients.map((key) => clientLogos[ke
   import { middleBelow, trackScrollHighlight } from '../../scripts/scroll-highlight';
 
   const header = document.getElementById('site-header');
+  /** The middle of the screen below the header. */
+  const middle = () => middleBelow(header?.offsetHeight ?? 0);
 
   document.querySelectorAll<HTMLElement>('[data-wwd-lines]').forEach((root) => {
     const items = [...root.querySelectorAll<HTMLElement>('[data-wwd-item]')];
     if (items.length === 0) return;
 
-    // The middle of the screen below the header.
+    const body = root.querySelector<HTMLElement>('[data-wwd-body]');
+    const pace = Math.min(1, Math.max(0.1, Number(root.dataset.pace) || 1));
+
+    // Brake. Item offsets are within the section (its offsetParent) and ignore
+    // the transform. `extra`: the scroll the brake adds, measured once per
+    // layout change (not every frame, so the section's height stays put while
+    // the current line grows and shrinks).
+    let extra = 0;
+    const measure = () => {
+      const span = items[items.length - 1].offsetTop - items[0].offsetTop;
+      extra = Math.round(span * (1 / pace - 1));
+      root.style.paddingBottom = `${extra}px`;
+    };
+    const brake = () => {
+      if (!body) return;
+      const sectionTop = root.getBoundingClientRect().top + window.scrollY;
+      // Scroll position where the first line's top reaches the middle.
+      const start = sectionTop + items[0].offsetTop - middle();
+      const shift = Math.min(extra, Math.max(0, (window.scrollY - start) * (1 - pace)));
+      body.style.transform = shift ? `translateY(${shift}px)` : '';
+    };
+    if (body && pace < 1) {
+      new ResizeObserver(() => {
+        measure();
+        brake();
+      }).observe(body);
+      // Registered before the highlight's listener, so each frame moves the
+      // list first and then measures which line is at the middle.
+      window.addEventListener('scroll', brake, { passive: true });
+      window.addEventListener('resize', brake);
+      measure();
+      brake();
+    }
+
     trackScrollHighlight(
       items,
-      () => middleBelow(header?.offsetHeight ?? 0),
+      middle,
       (index) => items.forEach((item, i) => item.toggleAttribute('data-active', i === index)),
     );
   });
