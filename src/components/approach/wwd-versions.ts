@@ -12,4 +12,4 @@ export const wwdVersions = [
 export type WwdVersion = (typeof wwdVersions)[number]['id'];
 
 /** Shown by default, and the only one in production builds. */
-export const defaultWwdVersion: WwdVersion = 'cards';
+export const defaultWwdVersion: WwdVersion = 'lines';
