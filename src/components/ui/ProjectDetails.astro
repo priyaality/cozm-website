@@ -33,7 +33,7 @@ interface Props extends ProjectDetailsContent {
   index: number;
   /**
    * red   on brick red (/work): 20px copy, black credit line, outline buttons
-   * dark  over video (/originals): 16px copy, black buttons with butter borders
+   * dark  over video (/originals): 16px copy, transparent buttons with butter borders
    */
   tone?: 'red' | 'dark';
 }
@@ -76,7 +76,7 @@ const hasSlot = Astro.slots.has('default');
     links.length > 0 && (
       <div class:list={['grid gap-2', links.length > 1 && 'sm:grid-cols-2']}>
         {links.map((link) => (
-          <Button href={link.href} variant={tone === 'red' ? 'outline' : 'dark'} target="_blank" rel="noopener">
+          <Button href={link.href} variant={tone === 'red' ? 'outline' : 'ghost'} target="_blank" rel="noopener">
             {link.label}
             <span class="sr-only"> (opens in a new tab)</span>
           </Button>

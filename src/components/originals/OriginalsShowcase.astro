@@ -25,10 +25,12 @@ interface Props {
   heading: string;
   /** The rest of the heading, in brick red. */
   accent?: string;
+  /** A short line above the originals list (e.g. "IP 100% owned by COZM"). */
+  listNote?: string;
   items: Original[];
 }
 
-const { heading, accent, items } = Astro.props;
+const { heading, accent, listNote, items } = Astro.props;
 const withStart = (v: Original['video']) => (v.startAt ? `${v.src}#t=${v.startAt}` : v.src);
 const first = items[0].video;
 ---
@@ -65,13 +67,15 @@ const first = items[0].video;
   </h1>
 
   <div class="grid-split items-end gap-y-12">
-    <!-- The arrow links to an original's first CTA (none while it's coming soon). -->
-    <ProjectList
-      items={items.map((item) => ({ title: item.title, category: item.category, link: item.links?.[0] }))}
-      idPrefix="original"
-      label="Originals"
-      class="lg:w-max lg:min-w-[326px]"
-    />
+    <div class="flex flex-col gap-3 lg:w-max lg:min-w-[326px]">
+      {listNote && <p class="text-label">{listNote}</p>}
+      <!-- The arrow links to an original's first CTA (none while it's coming soon). -->
+      <ProjectList
+        items={items.map((item) => ({ title: item.title, category: item.category, link: item.links?.[0] }))}
+        idPrefix="original"
+        label="Originals"
+      />
+    </div>
 
     <div class="grid">
       {

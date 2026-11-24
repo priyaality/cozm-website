@@ -249,7 +249,7 @@ export const originals: Original[] = [
     category: 'Podcast',
     description: 'Stories of people who bet everything on an idea.',
     about:
-      'Documentary-style video essays and long-form conversations about risk-takers in technology, business and ideas, from Lee Kuan Yew and Ren Zhengfei to Jensen Huang, Jim Simons and Ramanujan. Made in India, watched around the world.',
+      'Audio essays on the lives of history’s greatest in business, politics, arts and sciences. PV Narasimha Rao, Lee Kuan Yew, Ramanujan, Christopher Nolan, Kurt Gödel, Jamsetji Tata and many more.',
     facts: [
       { label: 'Host', value: 'Palash Kulkarni' },
       { label: 'Platform', value: 'Spotify, YouTube' },
