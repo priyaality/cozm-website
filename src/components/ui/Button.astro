@@ -17,6 +17,14 @@
  *   sm    compact button, 10/24 padding, 16 / semibold (header "Talk to us")
  *   xs    small inline control (the hero card's Play / Pause, Also playing), caption type
  *   icon  56px square for a single icon (e.g. the hero's scroll-down button)
+ *
+ * Label centring: a label is centred by its line box, which includes room below
+ * the baseline for descenders, so text without any (most labels) sits a little
+ * high. Where the browser supports `text-box`, the label is trimmed to its
+ * capitals and baseline (optical centring); a minimum height of padding + one
+ * line keeps buttons their exact heights whatever the font.
+ * lg / sm wrap the label for this; xs buttons (icon + text) put their text in a
+ * <span class="button-label"> themselves (see NowPlaying).
  */
 import type { HTMLAttributes } from 'astro/types';
 import { withBase } from '../../lib/paths';
@@ -40,12 +48,15 @@ const variants = {
   red: 'bg-brick-red text-butter border-brick-red',
 };
 
+/** --btn-py: vertical padding (before the label-trim adjustment). */
 const sizes = {
-  lg: 'w-full px-10 py-7 button-text',
-  sm: 'px-6 py-2.5 text-nav font-semibold leading-none',
-  xs: 'gap-2 px-3 py-1.5 text-caption leading-none',
+  lg: 'button-pad w-full px-10 [--btn-py:1.75rem] button-text',
+  sm: 'button-pad px-6 [--btn-py:0.625rem] text-nav font-semibold leading-none',
+  xs: 'button-pad gap-2 px-3 [--btn-py:0.375rem] text-caption leading-none',
   icon: 'size-14',
 };
+/** Sizes whose label Button wraps itself (xs labels sit beside icons). */
+const wrapLabel = size === 'lg' || size === 'sm';
 
 const classes = [
   'inline-flex items-center justify-center border text-center whitespace-nowrap',
@@ -58,11 +69,38 @@ const classes = [
 {
   href ? (
     <a href={withBase(href)} class:list={classes} {...rest}>
-      <slot />
+      {wrapLabel ? (
+        <span class="button-label">
+          <slot />
+        </span>
+      ) : (
+        <slot />
+      )}
     </a>
   ) : (
     <button type={type} class:list={classes} {...rest}>
-      <slot />
+      {wrapLabel ? (
+        <span class="button-label">
+          <slot />
+        </span>
+      ) : (
+        <slot />
+      )}
     </button>
   )
 }
+
+<style is:global>
+  /* Height is the padding + one line + the 1px borders, the same with or
+     without the label trim below; the content is centred in it. */
+  .button-pad {
+    padding-block: var(--btn-py);
+    min-height: calc(2 * var(--btn-py) + 1lh + 2px);
+  }
+  /* Optical centring (see above): the label is trimmed to cap height and
+     baseline, so centring it centres the letters. Ignored by browsers
+     without text-box, which centre the line box as before. */
+  .button-label {
+    text-box: trim-both cap alphabetic;
+  }
+</style>

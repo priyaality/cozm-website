@@ -46,11 +46,11 @@ const { title, subtitle, poster } = Astro.props;
           ><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg
         >
         <img data-icon-play src={playIcon.src} width="12" height="12" alt="" class="hidden size-3" />
-        <span data-now-playing-label>Pause</span>
+        <span data-now-playing-label class="button-label">Pause</span>
       </Button>
       <Button href="/work" variant="ghost" size="xs">
         <img src={queueIcon.src} width="12" height="12" alt="" class="size-3" />
-        Also playing
+        <span class="button-label">Also playing</span>
       </Button>
     </div>
   </div>
