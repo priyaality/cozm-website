@@ -4,7 +4,7 @@
  * (Figma: hero-sec › now-playing, node 312:2717). Butter card with a 1px ink
  * rule. The Play / Pause button controls the hero video (wired up in
  * HeroPlayer), which also gives visitors a way to stop the autoplaying video;
- * "View full catalog" opens /work.
+ * "Also playing" opens /work.
  */
 import Logo from '../ui/Logo.astro';
 import Button from '../ui/Button.astro';
@@ -50,7 +50,7 @@ const { title, subtitle, poster } = Astro.props;
       </Button>
       <Button href="/work" variant="ghost" size="xs">
         <img src={queueIcon.src} width="12" height="12" alt="" class="size-3" />
-        View full catalog
+        Also playing
       </Button>
     </div>
   </div>

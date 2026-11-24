@@ -52,7 +52,7 @@ export const services = [
   'Documentaries',
   'Long-form interviews',
   'Video essays',
-  'Youtube channels',
+  'YouTube channels',
   'Short-form video',
   'Content strategy',
   'Format & IP development',
@@ -65,33 +65,40 @@ export const services = [
 export type WorkItem = {
   title: string;
   description: string;
-  image: ImageMetadata;
+  /** Cover image (/work). Featured-only items (no /work entry yet) can leave it out. */
+  image?: ImageMetadata;
   /** CSS object-position reproducing the Figma crop. */
   position?: string;
 };
 
+/** Featured work (home and approach), in this order. */
 export const featuredWork: WorkItem[] = [
   {
-    title: 'Uncovered with Suketu Shah',
-    description: 'Conversations with India’s top industrialists and businesspeople.',
+    title: 'The Uncovered Podcast',
+    description: 'Philosophical conversations with India’s top business leaders.',
     image: uncovered,
   },
   {
     title: 'CapMint Stories',
-    description: 'Short documentaries on India’s most successful investors and traders.',
+    description: 'Documentaries chronicling human moments in the lives of India’s most popular traders and investors.',
     image: capmint,
     position: '21.2% 50%',
   },
   {
-    title: 'PaisaSmart',
-    description: 'Educating India’s next 100 million investors on finance and capital markets.',
-    image: paisasmart,
-    position: '18.6% 50%',
+    title: 'Musings',
+    description: 'A Podcast series on pop-culture, dating and sex for MyMuse.',
   },
   {
     title: 'How I Masaba',
-    description: 'The world’s most accomplished women on their craft.',
+    description: 'Masaba Gupta speaks to the world’s most influential women in business, arts and philanthropy.',
     image: masaba,
+  },
+  {
+    title: 'PaisaSmart',
+    description:
+      'Video essays and Podcast series for Elixir Equities’ PaisaSmart, a mutual fund distribution platform.',
+    image: paisasmart,
+    position: '18.6% 50%',
   },
 ];
 
@@ -108,9 +115,20 @@ export interface WorkProject {
   facts: { label: string; value: string }[];
   /** Closing credit line. */
   credit?: string;
-  /** Where to watch. */
-  watch: string;
+  /** Where to watch (YouTube). */
+  watch?: string;
+  /** Where to listen (Spotify). */
+  listen?: string;
 }
+
+/**
+ * A project's links, in order: "Watch on YouTube", then "Listen on Spotify".
+ * The first is its main link (the ↗ in the /work list, the featured work CTA).
+ */
+export const projectLinks = (p: WorkProject) => [
+  ...(p.watch ? [{ label: 'Watch on YouTube', href: p.watch }] : []),
+  ...(p.listen ? [{ label: 'Listen on Spotify', href: p.listen }] : []),
+];
 
 const work = (title: string): WorkItem => {
   const item = featuredWork.find((w) => w.title === title);
@@ -118,17 +136,27 @@ const work = (title: string): WorkItem => {
   return item;
 };
 
-/** The /work page list, in Figma's order. Copy from the Notion "Work" page. */
+/**
+ * Placeholder for a subscriber / view count not filled in yet (the numbers may
+ * later be fetched from YouTube at build time).
+ */
+export const COUNT_TBC = '—';
+
+/** The /work page list (Figma's order, with Musings after CapMint as in featured work). Copy from the Notion "Work" page. */
 export const workProjects: WorkProject[] = [
   {
-    item: work('Uncovered with Suketu Shah'),
+    item: work('The Uncovered Podcast'),
     category: 'Podcast',
     about:
       'Long, unhurried conversations that go past the press release: how India’s most consequential business leaders think, decide and live. Made for people who want the story behind the companies they invest in, work for and compete with.',
     facts: [
       { label: 'Host', value: 'Suketu Shah' },
       { label: 'Views (till date)', value: '1,457,690' },
-      { label: 'Notable guests', value: 'Harsh Mariwala, Sajjan Jindal and Perizaad Zorabian' },
+      { label: 'Subscribers', value: COUNT_TBC },
+      {
+        label: 'Notable guests',
+        value: 'Sajjan Jindal, Harsh Mariwala, Ronnie Screwvala, Ajay Piramal, Ashish Dhawan, Falguni Nayar',
+      },
     ],
     watch: 'https://www.youtube.com/@UncoveredwithSuketuShah',
   },
@@ -142,8 +170,17 @@ export const workProjects: WorkProject[] = [
       { label: 'Acquired by', value: 'AlphaGrep' },
       { label: 'Episodes', value: '25' },
       { label: 'Views (till date)', value: '2,683,450' },
+      { label: 'Subscribers', value: COUNT_TBC },
     ],
     watch: 'https://www.youtube.com/@CapMintStories',
+  },
+  {
+    item: work('Musings'),
+    category: 'Podcast',
+    about:
+      'Candid conversations featuring two star employees of MyMuse. The property was built with an objective to attract the best culture-fit employees to MyMuse. RIP Arman Ahluwalia <3',
+    facts: [{ label: 'Views (till date)', value: COUNT_TBC }],
+    watch: 'https://www.youtube.com/playlist?list=PLZQfh7ogITTKVADa-ohO41WQXhZinhsnv',
   },
   {
     item: work('How I Masaba'),
@@ -157,17 +194,20 @@ export const workProjects: WorkProject[] = [
         label: 'Notable guests',
         value: 'Sania Mirza, Faye D’Souza, Anoushka Shankar, Maitreyi Ramakrishnan and Mithali Raj',
       },
+      { label: 'Views (till date)', value: COUNT_TBC },
     ],
     watch: 'https://www.youtube.com/playlist?list=PLjJcxDJbsFFnbhpNviAMv3iKYK9OXOoQP',
+    listen: 'https://open.spotify.com/show/1BbbeOZBVAbcXWubGM5nHW',
   },
   {
     item: work('PaisaSmart'),
-    category: 'Youtube channel',
+    category: 'YouTube channel',
     about:
       'A YouTube channel of smart, nuanced explainers on India’s economy and markets. We joined at about 500 subscribers. We made the first episodes, built the production setup and defined the tone, then trained the team to run it themselves.',
     facts: [
       { label: 'Made for', value: 'Elixir Equities' },
       { label: 'Subscribers', value: '~500 → 186K' },
+      { label: 'Views (till date)', value: COUNT_TBC },
     ],
     credit: 'Built with COZM, run in-house since the handover',
     watch: 'https://www.youtube.com/@paisasmart',
@@ -212,12 +252,12 @@ export const originals: Original[] = [
       'Documentary-style video essays and long-form conversations about risk-takers in technology, business and ideas, from Lee Kuan Yew and Ren Zhengfei to Jensen Huang, Jim Simons and Ramanujan. Made in India, watched around the world.',
     facts: [
       { label: 'Host', value: 'Palash Kulkarni' },
-      { label: 'Platform', value: 'Spotify, Youtube' },
+      { label: 'Platform', value: 'Spotify, YouTube' },
     ],
     // TODO: real links.
     links: [
       { label: 'Listen on Spotify', href: '#' },
-      { label: 'Watch on Youtube', href: '#' },
+      { label: 'Watch on YouTube', href: '#' },
     ],
     video: heroVideo,
   },

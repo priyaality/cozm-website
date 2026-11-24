@@ -12,13 +12,14 @@ import Button from './ui/Button.astro';
 interface Props {
   title: string;
   description: string;
-  cta: { label: string; href: string };
+  /** Buttons (side by side when there are two); none: just the title and description. */
+  ctas?: { label: string; href: string }[];
 }
 
-const { title, description, cta } = Astro.props;
+const { title, description, ctas = [] } = Astro.props;
 // Links off the site (e.g. YouTube) open in a new tab, like on /work.
-const isExternal = /^https?:\/\//.test(cta.href);
-const external = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+const isExternal = (href: string) => /^https?:\/\//.test(href);
+const external = { target: '_blank', rel: 'noopener noreferrer' };
 ---
 
 <article
@@ -34,9 +35,18 @@ const external = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } :
     >
       <h3 class="text-title">{title}</h3>
       <p class="text-body text-black-muted">{description}</p>
-      <Button href={cta.href} variant="secondary" {...external}
-        >{cta.label}{isExternal && <span class="sr-only">: {title} (opens in a new tab)</span>}</Button
-      >
+      {
+        ctas.length > 0 && (
+          <div class="flex flex-wrap gap-2 *:flex-1">
+            {ctas.map((cta) => (
+              <Button href={cta.href} variant="secondary" {...(isExternal(cta.href) ? external : {})}>
+                {cta.label}
+                {isExternal(cta.href) && <span class="sr-only">: {title} (opens in a new tab)</span>}
+              </Button>
+            ))}
+          </div>
+        )
+      }
     </div>
   </div>
 </article>

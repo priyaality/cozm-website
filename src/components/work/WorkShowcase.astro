@@ -11,13 +11,16 @@
  * details replace the previous ones. The list, details and behaviour are shared with /originals
  * (ProjectList, ProjectDetails, initProjectTabs).
  *
+ * A project without a cover image shows the empty black frame. Its links:
+ * "Watch on YouTube" and/or "Listen on Spotify" (projectLinks).
+ *
  * Covers and detail panels share one grid cell each, so switching never
  * changes the layout. Without JS they all show, one after another.
  */
 import { Image } from 'astro:assets';
 import ProjectList from '../ui/ProjectList.astro';
 import ProjectDetails from '../ui/ProjectDetails.astro';
-import type { WorkProject } from '../../data/site';
+import { projectLinks, type WorkProject } from '../../data/site';
 
 interface Props {
   heading: string;
@@ -40,14 +43,16 @@ const { heading, projects } = Astro.props;
       {
         projects.map(({ item }, i) => (
           <div data-project-media data-active={i === 0 ? '' : undefined} class="relative aspect-[4/3] lg:aspect-auto">
-            <Image
-              src={item.image}
-              alt=""
-              class="absolute inset-0 size-full object-cover grayscale"
-              style={`object-position: ${item.position ?? '50% 50%'}`}
-              widths={[640, 960, 1280, 1600]}
-              sizes="(min-width: 64rem) 52vw, 100vw"
-            />
+            {item.image && (
+              <Image
+                src={item.image}
+                alt=""
+                class="absolute inset-0 size-full object-cover grayscale"
+                style={`object-position: ${item.position ?? '50% 50%'}`}
+                widths={[640, 960, 1280, 1600]}
+                sizes="(min-width: 64rem) 52vw, 100vw"
+              />
+            )}
           </div>
         ))
       }
@@ -59,10 +64,10 @@ const { heading, projects } = Astro.props;
     </div>
 
     <ProjectList
-      items={projects.map(({ item, category, watch }) => ({
-        title: item.title,
-        category,
-        link: { label: 'Watch on Youtube', href: watch },
+      items={projects.map((project) => ({
+        title: project.item.title,
+        category: project.category,
+        link: projectLinks(project)[0],
       }))}
       idPrefix="work"
       label="Projects"
@@ -74,17 +79,17 @@ const { heading, projects } = Astro.props;
   <!-- Details of the selected project -->
   <div class="work-panels grid gap-y-16 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:self-end">
     {
-      projects.map(({ item, about, facts, credit = 'Produced by COZM', watch }, i) => (
+      projects.map((project, i) => (
         <ProjectDetails
           idPrefix="work"
           index={i}
           tone="red"
-          title={item.title}
-          description={item.description}
-          about={about}
-          facts={facts}
-          credit={credit}
-          links={[{ label: 'Watch on Youtube', href: watch }]}
+          title={project.item.title}
+          description={project.item.description}
+          about={project.about}
+          facts={project.facts}
+          credit={project.credit ?? 'Produced by COZM'}
+          links={projectLinks(project)}
         />
       ))
     }

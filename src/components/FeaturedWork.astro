@@ -5,19 +5,23 @@
  * + MediaFeature). Shared by the home and approach pages.
  *
  * Each card takes its title and description from Featured work, and its CTA
- * from the matching /work project's watch link.
+ * from the matching /work project's links (YouTube and/or Spotify, side by
+ * side; none if it has no links or no /work project).
  */
 import Section from './ui/Section.astro';
 import Button from './ui/Button.astro';
 import HorizontalScroll from './HorizontalScroll.astro';
 import MediaFeature from './MediaFeature.astro';
-import { featuredWork, workProjects } from '../data/site';
+import { featuredWork, projectLinks, workProjects } from '../data/site';
 
-const cards = featuredWork.map((item) => ({
-  title: item.title,
-  description: item.description,
-  cta: { label: 'Watch on Youtube', href: workProjects.find((p) => p.item === item)!.watch },
-}));
+const cards = featuredWork.map((item) => {
+  const project = workProjects.find((p) => p.item === item);
+  return {
+    title: item.title,
+    description: item.description,
+    ctas: project ? projectLinks(project) : [],
+  };
+});
 ---
 
 <section aria-labelledby="featured-work">
