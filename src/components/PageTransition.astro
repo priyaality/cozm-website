@@ -1,0 +1,116 @@
+---
+/**
+ * PageTransition — a curtain between pages: eight butter vertical panels.
+ *
+ *   cover   clicking a link to another page on the site slides the panels up
+ *           from the bottom, left to right, 40ms apart; once they cover the
+ *           screen the browser goes to the new page.
+ *   reveal  the new page opens covered (an inline script in BaseLayout's head
+ *           sees the flag this sets in sessionStorage and sets
+ *           data-curtain="covered" on <html> before the first paint), then the
+ *           panels slide back down, in the same order, to show it.
+ *
+ * State lives on <html> as data-curtain: cover → (new page) covered → reveal →
+ * removed. Arriving through the curtain also counts as having seen the home
+ * hero's intro, so the two don't play back to back (BaseLayout's head script).
+ *
+ * Plays only for a plain left click on a same-site link that leaves the page:
+ * not for new tabs or windows (modifier keys, target), downloads, other sites,
+ * mailto: (CopyEmailOnClick), links to a section of the same page, or links
+ * marked data-no-transition. Skipped entirely with prefers-reduced-motion.
+ * Back / forward from the browser's page cache reveals the page instead of
+ * leaving it covered.
+ */
+const panels = 8;
+---
+
+<div class="page-curtain" aria-hidden="true" style={`--curtain-panels: ${panels}`}>
+  {Array.from({ length: panels }, (_, i) => <span style={`--i: ${i}`} />)}
+</div>
+
+<style is:global>
+  .page-curtain {
+    --curtain-duration: 400ms;
+    --curtain-stagger: 40ms;
+    --curtain-ease: cubic-bezier(0.65, 0, 0.35, 1);
+    position: fixed;
+    inset: 0;
+    z-index: 90; /* above the header (50) and the font picker button (60) */
+    display: flex;
+    pointer-events: none;
+  }
+  .page-curtain > span {
+    /* A pixel wider than its share, so no hairline shows between panels. */
+    flex: none;
+    width: calc(100% / var(--curtain-panels) + 1px);
+    margin-right: -1px;
+    background-color: var(--color-butter);
+    transform: translateY(100%);
+  }
+  /* While it's on screen it also blocks clicks. */
+  html[data-curtain] .page-curtain {
+    pointer-events: auto;
+  }
+  html[data-curtain='cover'] .page-curtain > span,
+  html[data-curtain='reveal'] .page-curtain > span {
+    transition: transform var(--curtain-duration) var(--curtain-ease);
+    transition-delay: calc(var(--i) * var(--curtain-stagger));
+  }
+  html[data-curtain='cover'] .page-curtain > span,
+  html[data-curtain='covered'] .page-curtain > span {
+    transform: none;
+  }
+  html[data-curtain='reveal'] .page-curtain > span {
+    transform: translateY(100%);
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const FLAG = 'cozm-curtain';
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // The last panel finishes after the stagger + one panel's duration.
+  const panels = document.querySelectorAll('.page-curtain > span').length;
+  const TOTAL_MS = 400 + (panels - 1) * 40;
+
+  /** Slide the panels back down off the bottom, then clear the state. */
+  const reveal = () => {
+    root.dataset.curtain = 'reveal';
+    window.setTimeout(() => {
+      if (root.dataset.curtain === 'reveal') delete root.dataset.curtain;
+    }, TOTAL_MS + 50);
+  };
+
+  // Arrived through the curtain: reveal once the page has had a frame to paint.
+  if (root.dataset.curtain === 'covered') {
+    requestAnimationFrame(() => requestAnimationFrame(reveal));
+  }
+
+  // Back / forward from the page cache: the page was left covered.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted && root.dataset.curtain) reveal();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || reducedMotion.matches) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = (event.target as Element | null)?.closest?.('a[href]');
+    if (!(link instanceof HTMLAnchorElement)) return;
+    if ((link.target && link.target !== '_self') || link.hasAttribute('download')) return;
+    if (link.dataset.noTransition !== undefined) return;
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin) return;
+    // A section of this page (e.g. the skip link): just scroll.
+    if (url.hash && url.pathname === location.pathname && url.search === location.search) return;
+    if (root.dataset.curtain) return event.preventDefault();
+
+    event.preventDefault();
+    try {
+      sessionStorage.setItem(FLAG, '1');
+    } catch {
+      // Storage blocked: the next page just won't open covered.
+    }
+    root.dataset.curtain = 'cover';
+    window.setTimeout(() => location.assign(url.href), TOTAL_MS);
+  });
+</script>

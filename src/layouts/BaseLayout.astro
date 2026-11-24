@@ -4,6 +4,7 @@ import Seo from '../components/head/Seo.astro';
 import '../styles/global.css';
 import FontPicker from '../components/dev/FontPicker.astro';
 import CopyEmailOnClick from '../components/ui/CopyEmailOnClick.astro';
+import PageTransition from '../components/PageTransition.astro';
 import { seo } from '../data/seo';
 
 interface Props {
@@ -24,6 +25,17 @@ const { title = seo.defaultTitle, description = seo.defaultDescription, noindex 
     <Seo {title} {description} {noindex} />
     <!-- Lets CSS hide JS-animated elements before their intro, without hiding them when JS is off. -->
     <script is:inline>document.documentElement.classList.add('js');</script>
+    <!-- Page transition (PageTransition.astro): arriving through the curtain, start
+         covered (before the first paint) and skip the home hero's intro. -->
+    <script is:inline>
+      try {
+        if (sessionStorage.getItem('cozm-curtain') === '1') {
+          sessionStorage.removeItem('cozm-curtain');
+          sessionStorage.setItem('cozm-intro-seen', '1');
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.dataset.curtain = 'covered';
+        }
+      } catch {}
+    </script>
     <Fonts />
     <!-- Page-specific head tags, e.g. <link slot="head" rel="preload" …>. -->
     <slot name="head" />
@@ -35,6 +47,7 @@ const { title = seo.defaultTitle, description = seo.defaultDescription, noindex 
       class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-black focus:px-4 focus:py-2 focus:text-butter"
       >Skip to content</a
     >
+    <PageTransition />
     <slot />
     <CopyEmailOnClick />
     <FontPicker />
