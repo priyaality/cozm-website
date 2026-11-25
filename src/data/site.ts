@@ -3,7 +3,7 @@ import uncovered from '../assets/images/work-uncovered.png';
 import capmint from '../assets/images/work-capmint.png';
 import paisasmart from '../assets/images/work-paisasmart.png';
 import masaba from '../assets/images/work-masaba.png';
-import theCraft from '../assets/originals/the-craft.jpg';
+import theCraft from '../assets/originals/the-craft-studio.jpg';
 import { withBase } from '../lib/paths';
 import type { ClientLogoKey } from './logos';
 

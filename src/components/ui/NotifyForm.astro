@@ -4,6 +4,10 @@
  * sent anywhere. On submit it checks the address (type="email" plus a pattern
  * that needs a dot in the domain), shows an error or a thank-you below, and
  * clears the field when it's valid.
+ *
+ * The field is exactly as tall as a large Button (28px padding each side + one
+ * line + borders). It's set as a height rather than padding: browsers give a
+ * text field's line more room than its line-height, which made it 6px taller.
  */
 import Button from './Button.astro';
 
@@ -29,7 +33,7 @@ const { id } = Astro.props;
       pattern="[^@\s]+@[^@\s]+\.[^@\s]{2,}"
       placeholder="Enter your email ID"
       aria-describedby={`${id}-status`}
-      class="min-w-0 border border-black bg-butter px-6 py-7 button-text text-black placeholder:text-black/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current sm:px-10"
+      class="h-[calc(3.5rem+1lh+2px)] min-w-0 border border-black bg-butter px-6 button-text text-black placeholder:text-black/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current sm:px-10"
     />
     <Button type="submit" variant="primary">Notify me</Button>
   </div>
