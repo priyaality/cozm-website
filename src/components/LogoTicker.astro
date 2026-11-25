@@ -1,6 +1,6 @@
 ---
 /**
- * LogoTicker — "Built with": an endlessly scrolling row of client logos on
+ * LogoTicker — "Our partners range from…": an endlessly scrolling row of client logos on
  * brick red (Figma: homepage › ticker-section, node 304:2374). The row is
  * rendered twice and the track slides by exactly one copy (-50%), so the loop
  * is seamless. Stops for prefers-reduced-motion.
@@ -21,7 +21,9 @@ const logos = Object.values(clientLogos);
 ---
 
 <section data-tone="red" class="logo-ticker flex flex-col gap-4 bg-brick-red pb-4 text-butter" aria-labelledby="built-with">
-  <h2 id="built-with" class="button-text text-center uppercase">Built with</h2>
+  <h2 id="built-with" class="px-4 text-center text-body">
+    Our partners range from startups to family businesses, D2C to SaaS, and founders to legacy creators.
+  </h2>
   <div class="overflow-hidden py-6" style={`--ticker-duration: ${duration}s`}>
     <div class="logo-ticker__track flex w-max">
       {
