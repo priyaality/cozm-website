@@ -6,9 +6,10 @@ import Button from '../components/ui/Button.astro';
 import HeroPlayer from '../components/hero/HeroPlayer.astro';
 import LogoTicker from '../components/LogoTicker.astro';
 import FeaturedWork from '../components/FeaturedWork.astro';
+import WhatWeDo from '../components/approach/WhatWeDo.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
 import Footer from '../components/Footer.astro';
-import { heroVideo } from '../data/site';
+import { heroVideo, offerings } from '../data/site';
 ---
 
 <BaseLayout
@@ -70,6 +71,11 @@ import { heroVideo } from '../data/site';
 
     <!-- Featured work: heading + "View all work", then scroll sideways through the cards -->
     <FeaturedWork />
+
+    <!-- What we do (#services: the nav's "Services" and cozm.in/#services land here, its top just below the header) -->
+    <div id="services" class="scroll-mt-nav">
+      <WhatWeDo items={offerings} />
+    </div>
 
     <!-- Approach -->
     <Section tone="red" class="grid-split items-start gap-y-12">

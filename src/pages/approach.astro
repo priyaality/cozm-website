@@ -5,10 +5,9 @@ import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
 import DayDial from '../components/approach/DayDial.astro';
 import DayNinetyOne from '../components/approach/DayNinetyOne.astro';
-import WhatWeDo from '../components/approach/WhatWeDo.astro';
 import FeaturedWork from '../components/FeaturedWork.astro';
 import Footer from '../components/Footer.astro';
-import { approachSteps, contactHref, dayNinetyOne, offerings } from '../data/site';
+import { approachSteps, contactHref, dayNinetyOne } from '../data/site';
 ---
 
 <BaseLayout
@@ -44,9 +43,6 @@ import { approachSteps, contactHref, dayNinetyOne, offerings } from '../data/sit
 
     <!-- Day 91: what the team is left with -->
     <DayNinetyOne items={dayNinetyOne} />
-
-    <!-- What we do: offerings highlighted one by one on scroll (two versions to compare) -->
-    <WhatWeDo items={offerings} />
 
     <FeaturedWork />
   </main>

@@ -14,6 +14,7 @@ import type { ClientLogoKey } from './logos';
 export const contactHref: string | undefined = 'mailto:palash@cozm.in';
 
 export const navLinks = [
+  { label: 'Services', href: '/#services' },
   { label: 'Approach', href: '/approach' },
   { label: 'Work', href: '/work' },
   { label: 'Originals', href: '/originals' },
