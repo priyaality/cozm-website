@@ -13,12 +13,14 @@
  * Selecting another original crossfades its details and fades the video to
  * black, switches to that original's video (or restarts it from its start
  * time if it's the same file), then fades back in (videoSwitcher, shared
- * with /work). A coming-soon original gets
+ * with /work). An original with an image instead of a video fades to that
+ * still the same way (the video pauses behind it). A coming-soon original gets
  * a "Coming soon!" tag and the notify form instead of links.
  */
 import ProjectList from '../ui/ProjectList.astro';
 import ProjectDetails from '../ui/ProjectDetails.astro';
 import NotifyForm from '../ui/NotifyForm.astro';
+import { Image } from 'astro:assets';
 import type { Original } from '../../data/site';
 
 interface Props {
@@ -31,15 +33,15 @@ interface Props {
 }
 
 const { heading, accent, listNote, items } = Astro.props;
-const withStart = (v: Original['video']) => (v.startAt ? `${v.src}#t=${v.startAt}` : v.src);
-const first = items[0].video;
+const withStart = (v: NonNullable<Original['video']>) => (v.startAt ? `${v.src}#t=${v.startAt}` : v.src);
+const first = items[0].video!;
 ---
 
 <section
   data-hero
   data-tone="black"
   data-originals
-  data-videos={JSON.stringify(items.map((i) => i.video))}
+  data-videos={JSON.stringify(items.map((i) => i.video ?? null))}
   class="relative isolate flex min-h-svh flex-col justify-between gap-16 overflow-hidden bg-black px-gutter pt-[calc(var(--spacing-nav)+2rem)] pb-8 text-butter lg:h-svh lg:min-h-[44rem]"
 >
   <video
@@ -57,6 +59,24 @@ const first = items[0].video;
   >
     {first.sources?.map((source) => <source src={withStart({ ...first, src: source.src })} type={source.type} />)}
   </video>
+  <!-- Stills, for originals with an image instead of a video: shown over the video while selected. -->
+  {
+    items.map(
+      (item, i) =>
+        item.image && (
+          <Image
+            src={item.image}
+            alt=""
+            aria-hidden="true"
+            data-originals-still={i}
+            widths={[1280, 1920, 2560, 3840]}
+            sizes="100vw"
+            fetchpriority="low"
+            class="originals-still absolute inset-0 -z-30 size-full object-cover"
+          />
+        ),
+    )
+  }
   <!-- Fades in to black while the video changes. -->
   <div data-originals-fade aria-hidden="true" class="originals-fade absolute inset-0 -z-20 bg-black opacity-0"></div>
   <div aria-hidden="true" class="absolute inset-0 -z-10 bg-linear-to-b from-black/60 via-black/10 via-45% to-black/75"></div>
@@ -102,6 +122,9 @@ const first = items[0].video;
   .originals-fade[data-on] {
     opacity: 1;
   }
+  .originals-still:not([data-on]) {
+    visibility: hidden;
+  }
   @media (prefers-reduced-motion: reduce) {
     .originals-fade {
       transition: none;
@@ -117,6 +140,10 @@ const first = items[0].video;
     const video = root.querySelector<HTMLVideoElement>('[data-originals-video]');
     const fade = root.querySelector<HTMLElement>('[data-originals-fade]');
     if (!video || !fade) return;
-    initProjectTabs(root, videoSwitcher(video, fade, JSON.parse(root.dataset.videos ?? '[]')));
+    const stills: (HTMLImageElement | undefined)[] = [];
+    root.querySelectorAll<HTMLImageElement>('[data-originals-still]').forEach((img) => {
+      stills[Number(img.dataset.originalsStill)] = img;
+    });
+    initProjectTabs(root, videoSwitcher(video, fade, JSON.parse(root.dataset.videos ?? '[]'), stills));
   });
 </script>

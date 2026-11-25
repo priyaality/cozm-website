@@ -6,13 +6,21 @@
  * same file), waits until the new frame can show, then fades back out. The
  * fade's timing is CSS (FADE_MS here must match it); a newer selection
  * cancels an older one partway.
+ *
+ * An item can have a still instead (`stills[index]`, an image layered over
+ * the video): it's faded to the same way, with the video paused behind it.
  */
 export type SwitchVideo = { src: string; sources?: { src: string; type: string }[]; poster?: string; startAt?: number };
 
 const FADE_MS = 450;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export function videoSwitcher(video: HTMLVideoElement, fade: HTMLElement, videos: SwitchVideo[]) {
+export function videoSwitcher(
+  video: HTMLVideoElement,
+  fade: HTMLElement,
+  videos: (SwitchVideo | null)[],
+  stills: (HTMLImageElement | undefined)[] = [],
+) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let currentSrc = videos[0]?.src;
   let switchId = 0;
@@ -23,13 +31,18 @@ export function videoSwitcher(video: HTMLVideoElement, fade: HTMLElement, videos
 
   return async (index: number) => {
     const next = videos[index];
-    if (!next) return;
+    const still = stills[index];
+    if (!next && !still) return;
     const id = ++switchId;
     fade.toggleAttribute('data-on', true);
     await wait(reducedMotion ? 0 : FADE_MS);
     if (id !== switchId) return; // a newer selection took over
 
-    if (next.src !== currentSrc) {
+    stills.forEach((s) => s?.toggleAttribute('data-on', s === still));
+    if (still || !next) {
+      video.pause();
+      await Promise.race([still?.decode().catch(() => {}), wait(1500)]);
+    } else if (next.src !== currentSrc) {
       currentSrc = next.src;
       video.poster = next.poster ?? '';
       // The first encoding this browser can play (AV1 WebM where supported), else the fallback.

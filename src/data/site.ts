@@ -3,6 +3,7 @@ import uncovered from '../assets/images/work-uncovered.png';
 import capmint from '../assets/images/work-capmint.png';
 import paisasmart from '../assets/images/work-paisasmart.png';
 import masaba from '../assets/images/work-masaba.png';
+import theCraft from '../assets/originals/the-craft.jpg';
 import { withBase } from '../lib/paths';
 import type { ClientLogoKey } from './logos';
 
@@ -132,7 +133,7 @@ export interface WorkProject {
   /** Where to listen (Spotify). */
   listen?: string;
   /** Video beside the details while this project is open on /work. */
-  video: Original['video'];
+  video: NonNullable<Original['video']>;
 }
 
 /**
@@ -251,8 +252,10 @@ export interface Original {
   note?: string;
   /** Where to listen / watch. A coming-soon original shows the notify form instead. */
   links?: { label: string; href: string }[];
-  /** Background video while this original is selected. */
-  video: {
+  /** Background still while this original is selected, instead of a video. */
+  image?: ImageMetadata;
+  /** Background video while this original is selected (the first original needs one). */
+  video?: {
     /** Fallback file; also identifies the video (same src = same video, just restarted). */
     src: string;
     /** Encodings, best first; the browser plays the first one it supports. */
@@ -292,8 +295,7 @@ export const originals: Original[] = [
       { label: 'Platform', value: 'TBD' },
     ],
     note: 'A new COZM original. Get the first episode the day it’s out.',
-    // TODO: its own video; for now the same one, restarted.
-    video: heroVideo,
+    image: theCraft,
   },
 ];
 
