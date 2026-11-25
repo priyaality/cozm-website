@@ -4,11 +4,31 @@
  * ruled 2 × 2 grid on the left, running from the left edge of the screen to
  * just past column 7; the heading sits to its right. On desktop the section
  * fills the visible area below the header and the cells stretch to share it.
- * In each cell the icon (a white square placeholder for now) is at the top
- * and the title and description at the bottom. Below lg the
- * heading comes first and the principles stack with rules between.
+ * Each cell has an illustration (Figma 432:7036) that bleeds off its edges,
+ * cropped by the cell, with the copy at the top (left column) or the bottom
+ * (right column). Below lg the heading comes first and the principles stack
+ * with rules between.
+ *
+ * The illustrations scale with their cell's width (cqw: each cell is a size
+ * container), placed as in the 439px-wide Figma cells: `at` pins one corner,
+ * in cqw from the cell's edges, so they keep bleeding the same way as cells
+ * get taller. A cell is never shorter than the Figma cell's proportions.
  */
 import { philosophy } from '../../data/site';
+import media from '../../assets/about/philosophy/media.svg';
+import consistency from '../../assets/about/philosophy/consistency.svg';
+import own from '../../assets/about/philosophy/own.svg';
+import craft from '../../assets/about/philosophy/craft.svg';
+
+/** Per principle, in order: the illustration, its width and pinned corner (cqw), and where the copy sits. */
+const art = [
+  { img: media, width: 84.33, at: { right: -6.97, bottom: -4.57 }, copy: 'top' },
+  { img: consistency, width: 157.22, at: { left: -26.88, top: -20.93 }, copy: 'bottom' },
+  { img: own, width: 100, at: { left: 0, bottom: 0 }, copy: 'top' },
+  { img: craft, width: 103.42, at: { right: -25.06, top: -34.74 }, copy: 'bottom' },
+] as const;
+const place = (a: (typeof art)[number]) =>
+  [`width: ${a.width}cqw`, ...Object.entries(a.at).map(([side, v]) => `${side}: ${v}cqw`)].join('; ');
 ---
 
 <!--
@@ -32,22 +52,42 @@ import { philosophy } from '../../data/site';
     {
       [philosophy.slice(0, 2), philosophy.slice(2, 4)].map((row, r) => (
         <div class:list={['flex flex-1 flex-col sm:flex-row', r === 0 && 'border-b border-black']}>
-          {row.map((item, c) => (
-            <div
-              class:list={[
-                'flex flex-1 flex-col justify-between gap-6 px-gutter',
-                r === 0 ? 'pt-8 pb-4' : 'pt-4 pb-8',
-                c === 0 ? 'border-black max-sm:border-b sm:border-r sm:pr-4' : 'sm:pl-4',
-                c === 1 && 'lg:pr-4',
-              ]}
-            >
-              <div aria-hidden="true" class="size-[124px] bg-paper" />
-              <div class="flex flex-col gap-2">
-                <h3 class="text-title leading-none">{item.title}</h3>
-                <p class="text-body">{item.description}</p>
+          {row.map((item, c) => {
+            const a = art[r * 2 + c];
+            return (
+              <div
+                class:list={[
+                  'relative flex flex-1 flex-col overflow-hidden @container',
+                  c === 0 && 'border-black max-sm:border-b sm:border-r',
+                ]}
+              >
+                <img
+                  src={a.img.src}
+                  width={a.img.width}
+                  height={a.img.height}
+                  alt=""
+                  aria-hidden="true"
+                  class="pointer-events-none absolute h-auto max-w-none"
+                  style={place(a)}
+                />
+                <div
+                  class:list={[
+                    'relative flex min-h-[81.55cqw] flex-1 flex-col px-gutter',
+                    a.copy === 'top' ? 'justify-start' : 'justify-end',
+                    r === 0 ? 'pt-8' : 'pt-4',
+                    'pb-4',
+                    c === 0 ? 'sm:pr-4' : 'sm:pl-4',
+                    c === 1 && 'lg:pr-4',
+                  ]}
+                >
+                  <div class="flex flex-col gap-2">
+                    <h3 class="text-title leading-none">{item.title}</h3>
+                    <p class="text-body">{item.description}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ))
     }
