@@ -60,7 +60,7 @@ const accordion = variant === 'accordion';
     {
       item.clients.length > 0 && (
         <div class:list={['flex flex-col', accordion ? 'gap-2' : 'gap-4']}>
-          <p class="text-label text-butter/60 uppercase">Clients include:</p>
+          <p class="text-label text-butter-60 uppercase">Clients include:</p>
           <div class="offering-card__logos flex flex-wrap items-center gap-x-[26px] gap-y-3">
             {item.clients.map((key) => (
               <ClientLogo logo={clientLogos[key]} alt="" />

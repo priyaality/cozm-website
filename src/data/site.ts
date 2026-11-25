@@ -22,6 +22,17 @@ export const navLinks = [
 ];
 
 /**
+ * Home intro statement (Figma 428:6931): lit with a moving edge as the page
+ * scrolls. The first paragraph is the page's h1.
+ */
+export const homeStatement = [
+  'Cozm is a media studio that helps brands build original media for India’s top 10%.',
+  'Attention is a prized asset. Short-form content leases your customer’s attention. Long-form owns it.',
+  'This is the crux of brand building through content today.',
+  'Our team are creatives with backgrounds in business and technology. We understand creativity, and we understand business.',
+];
+
+/**
  * Hero video, also used by the Originals showcase. Always muted, so encoded without
  * audio: hero.webm (AV1: SVT-AV1 preset 2, CRF 46) and hero.mp4 (H.264 High@4.0,
  * two-pass 400 kb/s, +faststart), each with a keyframe at startAt so the #t= start

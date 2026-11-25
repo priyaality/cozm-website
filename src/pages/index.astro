@@ -8,8 +8,9 @@ import LogoTicker from '../components/LogoTicker.astro';
 import FeaturedWork from '../components/FeaturedWork.astro';
 import WhatWeDo from '../components/approach/WhatWeDo.astro';
 import ScriptPage from '../components/script/ScriptPage.astro';
+import ScrollWordReveal from '../components/ScrollWordReveal.astro';
 import Footer from '../components/Footer.astro';
-import { heroVideo, offerings } from '../data/site';
+import { heroVideo, homeStatement, offerings } from '../data/site';
 ---
 
 <BaseLayout
@@ -32,37 +33,9 @@ import { heroVideo, offerings } from '../data/site';
         <HeroPlayer {...heroVideo} next="main-content" />
       </div>
 
-      <!-- Intro + client logos fill one viewport together -->
-      <div id="main-content" class="relative z-10 flex min-h-svh flex-col">
-        <Section tone="red" class="grid-split flex-1 items-start gap-y-4 pt-[calc(var(--spacing-nav)+2.5rem)]">
-          <!-- Desktop: the heading also shrinks on short screens, so the intro and the
-               logo ticker fit one screen. Taken off the screen height: the header, 280px
-               (40 above the heading + 80 bottom padding + ticker 159 + the 1px rule); the
-               rest is the heading's. How many lines it wraps to depends on the width, so
-               the script below sizes it to fit (data-fit-heading); this CSS (room for 7
-               lines) is the fallback without JS. -->
-          <h1
-            data-fit-heading
-            class="text-display lg:text-[length:min(var(--text-display),calc((100svh-var(--spacing-nav)-280px)/7))]">
-            COZM is a media studio that builds{' '}
-            <span class="text-black">long-form content properties for companies and creators.</span>
-          </h1>
-          <div class="flex flex-col gap-6 lg:pt-5">
-            <div class="flex flex-col gap-6">
-              <p class="text-body">
-                Attention is a prized asset. Short-form content leases your customer’s attention. Long-form
-                owns it. This is the crux of brand building through content today.
-              </p>
-              <p class="text-body">
-                Our team are creatives with backgrounds in business and technology. We understand creativity,
-                and we understand business.
-              </p>
-            </div>
-            <div class="flex flex-col gap-4">
-              <Button href="/approach" variant="secondary">Learn our approach</Button>
-            </div>
-          </div>
-        </Section>
+      <!-- Intro: the statement, lit word by word as it scrolls (Figma 428:6931), then the client logos -->
+      <div id="main-content" class="relative z-10">
+        <ScrollWordReveal paragraphs={homeStatement} />
 
         <!-- Client logos ("Our partners range from…") -->
         <LogoTicker />
@@ -98,40 +71,6 @@ import { heroVideo, offerings } from '../data/site';
 </BaseLayout>
 
 <script>
-  /**
-   * Intro heading (desktop): the largest size, up to the display size, at which
-   * it fits the room left for it (the screen less the header and 280px; see the
-   * markup). Re-fitted on resize and once the fonts have loaded.
-   */
-  const heading = document.querySelector<HTMLElement>('[data-fit-heading]');
-  if (heading) {
-    const desktop = window.matchMedia('(min-width: 64rem)');
-    const fitHeading = () => {
-      heading.style.fontSize = '';
-      if (!desktop.matches) return;
-      const room = window.innerHeight - (document.getElementById('site-header')?.offsetHeight ?? 0) - 280;
-      // Largest allowed: the display size.
-      heading.style.fontSize = 'var(--text-display)';
-      let hi = parseFloat(getComputedStyle(heading).fontSize);
-      if (heading.offsetHeight <= room) return;
-      let lo = 16;
-      for (let i = 0; i < 10 && hi - lo > 0.5; i++) {
-        const mid = (lo + hi) / 2;
-        heading.style.fontSize = `${mid}px`;
-        if (heading.offsetHeight <= room) lo = mid;
-        else hi = mid;
-      }
-      heading.style.fontSize = `${lo}px`;
-    };
-    let fitTimer: number | undefined;
-    window.addEventListener('resize', () => {
-      clearTimeout(fitTimer);
-      fitTimer = window.setTimeout(fitHeading, 100);
-    });
-    document.fonts.ready.then(fitHeading);
-    fitHeading();
-  }
-
   /**
    * Curtain snap: the intro never rests partway over the hero.
    *

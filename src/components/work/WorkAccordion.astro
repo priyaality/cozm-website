@@ -108,7 +108,7 @@ const first = projects[0].video;
                       <dl class="flex flex-wrap gap-4">
                         {project.facts.map((fact) => (
                           <div class="flex flex-col gap-0.5">
-                            <dt class="text-caption leading-[1.2] font-medium uppercase opacity-60">{fact.label}</dt>
+                            <dt class="text-caption leading-[1.2] font-medium text-butter-60 uppercase">{fact.label}</dt>
                             <dd class="text-body">{fact.value}</dd>
                           </div>
                         ))}
@@ -181,14 +181,15 @@ const first = projects[0].video;
     transition: opacity 0.25s ease-in 0.12s;
   }
 
-  /* Headers: 60%, the open one at full strength; a rule under every project but the last. */
+  /* Headers: butter-60, the open one (and a hovered one) full butter; a rule
+     under every project but the last. */
   .work-acc__line {
-    opacity: 0.6;
-    transition: opacity 0.3s;
+    color: var(--color-butter-60);
+    transition: color 0.3s;
   }
   .work-acc__line:hover,
   .work-acc__item[data-open] .work-acc__line {
-    opacity: 1;
+    color: var(--color-butter);
   }
   /* The open project's header shows only its number: its name is the big title
      in its details (the hidden name and category are still read out as part of
@@ -205,7 +206,7 @@ const first = projects[0].video;
     visibility: hidden;
   }
   .work-acc__item:not(:last-child) {
-    border-bottom: 1px solid color-mix(in srgb, currentColor 60%, transparent);
+    border-bottom: 1px solid var(--color-butter-60);
   }
   .work-acc__item:last-child:not([data-open]) .work-acc__line {
     padding-bottom: 0;

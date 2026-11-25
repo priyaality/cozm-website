@@ -1,0 +1,181 @@
+---
+/**
+ * ScrollWordReveal — the home intro (Figma 428:6931): a large statement on
+ * brick red that lights up, from black at 60% to butter, as the page
+ * scrolls (no pinning).
+ *
+ * The lit part ends in a hard edge (no gradient), and the edge moves smoothly
+ * through the text in reading order: letters before it are lit, letters after
+ * it aren't, and the letter it's passing through is lit part of the way
+ * across, so it glides rather than stepping a letter at a time.
+ *
+ * How far it has got is linear in scroll, measured from the layout so that:
+ *  - the first paragraph is fully lit by the time the section's top reaches
+ *    the top of the screen (where the home page's curtain glide lands it), so
+ *    it lights up as the section slides over the hero, and
+ *  - the last letter is lit once it has scrolled up to 60% of the screen
+ *    height.
+ *
+ * Screen readers get each paragraph as plain text; the letter-by-letter copy
+ * is hidden from them. The first paragraph is the page's h1. Without JS, or
+ * with prefers-reduced-motion, everything is lit.
+ */
+interface Props {
+  paragraphs: string[];
+  id?: string;
+}
+
+const { paragraphs, id } = Astro.props;
+---
+
+<section
+  id={id}
+  data-word-reveal
+  data-tone="red"
+  class="border-t border-black bg-brick-red px-gutter pt-[calc(var(--spacing-nav)+2.5rem)] pb-section text-butter"
+>
+  <div class="word-reveal flex flex-col gap-10 text-display">
+    {
+      paragraphs.map((paragraph, i) => {
+        const Tag = i === 0 ? 'h1' : 'p';
+        return (
+          <Tag data-reveal-paragraph>
+            <span class="sr-only">{paragraph}</span>
+            <span aria-hidden="true">
+              {paragraph.split(/\s+/).map((word) => (
+                <>
+                  {/* Each word's letters stay together, so lines still break between words. */}
+                  <span class="whitespace-nowrap">
+                    {[...word].map((letter) => (
+                      <span class="word-reveal__letter">{letter}</span>
+                    ))}
+                  </span>{' '}
+                </>
+              ))}
+            </span>
+          </Tag>
+        );
+      })
+    }
+  </div>
+</section>
+
+<style>
+  /* The display size, but regular weight, 110% line height and -3% tracking.
+     Paragraphs 40px apart (gap-10). */
+  .word-reveal {
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  /* Lit is butter (the section's text colour); while the reveal runs, letters
+     not yet lit are black at 60%. */
+  .word-reveal[data-active] .word-reveal__letter:not([data-lit]) {
+    color: var(--color-black-60);
+  }
+  /* The letter the edge is passing through: lit up to --edge (0–1) of its
+     width, with a hard stop. The text is painted by its background, clipped to
+     the glyph; the box is widened by --bleed each side (without moving
+     anything) so a glyph that overhangs its letter box isn't cut off. */
+  .word-reveal[data-active] .word-reveal__letter[data-edge] {
+    --bleed: 0.15em;
+    margin-inline: calc(var(--bleed) * -1);
+    padding-inline: var(--bleed);
+    background: linear-gradient(
+      to right,
+      var(--color-butter) calc(var(--bleed) + var(--edge) * (100% - 2 * var(--bleed))),
+      var(--color-black-60) 0
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+</style>
+
+<script>
+  /** Where the last letter sits (fraction of the screen height) when it's lit. */
+  const LAST_LETTER_AT = 0.6;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-word-reveal]').forEach((root) => {
+    const text = root.querySelector<HTMLElement>('.word-reveal');
+    const letters = [...root.querySelectorAll<HTMLElement>('.word-reveal__letter')];
+    const firstParagraph = root.querySelector<HTMLElement>('[data-reveal-paragraph]');
+    const firstCount = firstParagraph?.querySelectorAll('.word-reveal__letter').length ?? 0;
+    const count = letters.length;
+    if (!text || !count || !firstCount) return;
+
+    /** Letters fully lit, in order; the next one (if any) is the edge letter. */
+    let litCount = count;
+    let edge: HTMLElement | undefined;
+
+    /** `position` runs 0 (nothing lit) → count (everything lit), continuously. */
+    const render = (position: number) => {
+      const next = Math.floor(position);
+      if (next !== litCount) {
+        const [from, to] = next > litCount ? [litCount, next] : [next, litCount];
+        for (let i = from; i < to; i++) letters[i].toggleAttribute('data-lit', next > litCount);
+        litCount = next;
+      }
+      const fraction = position - next;
+      const letter = next < count && fraction > 0 ? letters[next] : undefined;
+      if (letter !== edge) {
+        edge?.removeAttribute('data-edge');
+        edge?.style.removeProperty('--edge');
+        letter?.setAttribute('data-edge', '');
+        edge = letter;
+      }
+      letter?.style.setProperty('--edge', fraction.toFixed(3));
+    };
+
+    // The section's top edge (px from the top of the screen) when nothing is
+    // lit and when everything is.
+    let startTop = 0;
+    let endTop = 0;
+    let frame = 0;
+    let active = false;
+
+    const update = () => {
+      frame = 0;
+      const top = root.getBoundingClientRect().top;
+      const progress = Math.min(1, Math.max(0, (startTop - top) / (startTop - endTop)));
+      render(progress * count);
+    };
+    const schedule = () => {
+      if (active) frame ||= requestAnimationFrame(update);
+    };
+
+    const setup = () => {
+      active = !reducedMotion.matches;
+      text.toggleAttribute('data-active', active);
+      if (!active) return;
+      if (litCount === count) letters.forEach((letter) => letter.setAttribute('data-lit', ''));
+
+      const viewport = window.innerHeight;
+      const sectionTop = root.getBoundingClientRect().top;
+      const depth = (el: HTMLElement) => el.getBoundingClientRect().bottom - sectionTop;
+
+      // First paragraph fully lit with the section at the top of the screen (or
+      // earlier, if that paragraph is too tall to be on screen by then).
+      const landedTop = Math.min(0, viewport * 0.9 - depth(letters[firstCount - 1]));
+      // Last letter lit at LAST_LETTER_AT of the screen.
+      endTop = viewport * LAST_LETTER_AT - depth(letters[count - 1]);
+
+      // Pin progress to those two moments, then extend back to find where it starts.
+      const landedProgress = firstCount / count;
+      const range = (landedTop - endTop) / (1 - landedProgress);
+      startTop = landedTop + landedProgress * range;
+      update();
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    let resizeTimer: number | undefined;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(setup, 150);
+    });
+    reducedMotion.addEventListener('change', setup);
+    document.fonts.ready.then(setup);
+    setup();
+  });
+</script>

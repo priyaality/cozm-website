@@ -24,6 +24,8 @@
   --color-black-muted: rgb(10 5 1 / 0.7); /* secondary body copy */
   --color-black-faint: rgb(10 5 1 / 0.4); /* de-emphasised copy (unselected "What we do" tabs) */
   --color-scrim: rgb(10 5 1 / 0.6); /* overlay on work imagery */
+  --color-black-60: rgb(10 5 1 / 0.6); /* home statement letters not yet lit */
+  --color-butter-60: rgb(254 253 222 / 0.6); /* secondary text and rules on black (/work, "What we do") */
   --color-paper: #ffffff; /* media placeholder cards */
   --color-graphite: #6b6b6b; /* typewritten script text */
   --color-transparent: transparent;
