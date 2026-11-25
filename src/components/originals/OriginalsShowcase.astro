@@ -7,13 +7,13 @@
  * looping, inline, from its start time, like the home hero). The header sits
  * transparent over it ([data-hero]), the heading is at the top, and along the
  * bottom are the originals list (ProjectList, left) and the selected
- * original's details (ProjectDetails, right, 5 columns) — the same components
- * as /work. A light gradient at the top and bottom keeps the sand text
+ * original's details (ProjectDetails, right, 5 columns). A light gradient at the top and bottom keeps the sand text
  * readable whatever the video shows.
  *
  * Selecting another original crossfades its details and fades the video to
  * black, switches to that original's video (or restarts it from its start
- * time if it's the same file), then fades back in. A coming-soon original gets
+ * time if it's the same file), then fades back in (videoSwitcher, shared
+ * with /work). A coming-soon original gets
  * a "Coming soon!" tag and the notify form instead of links.
  */
 import ProjectList from '../ui/ProjectList.astro';
@@ -111,51 +111,12 @@ const first = items[0].video;
 
 <script>
   import { initProjectTabs } from '../../scripts/project-tabs';
-
-  type VideoInfo = { src: string; sources?: { src: string; type: string }[]; poster?: string; startAt?: number };
-  const FADE_MS = 450;
-  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  import { videoSwitcher } from '../../scripts/video-switch';
 
   document.querySelectorAll<HTMLElement>('[data-originals]').forEach((root) => {
     const video = root.querySelector<HTMLVideoElement>('[data-originals-video]');
     const fade = root.querySelector<HTMLElement>('[data-originals-fade]');
     if (!video || !fade) return;
-    const videos: VideoInfo[] = JSON.parse(root.dataset.videos ?? '[]');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let currentSrc = videos[0]?.src;
-    let switchId = 0;
-
-    /** Resolves when the video can show the new frame (or after a timeout, so it never sticks on black). */
-    const ready = (event: 'seeked' | 'playing') =>
-      Promise.race([new Promise((resolve) => video.addEventListener(event, resolve, { once: true })), wait(1500)]);
-
-    const show = async (index: number) => {
-      const next = videos[index];
-      if (!next) return;
-      const id = ++switchId;
-      fade.toggleAttribute('data-on', true);
-      await wait(reducedMotion ? 0 : FADE_MS);
-      if (id !== switchId) return; // a newer selection took over
-
-      if (next.src !== currentSrc) {
-        currentSrc = next.src;
-        video.poster = next.poster ?? '';
-        // The first encoding this browser can play (AV1 WebM where supported), else the fallback.
-        const file = next.sources?.find((source) => video.canPlayType(source.type) !== '')?.src ?? next.src;
-        video.src = next.startAt ? `${file}#t=${next.startAt}` : file;
-        const playing = ready('playing');
-        video.play().catch(() => {});
-        await playing;
-      } else {
-        const seeked = ready('seeked');
-        video.currentTime = next.startAt ?? 0;
-        video.play().catch(() => {});
-        await seeked;
-      }
-      if (id !== switchId) return;
-      fade.toggleAttribute('data-on', false);
-    };
-
-    initProjectTabs(root, show);
+    initProjectTabs(root, videoSwitcher(video, fade, JSON.parse(root.dataset.videos ?? '[]')));
   });
 </script>

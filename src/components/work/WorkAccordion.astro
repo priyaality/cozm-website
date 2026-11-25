@@ -1,0 +1,333 @@
+---
+/**
+ * WorkAccordion — the /work page's projects (Figma 425:6361): an accordion
+ * list on the left, the open project's video on the right. Black.
+ *
+ * An accordion: every project has a header row ("01  Title  Category  ↗")
+ * that's always there; clicking one opens its details below it and closes the
+ * open one, in one motion (the old details close as the new ones open). One
+ * project is always open, the first by default, and its header is at full
+ * strength (the others 60%) and shows only its number: its name is the big
+ * title in its details, and its category and ↗ are hidden. The video changes with the same
+ * fade-through-black as /originals (videoSwitcher).
+ *
+ * Desktop: fills the screen below the fixed header (taller on short screens
+ * if the longest project's details need it). The open project takes the
+ * column's free height, its copy at the top and its facts, credit and links
+ * at the bottom.
+ *
+ * Below lg it stacks: the video, then the list, each project as tall as its
+ * content. Tapping a header closes an open project above it at once (keeping
+ * the page still) and glides the new one up under the header as it opens.
+ *
+ * The ↗ on a row links to the project's main CTA (new tab). Without JS the
+ * first project is open and the rest are rows.
+ */
+import Button from '../ui/Button.astro';
+import arrowUpRight from '../../assets/icons/arrow-up-right.svg';
+import { projectLinks, type WorkProject } from '../../data/site';
+
+interface Props {
+  projects: WorkProject[];
+  label?: string;
+}
+
+const { projects, label = 'Projects' } = Astro.props;
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+const withStart = (v: WorkProject['video']) => (v.startAt ? `${v.src}#t=${v.startAt}` : v.src);
+const first = projects[0].video;
+---
+
+<section
+  data-work-accordion
+  data-tone="black"
+  data-videos={JSON.stringify(projects.map((p) => p.video))}
+  aria-label={label}
+  class="work-acc flex flex-col bg-black text-butter lg:h-[calc(100svh-var(--spacing-nav))] lg:min-h-[44rem] lg:flex-row lg:gap-4 lg:pl-gutter"
+>
+  <!-- The list -->
+  <div
+    data-work-list
+    class="flex flex-col px-gutter pt-8 pb-4 lg:h-full lg:w-[max(22.5rem,29.1vw)] lg:shrink-0 lg:px-0"
+  >
+    {
+      projects.map((project, i) => {
+        const links = projectLinks(project);
+        const main = links[0];
+        return (
+          <div data-work-item data-open={i === 0 ? '' : undefined} class="work-acc__item flex flex-col pt-2 first:pt-0">
+            <!-- The header: always shown. -->
+            <div class="work-acc__line flex items-center gap-4 pb-2 text-caption leading-[1.3]">
+              <button
+                type="button"
+                id={`work-${i}-header`}
+                aria-expanded={i === 0 ? 'true' : 'false'}
+                aria-controls={`work-${i}-panel`}
+                data-work-header
+                class="flex min-w-0 flex-1 cursor-pointer items-center gap-4 text-left"
+              >
+                <span>{pad(i)}</span>
+                <span class="work-acc__name min-w-0 flex-1">{project.item.title}</span>
+                <span class="work-acc__name whitespace-nowrap">{project.category}</span>
+              </button>
+              {main && (
+                <a
+                  href={main.href}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`${main.label}: ${project.item.title} (opens in a new tab)`}
+                  class="work-acc__name work-acc__link -m-1 grid shrink-0 place-items-center p-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="m-px size-4 bg-current"
+                    style={`mask: url(${arrowUpRight.src}) center / contain no-repeat`}
+                  />
+                </a>
+              )}
+            </div>
+
+            <!-- The details: shown while the project is open. -->
+            <div
+              role="region"
+              id={`work-${i}-panel`}
+              aria-labelledby={`work-${i}-header`}
+              data-work-panel
+              inert={i !== 0}
+              class="work-acc__panel grid"
+            >
+              <div class="min-h-0 overflow-hidden">
+                <div class="work-acc__content flex h-full flex-col gap-8 pt-4 pb-6">
+                  <div class="flex flex-col gap-4">
+                    <h2 class="text-title">{project.item.title}</h2>
+                    <p class="text-body">{project.item.description}</p>
+                    <p class="text-body">{project.about}</p>
+                  </div>
+                  <div class="flex flex-col gap-4 lg:mt-auto">
+                    {project.facts.length > 0 && (
+                      <dl class="flex flex-wrap gap-4">
+                        {project.facts.map((fact) => (
+                          <div class="flex flex-col gap-0.5">
+                            <dt class="text-caption leading-[1.2] font-medium uppercase opacity-60">{fact.label}</dt>
+                            <dd class="text-body">{fact.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
+                    <p class="button-text text-brick-red">{project.credit ?? 'Produced by COZM'}</p>
+                    {links.length > 0 && (
+                      <div class:list={['grid gap-2', links.length > 1 && 'sm:grid-cols-2']}>
+                        {links.map((link) => (
+                          <Button href={link.href} variant="ghost" target="_blank" rel="noopener">
+                            {link.label}
+                            <span class="sr-only"> (opens in a new tab)</span>
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+
+  <!-- The open project's video -->
+  <div class="relative isolate order-first aspect-[4/3] overflow-hidden lg:order-none lg:aspect-auto lg:h-full lg:flex-1">
+    <video
+      data-work-video
+      class="absolute inset-0 -z-20 size-full object-cover"
+      src={first.sources ? undefined : withStart(first)}
+      poster={first.poster}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      disablepictureinpicture
+      aria-hidden="true"
+    >
+      {first.sources?.map((source) => <source src={withStart({ ...first, src: source.src })} type={source.type} />)}
+    </video>
+    <!-- Fades in to black while the video changes. -->
+    <div data-work-fade aria-hidden="true" class="work-acc__fade absolute inset-0 -z-10 bg-black opacity-0"></div>
+  </div>
+</section>
+
+<style>
+  /* The details sit in a one-row grid whose row runs 0fr (closed) to 1fr
+     (open), so the change of height animates. Closing details fade out fast;
+     opening ones fade in as they finish growing. */
+  .work-acc {
+    --work-acc-duration: 0.35s;
+    --work-acc-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .work-acc__panel {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--work-acc-duration) var(--work-acc-ease);
+  }
+  .work-acc__item[data-open] .work-acc__panel {
+    grid-template-rows: 1fr;
+  }
+  .work-acc__content {
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+  }
+  .work-acc__item[data-open] .work-acc__content {
+    opacity: 1;
+    transition: opacity 0.25s ease-in 0.12s;
+  }
+
+  /* Headers: 60%, the open one at full strength; a rule under every project but the last. */
+  .work-acc__line {
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  .work-acc__line:hover,
+  .work-acc__item[data-open] .work-acc__line {
+    opacity: 1;
+  }
+  /* The open project's header shows only its number: its name is the big title
+     in its details (the hidden name and category are still read out as part of
+     the button), and the ↗ is hidden (visibility, so it also leaves the Tab order). */
+  .work-acc__name {
+    transition:
+      opacity 0.2s,
+      visibility 0.2s;
+  }
+  .work-acc__item[data-open] .work-acc__name {
+    opacity: 0;
+  }
+  .work-acc__item[data-open] .work-acc__link {
+    visibility: hidden;
+  }
+  .work-acc__item:not(:last-child) {
+    border-bottom: 1px solid color-mix(in srgb, currentColor 60%, transparent);
+  }
+  .work-acc__item:last-child:not([data-open]) .work-acc__line {
+    padding-bottom: 0;
+  }
+
+  /* Desktop: the open project takes the column's free height. flex-grow goes
+     0 → 1 on the new one as it goes 1 → 0 on the old, so the space passes
+     smoothly from one to the other. */
+  @media (min-width: 64rem) {
+    .work-acc__item {
+      flex: 0 0 auto;
+      min-height: 0;
+      transition: flex-grow var(--work-acc-duration) var(--work-acc-ease);
+    }
+    .work-acc__item[data-open] {
+      flex-grow: 1;
+    }
+    .work-acc__panel {
+      flex: 1 1 0;
+      min-height: 0;
+    }
+  }
+
+  .work-acc__fade {
+    transition: opacity 0.45s ease-in-out; /* FADE_MS in video-switch.ts */
+  }
+  .work-acc__fade[data-on] {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-acc__panel,
+    .work-acc__content,
+    .work-acc__item,
+    .work-acc__item[data-open] .work-acc__content,
+    .work-acc__name,
+    .work-acc__fade {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { videoSwitcher } from '../../scripts/video-switch';
+
+  const stacked = window.matchMedia('(max-width: 63.999rem)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-work-accordion]').forEach((root) => {
+    const items = [...root.querySelectorAll<HTMLElement>('[data-work-item]')];
+    const video = root.querySelector<HTMLVideoElement>('[data-work-video]');
+    const fade = root.querySelector<HTMLElement>('[data-work-fade]');
+    const show = video && fade ? videoSwitcher(video, fade, JSON.parse(root.dataset.videos ?? '[]')) : undefined;
+    let current = 0;
+
+    // Desktop: the section fills the screen below the header, but never so
+    // short that the longest project's details get cut off: it grows to fit
+    // them on short screens.
+    const list = root.querySelector<HTMLElement>('[data-work-list]');
+    const fit = () => {
+      root.style.minHeight = '';
+      if (stacked.matches || !list) return;
+      const contents = [...root.querySelectorAll<HTMLElement>('.work-acc__content')];
+      const need = Math.max(
+        ...contents.map((content) => {
+          content.style.height = 'auto';
+          const h = content.getBoundingClientRect().height;
+          content.style.height = '';
+          return h;
+        }),
+      );
+      const panel = items[current]?.querySelector<HTMLElement>('[data-work-panel]');
+      if (!panel) return;
+      const required = list.getBoundingClientRect().height - panel.getBoundingClientRect().height + need;
+      if (required > root.getBoundingClientRect().height) root.style.minHeight = `${Math.ceil(required)}px`;
+    };
+    let fitTimer: number | undefined;
+    window.addEventListener('resize', () => {
+      clearTimeout(fitTimer);
+      fitTimer = window.setTimeout(fit, 150);
+    });
+    document.fonts.ready.then(fit);
+    fit();
+
+    const open = (index: number) => {
+      items.forEach((item, i) => {
+        const isOpen = i === index;
+        item.toggleAttribute('data-open', isOpen);
+        item.querySelector('[data-work-header]')?.setAttribute('aria-expanded', String(isOpen));
+        const panel = item.querySelector<HTMLElement>('[data-work-panel]');
+        if (panel) panel.inert = !isOpen;
+      });
+      current = index;
+    };
+
+    items.forEach((item, i) => {
+      const header = item.querySelector<HTMLElement>('[data-work-header]');
+      header?.addEventListener('click', () => {
+        // One project is always open: clicking the open one does nothing.
+        if (i === current) return;
+        void show?.(i);
+        if (!stacked.matches) return open(i);
+
+        // Small screens: if the open project is above this one, close it
+        // instantly and scroll by the height it loses, before the next paint,
+        // so the page doesn't jump; only the new one animates open.
+        const above = current < i ? items[current] : null;
+        const parts = above ? [...above.querySelectorAll<HTMLElement>('.work-acc__panel, .work-acc__content')] : [];
+        const top = header.getBoundingClientRect().top;
+        parts.forEach((el) => (el.style.transition = 'none'));
+        open(i);
+        if (above) {
+          window.scrollBy(0, header.getBoundingClientRect().top - top);
+          requestAnimationFrame(() => requestAnimationFrame(() => parts.forEach((el) => (el.style.transition = ''))));
+        }
+        // Then glide the new project up to just below the header.
+        const nav = document.getElementById('site-header')?.offsetHeight ?? 0;
+        window.scrollTo({
+          top: window.scrollY + item.getBoundingClientRect().top - nav,
+          behavior: reducedMotion.matches ? 'instant' : 'smooth',
+        });
+      });
+    });
+  });
+</script>

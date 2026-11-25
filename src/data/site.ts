@@ -120,6 +120,8 @@ export interface WorkProject {
   watch?: string;
   /** Where to listen (Spotify). */
   listen?: string;
+  /** Video beside the details while this project is open on /work. */
+  video: Original['video'];
 }
 
 /**
@@ -160,6 +162,8 @@ export const workProjects: WorkProject[] = [
       },
     ],
     watch: 'https://www.youtube.com/@UncoveredwithSuketuShah',
+    // TODO: each project's own video; for now the placeholder (the Originals one).
+    video: heroVideo,
   },
   {
     item: work('CapMint Stories'),
@@ -174,6 +178,7 @@ export const workProjects: WorkProject[] = [
       { label: 'Subscribers', value: COUNT_TBC },
     ],
     watch: 'https://www.youtube.com/@CapMintStories',
+    video: heroVideo,
   },
   {
     item: work('Musings'),
@@ -182,6 +187,7 @@ export const workProjects: WorkProject[] = [
       'Candid conversations featuring two star employees of MyMuse. The property was built with an objective to attract the best culture-fit employees to MyMuse. RIP Arman Ahluwalia <3',
     facts: [{ label: 'Views (till date)', value: COUNT_TBC }],
     watch: 'https://www.youtube.com/playlist?list=PLZQfh7ogITTKVADa-ohO41WQXhZinhsnv',
+    video: heroVideo,
   },
   {
     item: work('How I Masaba'),
@@ -199,6 +205,7 @@ export const workProjects: WorkProject[] = [
     ],
     watch: 'https://www.youtube.com/playlist?list=PLjJcxDJbsFFnbhpNviAMv3iKYK9OXOoQP',
     listen: 'https://open.spotify.com/show/1BbbeOZBVAbcXWubGM5nHW',
+    video: heroVideo,
   },
   {
     item: work('PaisaSmart'),
@@ -212,6 +219,7 @@ export const workProjects: WorkProject[] = [
     ],
     credit: 'Built with COZM, run in-house since the handover',
     watch: 'https://www.youtube.com/@paisasmart',
+    video: heroVideo,
   },
 ];
 
