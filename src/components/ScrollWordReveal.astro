@@ -61,10 +61,11 @@ const { paragraphs, id } = Astro.props;
 </section>
 
 <style>
-  /* The display size, but regular weight, 110% line height and -3% tracking.
-     Paragraphs 40px apart (gap-10). */
+  /* The display size, but capped at 100px (6.25rem), weight 460, 110% line
+     height and -3% tracking. Paragraphs 40px apart (gap-10). */
   .word-reveal {
-    font-weight: 400;
+    font-size: min(var(--text-display), 6.25rem);
+    font-weight: 460;
     line-height: 1.1;
     letter-spacing: -0.03em;
   }
